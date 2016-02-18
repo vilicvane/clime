@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "target": "es2015",
+        "module": "commonjs",
+        "declaration": true,
+        "experimentalDecorators": true,
+        "noImplicitReturns": true,
+        "noImplicitAny": true,
+        "noEmitOnError": true,
+        "sourceMap": true,
+        "rootDir": "src",
+        "outDir": "bld"
+    },
+    "exclude": [
+        "demo",
+        "node_modules",
+        "bld"
+    ]
+}
