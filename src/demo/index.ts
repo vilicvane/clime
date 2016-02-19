@@ -8,4 +8,4 @@ import { CLI } from '../';
 
 let cli = new CLI();
 
-cli.parse(['node', 'clime.js', 'scan', 'port'], Path.join(__dirname, 'commands'));
+cli.parse(process.argv, Path.join(__dirname, 'commands'));

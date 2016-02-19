@@ -1,5 +1,9 @@
 import { Resolvable } from 'thenfail';
 
+import {
+    memorize
+} from '../utils';
+
 export interface CommandOption<T> {
     type?: Function;
     description?: string;
@@ -9,9 +13,12 @@ export interface CommandOption<T> {
 
 export interface OptionOptions<T> extends CommandOption<T> {
     toggle?: boolean;
+    flag?: string;
 }
 
 export interface OptionDefinition {
+    name: string;
+    flag: string;
     type: Function;
     description: string;
     required: boolean;
@@ -36,7 +43,9 @@ export function option<T>(options: OptionOptions<T> = {}): PropertyDecorator {
         let type = options.type || Reflect.getMetadata('design:type', target, name);
 
         definitions.push({
+            name,
             type,
+            flag: options.flag,
             toggle: options.toggle,
             default: options.default,
             required: options.required,
@@ -46,29 +55,20 @@ export function option<T>(options: OptionOptions<T> = {}): PropertyDecorator {
 }
 
 export interface ToggleOptions {
-    default?: boolean;
+    flag?: string;
     description?: string;
 }
 
 export function toggle(options: ToggleOptions = {}): PropertyDecorator {
     return option<boolean>({
         toggle: true,
-        default: options.default,
+        flag: options.flag,
         description: options.description
     });
 }
 
-// export function command(): ClassDecorator {
-//     return (target: typeof Command) => {
-
-//     };
-// }
-
-// export interface OptionsOptions {
-
-// }
-
 export interface ParamDefinition {
+    // name: string;
     type: Function;
     description: string;
     required: boolean;
@@ -88,7 +88,7 @@ export function param<T>(options: ParamOptions<T> = {}): ParameterDecorator {
         }
 
         let type = options.type ||
-            Reflect.getMetadata('design:paramtypes', target, name)[index];
+            Reflect.getMetadata('design:paramtypes', target, name)[index] as Function;
 
         definitions[index] = {
             type,
@@ -100,16 +100,71 @@ export function param<T>(options: ParamOptions<T> = {}): ParameterDecorator {
 }
 
 export abstract class Command {
-    optionDefinitions: OptionDefinition[];
     paramDefinitions: ParamDefinition[];
+    requiredParamsNumber: number;
 
-    constructor(filename: string, cwd?: string) {
+    optionDefinitions: OptionDefinition[];
 
+    constructor(filename: string, cwd?: string) { }
+
+    private static validateParamDefinitions(): void {
+        let prototype = this.prototype;
+
+        let paramDefinitions = prototype.paramDefinitions;
+        let requiredParamsNumber = 0;
+        let hasOptional = false;
+
+        for (let i = 0; i < paramDefinitions.length; i++) {
+            let definition = paramDefinitions[i];
+
+            if (!definition) {
+                throw new Error(`Expecting parameter definition at position ${i}`);
+            }
+
+            if (hasOptional) {
+                if (definition.required) {
+                    throw new Error('Required parameter can not follow optional ones');
+                }
+            } else {
+                if (definition.required) {
+                    requiredParamsNumber++;
+                } else {
+                    hasOptional = true;
+                }
+            }
+        }
+
+        prototype.requiredParamsNumber = requiredParamsNumber;
+    }
+
+    private static prepareOptionDefinitions(): void {
+        let prototype = this.prototype;
+
+        if (prototype.optionDefinitions) {
+            return;
+        }
+
+        let types = Reflect.getMetadata('design:paramtypes', prototype, 'execute') as Function[];
+        let schema = types[prototype.paramDefinitions.length].prototype as OptionsSchema;
+
+        prototype.optionDefinitions = schema ? schema._definitions : [];
     }
 
     abstract execute(...args: any[]): Resolvable<void>;
+
+    @memorize()
+    static initialize(): void {
+        this.validateParamDefinitions();
+        this.prepareOptionDefinitions();
+    }
 }
 
 export interface CommandConstructor {
     new(filename: string, cwd?: string): Command;
+    initialize(): void;
+}
+
+export interface Context {
+    cwd: string;
+    args: string[];
 }

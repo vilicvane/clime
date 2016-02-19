@@ -1,20 +1,21 @@
 import { Command, param, option, toggle } from '../..';
 
-function test(target: any, abc: string) {
-
-}
-
 export class ScanOptions {
-    @option()
+    @option({
+        flag: 't'
+    })
     timeout: number;
 
     @option({
-        default: 5555
+        default: 5555,
+        flag: 'p'
     })
     port: number;
 
-    @toggle()
-    x: boolean;
+    @toggle({
+        flag: 'x'
+    })
+    xxx: boolean;
 }
 
 export default class extends Command {
@@ -33,6 +34,6 @@ export default class extends Command {
 
         options: ScanOptions
     ) {
-
+        console.log(arguments);
     }
 }
