@@ -2,7 +2,5 @@
 
 import 'reflect-metadata';
 
+export * from './core';
 export * from './cli';
-export * from './command';
-
-export { CLI as default } from './cli';

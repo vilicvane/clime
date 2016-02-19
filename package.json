@@ -4,6 +4,7 @@
   "dependencies": {
     "core-js": "^2.1.0",
     "reflect-metadata": "^0.1.3",
+    "source-map-support": "^0.4.0",
     "thenfail": "^0.4.1"
   }
 }

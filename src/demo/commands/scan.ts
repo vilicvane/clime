@@ -1,4 +1,4 @@
-import { Command, param, option } from '../..';
+import { Command, param, option, toggle } from '../..';
 
 function test(target: any, abc: string) {
 
@@ -12,6 +12,9 @@ export class ScanOptions {
         default: 5555
     })
     port: number;
+
+    @toggle()
+    x: boolean;
 }
 
 export default class extends Command {
@@ -30,6 +33,6 @@ export default class extends Command {
 
         options: ScanOptions
     ) {
-        
+
     }
 }
