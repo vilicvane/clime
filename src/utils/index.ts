@@ -1,39 +1,63 @@
-export function memorize(): MethodDecorator {
-    return (target: Object, name: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-        let getter = descriptor.get;
-        let value = descriptor.value;
+import * as Chalk from 'chalk';
 
-        let fn: Function;
-        let descriptorItemName: string;
+export * from './decorators';
 
-        if (getter) {
-            fn = getter;
-            descriptorItemName = 'get';
-        } else if (typeof value === 'function') {
-            fn = value;
-            descriptorItemName = 'value';
-        }
+export function buildTableOutput(rows: string[][], {
+    spaces = 4 as string | number,
+    indent = 0 as string | number
+} = {}): string {
+    let maxTextLengths: number[] = [];
 
-        if (!fn) {
-            throw new TypeError('Invalid decoration');
-        }
+    for (let row of rows) {
+        let lastNoneEmptyIndex = 0;
 
-        let hasCache = false;
-        let cache: any;
+        for (let i = 0; i < row.length; i++) {
+            let text = row[i] || '';
+            let textLength = Chalk.stripColor(text).length;
 
-        return {
-            configurable: descriptor.configurable,
-            enumerable: descriptor.enumerable,
-            [descriptorItemName]() {
-                if (hasCache) {
-                    return cache;
-                }
-
-                cache = fn.call(this);
-                hasCache = true;
-
-                return cache;
+            if (!textLength) {
+                continue;
             }
-        };
-    };
+
+            lastNoneEmptyIndex = i;
+
+            if (maxTextLengths.length > i) {
+                maxTextLengths[i] = Math.max(maxTextLengths[i], textLength);
+            } else {
+                maxTextLengths[i] = textLength;
+            }
+        }
+
+        row.splice(lastNoneEmptyIndex + 1);
+    }
+
+    let indentStr = typeof indent === 'string' ?
+        indent :
+        new Array(indent + 1).join(' ');
+
+    return rows
+        .map(row => {
+            let line = indentStr;
+
+            for (let i = 0; i < row.length; i++) {
+                let text = row[i] || '';
+                let textLength = Chalk.stripColor(text).length;
+
+                let maxLength = maxTextLengths[i];
+
+                line += text;
+                line += new Array(maxLength - textLength + 1).join(' ');
+
+                if (i < row.length - 1) {
+                    if (typeof spaces === 'string') {
+                        line += spaces;
+                    } else {
+                        line += new Array(spaces + 1).join(' ');
+                    }
+                }
+            }
+
+            return line;
+        })
+        .join('\n');
 }

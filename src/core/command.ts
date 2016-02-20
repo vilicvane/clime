@@ -1,19 +1,28 @@
 import { Resolvable } from 'thenfail';
+import * as Chalk from 'chalk';
 
 import {
-    memorize
+    memorize,
+    buildTableOutput
 } from '../utils';
 
-export interface CommandOption<T> {
-    type?: Function;
-    description?: string;
-    required?: boolean;
-    default?: T;
+export function command(options?: CommandOptions): ClassDecorator {
+    return (target: typeof Command) => {
+        target.description = options.description;
+    };
 }
 
-export interface OptionOptions<T> extends CommandOption<T> {
+export interface CommandOptions {
+    description?: string;
+}
+
+export interface OptionOptions<T> {
+    type?: Function;
     toggle?: boolean;
     flag?: string;
+    required?: boolean;
+    default?: T;
+    description?: string;
 }
 
 export interface OptionDefinition {
@@ -68,14 +77,19 @@ export function toggle(options: ToggleOptions = {}): PropertyDecorator {
 }
 
 export interface ParamDefinition {
-    // name: string;
+    name: string;
     type: Function;
     description: string;
     required: boolean;
     default: any;
 }
 
-export interface ParamOptions<T> extends CommandOption<T> { }
+export interface ParamOptions<T> {
+    type?: Function;
+    description?: string;
+    required?: boolean;
+    default?: T;
+}
 
 export function param<T>(options: ParamOptions<T> = {}): ParameterDecorator {
     return (target: Command, name: string, index: number) => {
@@ -90,7 +104,22 @@ export function param<T>(options: ParamOptions<T> = {}): ParameterDecorator {
         let type = options.type ||
             Reflect.getMetadata('design:paramtypes', target, name)[index] as Function;
 
+        // TODO: Avoid unnecessary parsing.
+        let groups = ((<any>target)[name] as Function)
+            .toString()
+            .match(/^[^{=]*\(([\w\d$-,\s]*)\)/);
+
+        let paramNames = groups && groups[1].trim().split(/\s*,\s*/);
+        let paramName: string;
+
+        if (paramNames && paramNames.length > index) {
+            paramName = paramNames[index];
+        } else {
+            paramName = 'param' + index;
+        }
+
         definitions[index] = {
+            name: paramName,
             type,
             required: options.required,
             default: options.default,
@@ -106,6 +135,8 @@ export abstract class Command {
     optionDefinitions: OptionDefinition[];
 
     constructor(filename: string, cwd?: string) { }
+
+    static description: string;
 
     private static validateParamDefinitions(): void {
         let prototype = this.prototype;
@@ -152,6 +183,100 @@ export abstract class Command {
 
     abstract execute(...args: any[]): Resolvable<void>;
 
+    help(commandSequence: string[]): void {
+        let constructor = this.constructor as typeof Command;
+        constructor.initialize();
+
+        console.error();
+
+        if (constructor.description) {
+            console.error('  ' + constructor.description);
+            console.error();
+        }
+
+        let paramDefinitions = this.paramDefinitions;
+        let optionDefinitions = this.optionDefinitions;
+
+        let parameterRows: string[][] = [];
+
+        let usageLine = Chalk.bold(commandSequence.join(' ')) + ' ' + paramDefinitions
+            .map(definition => {
+                let {
+                    name,
+                    required,
+                    description,
+                    default: defaultValue
+                } = definition;
+
+                if (description) {
+                    parameterRows.push([
+                        Chalk.bold(name),
+                        Chalk.dim(description)
+                    ]);
+                }
+
+                return required ?
+                    `<${name}>` :
+                    `[${name}${defaultValue !== undefined ? '=' + defaultValue : ''}]`;
+            })
+            .join(' ');
+
+        let requiredOptionDefinitions = optionDefinitions.filter(definition => definition.required);
+
+        usageLine += ' ' + requiredOptionDefinitions
+            .map(definition => {
+                return `--${definition.name} <${definition.name}>`;
+            })
+            .join(' ');
+
+        if (optionDefinitions.length > requiredOptionDefinitions.length) {
+            usageLine += ' [...options]';
+        }
+
+        console.error(Chalk.green('  USAGE'));
+        console.error();
+        console.error('    ' + usageLine);
+        console.error();
+        console.error(buildTableOutput(parameterRows, {
+            indent: 4,
+            spaces: ' - '
+        }));
+        console.error();
+
+        if (optionDefinitions.length) {
+            let optionRows = optionDefinitions
+                .map(definition => {
+                    let {
+                        name,
+                        flag,
+                        toggle: isToggle,
+                        description
+                    } = definition;
+
+                    let triggerStr = flag ? `-${flag}, ` : '';
+
+                    triggerStr += `--${name}`;
+
+                    if (!isToggle) {
+                        triggerStr += ` <${name}>`;
+                    }
+
+                    return [
+                        Chalk.bold(triggerStr),
+                        description && Chalk.dim(description)
+                    ];
+                });
+
+            console.error(Chalk.green('  OPTIONS'));
+            console.error();
+            console.error(buildTableOutput(optionRows, {
+                indent: 4,
+                spaces: Chalk.dim(' - ')
+            }));
+            console.error();
+        }
+    }
+
     @memorize()
     static initialize(): void {
         this.validateParamDefinitions();
@@ -166,5 +291,8 @@ export interface CommandConstructor {
 
 export interface Context {
     cwd: string;
+    /** Extra arguments. */
     args: string[];
+    /** Commands sequence including entry and sub commands. */
+    commands: string[];
 }

@@ -15,6 +15,11 @@ const validCommandNameRegex = /^[\w\d]+(?:-[\w\d]+)*$/;
 const defaultEntry = 'default';
 
 export class CLI {
+    constructor(
+        /** Entry command name. */
+        public entry: string
+    ) { }
+
     parse(argv: string[], root = CLI.root, cwd = process.cwd()): void {
         root = Path.resolve(root);
 
@@ -23,6 +28,8 @@ export class CLI {
 
         let argsIndex = 2;
         let args: string[];
+
+        let commandSequence = [this.entry];
 
         outer:
         for (let i = 2; i < argv.length; i++) {
@@ -40,6 +47,7 @@ export class CLI {
                     if (FS.existsSync(possiblePath)) {
                         filename = possiblePath;
                         argsIndex = i + 1;
+                        commandSequence.push(arg);
                         continue outer;
                     }
                 }
@@ -53,10 +61,10 @@ export class CLI {
             }
         }
 
-        this.load(filename, argv.slice(argsIndex), cwd);
+        this.load(filename, commandSequence, argv.slice(argsIndex), cwd);
     }
 
-    private load(filename: string, args: string[], cwd: string): void {
+    private load(filename: string, commandSequence: string[], args: string[], cwd: string): void {
         let CommandConstructor = require(filename).default as CommandConstructor;
 
         CommandConstructor.initialize();
@@ -100,6 +108,11 @@ export class CLI {
         while (args.length) {
             let arg = args.shift();
 
+            if (/^(?:-[h?]|--help)$/.test(arg)) {
+                command.help(commandSequence);
+                return;
+            }
+
             if (arg[0] === '-') {
                 if (arg[1] === '-') {
                     consumeToggleOrOption(arg.substr(2));
@@ -134,7 +147,8 @@ export class CLI {
 
         let context: Context = {
             cwd,
-            args: commandExtraArgs
+            args: commandExtraArgs,
+            commands: commandSequence
         };
 
         command.execute(...commandArgs, commandOptions, context);

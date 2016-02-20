@@ -1,14 +1,17 @@
-import { Command, param, option, toggle } from '../..';
+import { Command, command, param, option, toggle } from '../..';
 
 export class ScanOptions {
     @option({
-        flag: 't'
+        required: true,
+        flag: 't',
+        description: 'lalalala timeout~'
     })
     timeout: number;
 
     @option({
         default: 5555,
-        flag: 'p'
+        flag: 'p',
+        description: 'yayayaya~'
     })
     port: number;
 
@@ -18,6 +21,9 @@ export class ScanOptions {
     xxx: boolean;
 }
 
+@command({
+    description: 'Hello, world! This is the description of this command.'
+})
 export default class extends Command {
     execute(
         @param({
@@ -28,9 +34,15 @@ export default class extends Command {
         hostname: string,
 
         @param({
-            default: 10000
+            default: 10000,
+            description: 'whatever description'
         })
-        timeout: number,
+        whatever: number,
+
+        @param({
+            description: 'guess what'
+        })
+        foo: string,
 
         options: ScanOptions
     ) {
