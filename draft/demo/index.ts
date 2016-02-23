@@ -6,6 +6,6 @@ import * as Path from 'path';
 
 import { CLI } from '../';
 
-let cli = new CLI('demo');
-
-cli.parse(process.argv, Path.join(__dirname, 'commands'));
+let cli = new CLI('demo', {
+    root: Path.join(__dirname, 'commands')
+});

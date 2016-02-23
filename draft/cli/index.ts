@@ -14,11 +14,18 @@ import {
 const validCommandNameRegex = /^[\w\d]+(?:-[\w\d]+)*$/;
 const defaultEntry = 'default';
 
+export interface CLIOptions {
+    root?: string;
+}
+
 export class CLI {
     constructor(
         /** Entry command name. */
-        public entry: string
-    ) { }
+        public entry: string,
+        options: CLIOptions
+    ) {
+        
+    }
 
     parse(argv: string[], root = CLI.root, cwd = process.cwd()): void {
         root = Path.resolve(root);
@@ -71,38 +78,47 @@ export class CLI {
 
         let command = new CommandConstructor(filename, cwd);
 
-        let optionDefinitions = command.optionDefinitions;
-        let optionDefinitionMap: HashTable<OptionDefinition> = {};
-        let requiredOptionMap: HashTable<boolean> = {};
-
-        let flagToNameMapping: HashTable<string> = {};
-
-        let commandOptions: HashTable<any> = {};
         let commandArgs: any[] = [];
         let commandExtraArgs: any[] = [];
+        let executeMethodArgs: any[] = [];
 
-        for (let definition of optionDefinitions) {
-            let { name, flag, required, toggle, default: defaultValue } = definition;
+        let optionDefinitions = command.optionDefinitions;
+        let commandOptions: HashTable<any>;
+        let optionDefinitionMap: HashTable<OptionDefinition>;
+        let requiredOptionMap: HashTable<boolean>;
 
-            optionDefinitionMap[name] = definition;
+        let flagToNameMapping: HashTable<string>;
 
-            if (flag) {
-                flagToNameMapping[flag] = name;
-            }
+        if (optionDefinitions) {
+            commandOptions = {};
+            optionDefinitionMap = {};
+            requiredOptionMap = {};
+            flagToNameMapping = {};
 
-            if (required) {
-                requiredOptionMap[name] = true;
-            }
+            executeMethodArgs.push(commandOptions);
 
-            if (toggle) {
-                commandOptions[name] = false;
-            } else {
-                commandOptions[name] = defaultValue;
+            for (let definition of optionDefinitions) {
+                let { name, flag, required, toggle, default: defaultValue } = definition;
+
+                optionDefinitionMap[name] = definition;
+
+                if (flag) {
+                    flagToNameMapping[flag] = name;
+                }
+
+                if (required) {
+                    requiredOptionMap[name] = true;
+                }
+
+                if (toggle) {
+                    commandOptions[name] = false;
+                } else {
+                    commandOptions[name] = defaultValue;
+                }
             }
         }
 
         let paramDefinitions = command.paramDefinitions;
-
         let pendingParamDefinitions = paramDefinitions.concat();
 
         while (args.length) {
@@ -134,9 +150,9 @@ export class CLI {
         }
 
         {
-            let missingOptionNames = Object.keys(requiredOptionMap);
+            let missingOptionNames = requiredOptionMap && Object.keys(requiredOptionMap);
 
-            if (missingOptionNames.length) {
+            if (missingOptionNames && missingOptionNames.length) {
                 throw new Error(`Missing required option(s) \`${missingOptionNames.join('`, `')}\``);
             }
         }
@@ -151,18 +167,24 @@ export class CLI {
             commands: commandSequence
         };
 
-        command.execute(...commandArgs, commandOptions, context);
+        executeMethodArgs.push(context);
+
+        command.execute(...commandArgs, ...executeMethodArgs);
 
         function consumeFlags(flags: string): void {
             for (let i = 0; i < flags.length; i++) {
                 let flag = flags[i];
 
-                if (!flagToNameMapping.hasOwnProperty(flag)) {
+                if (!flagToNameMapping || !flagToNameMapping.hasOwnProperty(flag)) {
                     throw new Error(`Unknown option flag "${flag}"`);
                 }
 
                 let name = flagToNameMapping[flag];
                 let definition = optionDefinitionMap[name];
+
+                if (definition.required) {
+                    delete requiredOptionMap[name];
+                }
 
                 if (definition.toggle) {
                     commandOptions[name] = true;

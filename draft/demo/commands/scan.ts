@@ -1,4 +1,11 @@
-import { Command, command, param, option, toggle } from '../..';
+import {
+    Command,
+    Context,
+    command,
+    param,
+    option,
+    toggle
+} from '../..';
 
 export class ScanOptions {
     @option({
@@ -44,8 +51,9 @@ export default class extends Command {
         })
         foo: string,
 
-        options: ScanOptions
+        options: ScanOptions,
+        context: Context
     ) {
-        console.log(arguments);
+        console.log(context);
     }
 }
