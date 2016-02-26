@@ -1,3 +1,5 @@
+import 'source-map-support/register';
+
 import * as Path from 'path';
 
 import {
@@ -6,4 +8,6 @@ import {
 
 let cli = new CLI('demo', Path.join(__dirname, 'commands'));
 
-cli.parse(['node', 'launch.js', 'system']);
+cli
+    .parse(process.argv)
+    .print(process.stdout, process.stderr);

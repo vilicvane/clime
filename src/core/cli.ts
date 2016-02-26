@@ -4,14 +4,17 @@ import * as Path from 'path';
 import Promise from 'thenfail';
 
 import {
-    CommandsInfo
-} from '../utils';
-
-import {
+    Command,
+    Context,
     ParamDefinition,
     OptionDefinition,
-    ToggleDefinition
+    HelpInfo
 } from './command';
+
+export interface DescriptiveObject {
+    brief?: string;
+    description?: string;
+}
 
 const validCommandNameRegex = /^[\w\d]+(?:-[\w\d]+)*$/;
 
@@ -20,16 +23,16 @@ const validCommandNameRegex = /^[\w\d]+(?:-[\w\d]+)*$/;
  */
 export class CLI {
     root: string;
+    description: string;
 
     constructor(
         public name: string,
         root: string
     ) {
         this.root = Path.resolve(root);
-
     }
 
-    parse(argv: string[], cwd = process.cwd()) {
+    parse(argv: string[], cwd = process.cwd()): any {
         let {
             commands,
             args,
@@ -37,11 +40,16 @@ export class CLI {
         } = this.preProcessArguments(argv);
 
         if (path) {
-            // command file exists
-        } else if (commands.length > 1) {
+            // command file or directory exists
+            let isFile = FS.statSync(path).isFile();
 
+            if (isFile) {
+                return this.loadCommand(path, commands, args, cwd);
+            } else {
+                return HelpInfo.build(path);
+            }
         } else {
-            this.help();
+            return this.help;
         }
     }
 
@@ -55,7 +63,17 @@ export class CLI {
         let argsIndex = 2;
 
         let entryPath = Path.join(this.root, 'default.js');
-        let targetPath = FS.existsSync(entryPath) ? entryPath : searchPath;
+        let targetPath: string;
+
+        if (FS.existsSync(entryPath)) {
+            targetPath = entryPath;
+
+            let module = require(entryPath);
+            let object = (module.default || module) as DescriptiveObject;
+            this.description = object.description;
+        } else {
+            targetPath = searchPath;
+        }
 
         outer:
         for (let i = 2; i < argv.length; i++) {
@@ -95,42 +113,81 @@ export class CLI {
         };
     }
 
-    help(): Promise<CommandsInfo> {
-        return CommandsInfo.get(this.root);
+    loadCommand(path: string, sequence: string[], args: string[], cwd: string): any {
+        let module = require(path);
+        let TargetCommand: Constructor<Command> & typeof Command = module.default || module;
+
+        if (TargetCommand.prototype instanceof Command) {
+            TargetCommand.path = path;
+            TargetCommand.sequence = sequence;
+
+            let {
+                paramDefinitions,
+                optionDefinitions
+            } = TargetCommand;
+
+            let argsParser = new ArgsParser(paramDefinitions, optionDefinitions);
+
+            let {
+                args: commandArgs,
+                options: commandOptions,
+                extraArgs: commandExtraArgs
+            } = argsParser.parse(args);
+
+            let command = new TargetCommand();
+
+            let executeMethodArgs = commandArgs.concat();
+
+            if (optionDefinitions) {
+                executeMethodArgs.push(commandOptions);
+            }
+
+            let context: Context = {
+                cwd,
+                args: commandExtraArgs,
+                commands: sequence
+            };
+
+            executeMethodArgs.push(context)
+
+            return command.execute(...commandArgs, commandOptions);
+        } else if (Path.basename(path) === 'default.js') {
+            let dir = Path.dirname(path);
+            return HelpInfo.build(dir, TargetCommand.description);
+        }
+    }
+
+    get help(): HelpInfo {
+        return HelpInfo.build(this.root);
     }
 }
 
-export class CLIParsedArgs {
+export class ParsedArgs {
     args: any[];
     options: HashTable<any>;
     extraArgs: any[];
 }
 
-export class CLIParser {
+export class ArgsParser {
     private optionDefinitionMap: HashTable<OptionDefinition<any>>;
-    private toggleDefinitionMap: HashTable<ToggleDefinition>;
-
     private optionFlagMapping: HashTable<string>;
-    private toggleFlagMapping: HashTable<string>;
+    private paramDefinitions: ParamDefinition<any>[];
+    private optionDefinitions: OptionDefinition<any>[];
 
     constructor(
-        private paramDefinitions: ParamDefinition<any>[],
-        private optionDefinitions: OptionDefinition<any>[],
-        private toggleDefinitions: ToggleDefinition[]
+        paramDefinitions: ParamDefinition<any>[],
+        optionDefinitions: OptionDefinition<any>[]
     ) {
+        this.paramDefinitions = paramDefinitions || [];
+        this.optionDefinitions = optionDefinitions || [];
 
         for (let definition of optionDefinitions) {
             this.optionDefinitionMap[definition.name] = definition;
             this.optionFlagMapping[definition.flag] = definition.name;
         }
-
-        for (let definition of toggleDefinitions) {
-            this.toggleDefinitionMap[definition.name] = definition;
-            this.toggleFlagMapping[definition.flag] = definition.name;
-        }
     }
 
-    parse(args: string[]): CLIParsedArgs {
+    parse(args: string[]): ParsedArgs {
         let commandArgs: any[] = [];
         let commandOptions: HashTable<any> = {};
         let commandExtraArgs: any[] = [];

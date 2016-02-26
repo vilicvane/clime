@@ -2,8 +2,8 @@ import {
     Command,
     Options,
     command,
-    param,
-    option
+    option,
+    metadata
 } from '../../../';
 
 export class ScanOptions extends Options {
@@ -15,18 +15,11 @@ export class ScanOptions extends Options {
 }
 
 @command({
-    description: 'Scan scan scan...'
+    description: 'Start ahahaha...'
 })
 export default class extends Command {
-    execute(
-        @param()
-        foo: string,
-
-        @param()
-        bar: number,
-
-        options: ScanOptions
-    ) {
+    @metadata
+    execute(options: ScanOptions) {
 
     }
 }

@@ -57,5 +57,5 @@ export function buildTableOutput(rows: string[][], {
 
             return line;
         })
-        .join('\n');
+        .join('\n') + '\n';
 }

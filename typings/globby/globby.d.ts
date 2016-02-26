@@ -6,17 +6,17 @@
 /// <reference path="../node/node.d.ts" />
 /// <reference path="../minimatch/minimatch.d.ts" />
 
-declare module "glob" {
+declare module "globby" {
 
 	import events = require("events");
 	import fs = require('fs');
 	import minimatch = require("minimatch");
 
-	function G(pattern: string, cb: (err: Error, matches: string[]) => void): void;
-	function G(pattern: string, options: G.IOptions, cb: (err: Error, matches: string[]) => void): void;
+	function G(pattern: string | string[], cb: (err: Error, matches: string[]) => void): void;
+	function G(pattern: string | string[], options: G.IOptions, cb: (err: Error, matches: string[]) => void): void;
 
 	module G {
-		function sync(pattern: string, options?: IOptions): string[];
+		function sync(pattern: string | string[], options?: IOptions): string[];
 
 		function hasMagic(pattern: string, options?: IOptions): boolean;
 
