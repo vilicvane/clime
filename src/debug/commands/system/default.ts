@@ -3,12 +3,16 @@ import {
     Options,
     command,
     param,
+    params,
     option,
-    HelpInfo
+    HelpInfo,
+    Context,
+    metadata
 } from '../../../';
 
 export class SystemOptions extends Options {
     @option({
+        default: 'hahaha'
     })
     abc: string;
 
@@ -26,15 +30,28 @@ export class SystemOptions extends Options {
 export default class extends Command {
     execute(
         @param({
-            description: 'yo yo yo~'
+            description: 'yo yo yo~',
+            required: true
         })
         foo: string,
 
-        @param()
+        @param({
+            default: 456,
+            required: true
+        })
         bar: number,
 
-        options: SystemOptions
+        @params({
+            type: Number,
+            required: true,
+            description: 'variadic arguments'
+        })
+        args: number[],
+
+        options: SystemOptions,
+        context: Context
     ) {
-        return this.help;
+        console.log(arguments);
+        // return this.help;
     }
 }

@@ -7,6 +7,7 @@ import {
 
 import {
     ParamDefinition,
+    ParamsDefinition,
     OptionDefinition,
     Options,
     HelpInfo
@@ -19,8 +20,6 @@ export interface CommandOptions {
 
 export interface Context {
     cwd: string;
-    /** Extra arguments. */
-    args: string[];
     /** Commands sequence including entry and sub commands. */
     commands: string[];
 }
@@ -44,9 +43,10 @@ export abstract class Command {
     static description: string;
 
     static paramDefinitions: ParamDefinition<any>[];
+    static paramsDefinition: ParamsDefinition<any>;
     static optionDefinitions: OptionDefinition<any>[];
 
-    static requiredParamsNumber: number;
+    static requiredParamsNumber = 0;
 }
 
 export function command(options: CommandOptions = {}) {
@@ -56,6 +56,8 @@ export function command(options: CommandOptions = {}) {
 
         // Validate param definitions.
         let paramDefinitions = target.paramDefinitions || [];
+        let paramsDefinition = target.paramsDefinition;
+        let variadicParamsRequired = paramsDefinition && paramsDefinition.required;
 
         if (paramDefinitions.length) {
             let hasOptional = false;
@@ -69,16 +71,24 @@ export function command(options: CommandOptions = {}) {
 
                 if (hasOptional) {
                     if (definition.required) {
-                        throw new Error('Required parameter can not follow optional ones');
+                        throw new Error('Required parameter cannot follow optional ones');
                     }
                 } else {
                     if (definition.required) {
                         target.requiredParamsNumber++;
                     } else {
+                        if (variadicParamsRequired) {
+                            throw new Error('Parameter cannot be optional if variadic parameters are required');
+                        }
+
                         hasOptional = true;
                     }
                 }
             }
+        }
+
+        if (paramsDefinition && paramsDefinition.index !== paramDefinitions.length) {
+            throw new Error('Expecting variadic parameters to be adjacent to other parameters');
         }
 
         // Prepare option defintions.
@@ -88,7 +98,8 @@ export function command(options: CommandOptions = {}) {
             throw new Error(`No parameter type information found, please add \`@metadata\` decorator to method \`execute\` if no other decorator applied`);
         }
 
-        let candidate = types[paramDefinitions.length];
+        let candidateIndex = paramDefinitions.length + (target.paramsDefinition ? 1 : 0);
+        let candidate = types[candidateIndex];
 
         if (candidate && candidate.prototype instanceof Options) {
             target.optionDefinitions = (candidate as typeof Options).definitions;

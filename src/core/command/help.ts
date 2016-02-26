@@ -55,10 +55,13 @@ export class HelpInfo implements Printable {
         }
     }
 
-    private buildTextsForParamsAndOptions(CommandConstructor: typeof Command): void {
-        let paramDefinitions = CommandConstructor.paramDefinitions;
+    private buildTextsForParamsAndOptions(CommandClass: typeof Command): void {
+        let paramDefinitions = CommandClass.paramDefinitions;
+        let paramsDefinition = CommandClass.paramsDefinition;
+
         let parameterDescriptionRows: string[][] = [];
-        let parameterUsageItems = CommandConstructor
+
+        let parameterUsageItems = CommandClass
             .paramDefinitions
             .map(definition => {
                 let {
@@ -80,13 +83,34 @@ export class HelpInfo implements Printable {
                     `[${name}${defaultValue !== undefined ? '=' + defaultValue : ''}]`;
             });
 
-        let optionDefinitions = CommandConstructor.optionDefinitions || [];
+        if (paramsDefinition) {
+            let {
+                name,
+                required,
+                description
+            } = paramsDefinition;
+
+            if (description) {
+                parameterDescriptionRows.push([
+                    Chalk.bold(name),
+                    description
+                ]);
+            }
+
+            parameterUsageItems.push(
+                required ?
+                    `<...${name}>` :
+                    `[...${name}]`
+            );
+        }
+
+        let optionDefinitions = CommandClass.optionDefinitions || [];
         let requiredOptionUsageItems = optionDefinitions
             .filter(definition => definition.required)
             .map(definition => `--${definition.name} <${definition.name}>`);
 
         let usageLine = [
-            Chalk.bold(CommandConstructor.sequence.join(' ')),
+            Chalk.bold(CommandClass.sequence.join(' ')),
             ...parameterUsageItems,
             ...requiredOptionUsageItems
         ].join(' ');

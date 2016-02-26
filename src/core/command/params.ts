@@ -2,33 +2,29 @@ import {
     Command
 } from './command';
 
-export interface ParamOptions<T> {
-    type?: Constructor<T>;
-    description?: string;
+export interface ParamsOptions<T> {
+    type: Constructor<T>;
     required?: boolean;
-    default?: T;
+    description?: string;
 }
 
-export interface ParamDefinition<T> {
+export interface ParamsDefinition<T> {
     name: string;
     index: number;
     type: Constructor<T>;
-    description: string;
     required: boolean;
-    default: T;
+    description: string;
 }
 
-export function param<T>(options: ParamOptions<T> = {}) {
+export function params<T>(options: ParamsOptions<T>) {
     return (target: Command, name: 'execute', index: number) => {
         let constructor = target.constructor as typeof Command;
 
-        let definitions = constructor.paramDefinitions;
-
-        if (constructor.paramDefinitions) {
-            definitions = constructor.paramDefinitions;
-        } else {
-            definitions = constructor.paramDefinitions = [];
+        if (constructor.paramsDefinition) {
+            throw new Error('Can only define one `params` parameter');
         }
+
+        let paramDefinitions = constructor.paramDefinitions || [];
 
         let type = options.type ||
             Reflect.getMetadata('design:paramtypes', target, 'execute')[index] as Constructor<T>;
@@ -45,15 +41,14 @@ export function param<T>(options: ParamOptions<T> = {}) {
         if (paramNames && paramNames.length > index) {
             paramName = paramNames[index];
         } else {
-            paramName = 'param' + index;
+            paramName = 'params';
         }
 
-        definitions[index] = {
+        constructor.paramsDefinition = {
             name: paramName,
             index,
             type,
             required: options.required,
-            default: options.default,
             description: options.description
         };
     };

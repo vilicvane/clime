@@ -7,7 +7,11 @@
 			"request": "launch",
 			"program": "${workspaceRoot}/src/debug/launch.ts",
 			"stopOnEntry": false,
-			"args": ["system"],
+			"args": [
+                "system",
+                "--def", "123",
+                "--help"
+            ],
 			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
 			"runtimeArgs": [

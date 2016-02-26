@@ -1,15 +1,21 @@
 import * as FS from 'fs';
 import * as Path from 'path';
 
-import Promise from 'thenfail';
+import Promise, { Resolvable } from 'thenfail';
 
 import {
     Command,
     Context,
     ParamDefinition,
+    ParamsDefinition,
     OptionDefinition,
     HelpInfo
 } from './command';
+
+import {
+    isStringCastable,
+    Printable
+} from './object';
 
 export interface DescriptiveObject {
     brief?: string;
@@ -32,7 +38,7 @@ export class CLI {
         this.root = Path.resolve(root);
     }
 
-    parse(argv: string[], cwd = process.cwd()): any {
+    parse(argv: string[], cwd = process.cwd()): Resolvable<Printable | void> {
         let {
             commands,
             args,
@@ -123,34 +129,45 @@ export class CLI {
 
             let {
                 paramDefinitions,
-                optionDefinitions
+                paramsDefinition,
+                optionDefinitions,
+                requiredParamsNumber
             } = TargetCommand;
 
-            let argsParser = new ArgsParser(paramDefinitions, optionDefinitions);
+            let argsParser = new ArgsParser(
+                paramDefinitions,
+                paramsDefinition,
+                optionDefinitions,
+                requiredParamsNumber
+            );
 
             let {
                 args: commandArgs,
+                extraArgs: commandExtraArgs,
                 options: commandOptions,
-                extraArgs: commandExtraArgs
-            } = argsParser.parse(args);
+                context,
+                help
+            } = argsParser.parse(sequence, args, cwd);
 
             let command = new TargetCommand();
 
+            if (help) {
+                return command.help;
+            }
+
             let executeMethodArgs = commandArgs.concat();
+
+            if (paramsDefinition) {
+                executeMethodArgs.push(commandExtraArgs);
+            }
 
             if (optionDefinitions) {
                 executeMethodArgs.push(commandOptions);
             }
 
-            let context: Context = {
-                cwd,
-                args: commandExtraArgs,
-                commands: sequence
-            };
-
             executeMethodArgs.push(context)
 
-            return command.execute(...commandArgs, commandOptions);
+            return command.execute(...executeMethodArgs);
         } else if (Path.basename(path) === 'default.js') {
             let dir = Path.dirname(path);
             return HelpInfo.build(dir, TargetCommand.description);
@@ -162,38 +179,262 @@ export class CLI {
     }
 }
 
-export class ParsedArgs {
-    args: any[];
-    options: HashTable<any>;
-    extraArgs: any[];
+export interface ParsedArgs {
+    args?: any[];
+    extraArgs?: any[];
+    options?: HashTable<any>;
+    context?: Context;
+    help?: boolean;
 }
 
 export class ArgsParser {
+    private paramDefinitions: ParamDefinition<any>[];
+    private requiredParamsNumber: number;
+
+    private paramsDefinition: ParamsDefinition<any>;
+
+    private optionDefinitions: OptionDefinition<any>[];
     private optionDefinitionMap: HashTable<OptionDefinition<any>>;
     private optionFlagMapping: HashTable<string>;
-    private paramDefinitions: ParamDefinition<any>[];
-    private optionDefinitions: OptionDefinition<any>[];
 
     constructor(
         paramDefinitions: ParamDefinition<any>[],
-        optionDefinitions: OptionDefinition<any>[]
+        paramsDefinition: ParamsDefinition<any>,
+        optionDefinitions: OptionDefinition<any>[],
+        requiredParamsNumber: number
     ) {
         this.paramDefinitions = paramDefinitions || [];
-        this.optionDefinitions = optionDefinitions || [];
+        this.requiredParamsNumber = requiredParamsNumber;
 
-        for (let definition of optionDefinitions) {
-            this.optionDefinitionMap[definition.name] = definition;
-            this.optionFlagMapping[definition.flag] = definition.name;
+        this.paramsDefinition = paramsDefinition;
+
+        this.optionDefinitions = optionDefinitions;
+
+        if (this.optionDefinitions) {
+            this.optionFlagMapping = {};
+            this.optionDefinitionMap = {};
+
+            for (let definition of this.optionDefinitions) {
+                let {
+                    name,
+                    flag,
+                    required,
+                    toggle,
+                    default: defaultValue
+                } = definition;
+
+                this.optionDefinitionMap[name] = definition;
+
+                if (flag) {
+                    this.optionFlagMapping[flag] = name;
+                }
+            }
         }
     }
 
-    parse(args: string[]): ParsedArgs {
+    parse(sequence: string[], args: string[], cwd: string): ParsedArgs {
+        args = args.concat();
+
         let commandArgs: any[] = [];
-        let commandOptions: HashTable<any> = {};
+        let commandOptions: HashTable<any>;
         let commandExtraArgs: any[] = [];
 
-        let pendingParamDefinitions = this.paramDefinitions.concat();
-        return;
+        let optionDefinitions = this.optionDefinitions;
+        let optionDefinitionMap = this.optionDefinitionMap;
+        let optionFlagMapping = this.optionFlagMapping;
+        let requiredOptionMap: HashTable<boolean>;
+
+        let context: Context = {
+            cwd,
+            commands: sequence
+        };
+
+        if (optionDefinitions) {
+            commandOptions = {};
+            requiredOptionMap = {};
+
+            for (let definition of optionDefinitions) {
+                let {
+                    name,
+                    required,
+                    toggle,
+                    default: defaultValue
+                } = definition;
+
+                if (required) {
+                    requiredOptionMap[name] = true;
+                }
+
+                if (toggle) {
+                    commandOptions[name] = false;
+                } else {
+                    commandOptions[name] = defaultValue;
+                }
+            }
+        }
+
+        let paramDefinitions = this.paramDefinitions;
+        let pendingParamDefinitions = paramDefinitions.concat();
+
+        let paramsDefinition = this.paramsDefinition;
+        let paramsType = paramsDefinition && paramsDefinition.type;
+
+        while (args.length) {
+            let arg = args.shift();
+
+            if (/^(?:-[h?]|--help)$/.test(arg)) {
+                return {
+                    help: true
+                };
+            }
+
+            if (arg[0] === '-') {
+                if (arg[1] === '-') {
+                    consumeToggleOrOption(arg.substr(2));
+                } else {
+                    consumeFlags(arg.substr(1))
+                }
+            } else {
+                consumeArgument(arg);
+            }
+        }
+
+        {
+            let expecting = this.requiredParamsNumber;
+            let got = commandArgs.length;
+
+            if (got < expecting) {
+                let missingArgNames = pendingParamDefinitions
+                    .slice(0, expecting - got)
+                    .map(definition => `\`${definition.name}\``);
+
+                throw new Error(`Expecting argument(s) ${missingArgNames.join(', ')}`);
+            }
+        }
+
+        {
+            let missingOptionNames = requiredOptionMap && Object.keys(requiredOptionMap);
+
+            if (missingOptionNames && missingOptionNames.length) {
+                throw new Error(`Missing required option(s) \`${missingOptionNames.join('`, `')}\``);
+            }
+        }
+
+        for (let definition of pendingParamDefinitions) {
+            commandArgs.push(definition.default);
+        }
+
+        if (commandExtraArgs.length) {
+            if (!paramsDefinition) {
+                let expecting = paramDefinitions.length;
+                let got = commandExtraArgs.length + expecting;
+
+                throw new Error(`Expecting ${expecting} parameter(s) at most but got ${got} instead`);
+            }
+        } else if (paramsDefinition && paramsDefinition.required) {
+            throw new Error(`Expecting at least one element for variadic parameters \`${paramsDefinition.name}\``);
+        }
+
+        return {
+            args: commandArgs,
+            extraArgs: commandExtraArgs,
+            options: commandOptions,
+            context
+        };
+
+        function consumeFlags(flags: string): void {
+            for (let i = 0; i < flags.length; i++) {
+                let flag = flags[i];
+
+                if (!optionFlagMapping || !optionFlagMapping.hasOwnProperty(flag)) {
+                    throw new Error(`Unknown option flag "${flag}"`);
+                }
+
+                let name = optionFlagMapping[flag];
+                let definition = optionDefinitionMap[name];
+
+                if (definition.required) {
+                    delete requiredOptionMap[name];
+                }
+
+                if (definition.toggle) {
+                    commandOptions[name] = true;
+                } else {
+                    if (i !== flags.length - 1) {
+                        throw new Error('Only the last flag in a sequence can refer to an option instead of a toggle');
+                    }
+
+                    consumeOption(name, definition);
+                }
+            }
+        }
+
+        function consumeToggleOrOption(name: string): void {
+            if (!optionDefinitionMap || !optionDefinitionMap.hasOwnProperty(name)) {
+                throw new Error(`Unknown option \`${name}\``);
+            }
+
+            let definition = optionDefinitionMap[name];
+
+            if (definition.required) {
+                delete requiredOptionMap[name];
+            }
+
+            if (definition.toggle) {
+                commandOptions[name] = true;
+            } else {
+                consumeOption(name, definition);
+            }
+        }
+
+        function consumeOption(name: string, definition: OptionDefinition<any>) {
+            let arg = args.shift();
+
+            if (arg === undefined) {
+                throw new Error(`Expecting value for option \`${name}\``);
+            }
+
+            if (arg[0] === '-') {
+                throw new Error(`Expecting a value instead of an option or toggle "${arg}" for option \`${name}\``);
+            }
+
+            commandOptions[name] = castArgument(arg, definition.type);
+        }
+
+        function consumeArgument(arg: string): void {
+            if (pendingParamDefinitions.length) {
+                let definition = pendingParamDefinitions.shift();
+                commandArgs.push(castArgument(arg, definition.type))
+            } else {
+                commandExtraArgs.push(
+                    paramsType ?
+                        castArgument(arg, paramsType) :
+                        arg
+                );
+            }
+        }
+
+        function castArgument(arg: string, type: Constructor<any>): any {
+            switch (type) {
+                case String:
+                    return arg;
+                case Number:
+                    return Number(arg);
+                case Boolean:
+                    if (arg.toLowerCase() === 'false') {
+                        return false;
+                    } else {
+                        let n = Number(arg);
+                        return isNaN(n) ? true : Boolean(n);
+                    }
+                default:
+                    if (isStringCastable(type)) {
+                        return type.cast(arg, context)
+                    } else {
+                        return undefined;
+                    }
+            }
+        }
     }
 
 

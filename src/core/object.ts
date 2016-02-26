@@ -1,5 +1,9 @@
 import Promise, { Resolvable } from 'thenfail';
 
+import {
+    Context
+} from './command';
+
 export type PrintableOutputLevel = 'log' | 'info' | 'warn' | 'error';
 
 export interface Printable {
@@ -7,5 +11,13 @@ export interface Printable {
 }
 
 export function isPrintable(object: any): object is Printable {
-    return !!object && typeof object === 'function';
+    return !!object && typeof object.print === 'function';
+}
+
+export interface StringCastable<T> extends Constructor<T> {
+    cast(source: string, context: Context): T;
+}
+
+export function isStringCastable<T>(constructor: Constructor<T>): constructor is StringCastable<T>  {
+    return !!(<any>constructor).cast && typeof (<any>constructor).cast === 'function';
 }
