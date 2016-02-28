@@ -12,6 +12,7 @@ import {
 
 export class SystemOptions extends Options {
     @option({
+        flag: 'f',
         default: 'hahaha'
     })
     abc: string;
@@ -43,7 +44,6 @@ export default class extends Command {
 
         @params({
             type: Number,
-            required: true,
             description: 'variadic arguments'
         })
         args: number[],

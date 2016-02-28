@@ -4,6 +4,7 @@
   "dependencies": {
     "chalk": "^1.1.1",
     "core-js": "^2.1.0",
+    "extendable-error": "^0.1.2",
     "globby": "^4.0.0",
     "memorize-decorator": "^0.1.0",
     "reflect-metadata": "^0.1.3",

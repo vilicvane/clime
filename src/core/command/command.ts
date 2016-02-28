@@ -30,11 +30,9 @@ export abstract class Command {
      */
     abstract execute(...args: any[]): any;
 
-    @memorize()
-    get help(): HelpInfo {
-        let constructor = this.constructor as typeof Command;
-        let dir = Path.dirname(constructor.path);
-        return HelpInfo.build(dir, constructor);
+    static getHelp(): HelpInfo {
+        let dir = Path.dirname(this.path);
+        return HelpInfo.build(dir, this);
     }
 
     static path: string;

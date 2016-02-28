@@ -2,6 +2,7 @@ import * as FS from 'fs';
 import * as Path from 'path';
 
 import Promise, { Resolvable } from 'thenfail';
+import ExtendableError from 'extendable-error';
 
 import {
     Command,
@@ -38,28 +39,30 @@ export class CLI {
         this.root = Path.resolve(root);
     }
 
-    parse(argv: string[], cwd = process.cwd()): Resolvable<Printable | void> {
-        let {
-            commands,
-            args,
-            path
-        } = this.preProcessArguments(argv);
+    execute(argv: string[], cwd = process.cwd()): Promise<Printable | void> {
+        return Promise.then(() => {
+            let {
+                commands,
+                args,
+                path
+            } = this.preProcessArguments(argv);
 
-        if (path) {
-            // command file or directory exists
-            let isFile = FS.statSync(path).isFile();
+            if (path) {
+                // command file or directory exists
+                let isFile = FS.statSync(path).isFile();
 
-            if (isFile) {
-                return this.loadCommand(path, commands, args, cwd);
+                if (isFile) {
+                    return this.loadCommand(path, commands, args, cwd);
+                } else {
+                    throw HelpInfo.build(path);
+                }
             } else {
-                return HelpInfo.build(path);
+                throw this.getHelp();
             }
-        } else {
-            return this.help;
-        }
+        });
     }
 
-    preProcessArguments(argv: string[]): {
+    private preProcessArguments(argv: string[]): {
         commands: string[],
         args: string[],
         path: string
@@ -119,7 +122,7 @@ export class CLI {
         };
     }
 
-    loadCommand(path: string, sequence: string[], args: string[], cwd: string): any {
+    private loadCommand(path: string, sequence: string[], args: string[], cwd: string): any {
         let module = require(path);
         let TargetCommand: Constructor<Command> & typeof Command = module.default || module;
 
@@ -135,6 +138,7 @@ export class CLI {
             } = TargetCommand;
 
             let argsParser = new ArgsParser(
+                TargetCommand,
                 paramDefinitions,
                 paramsDefinition,
                 optionDefinitions,
@@ -152,7 +156,7 @@ export class CLI {
             let command = new TargetCommand();
 
             if (help) {
-                return command.help;
+                return TargetCommand.getHelp();
             }
 
             let executeMethodArgs = commandArgs.concat();
@@ -170,11 +174,11 @@ export class CLI {
             return command.execute(...executeMethodArgs);
         } else if (Path.basename(path) === 'default.js') {
             let dir = Path.dirname(path);
-            return HelpInfo.build(dir, TargetCommand.description);
+            throw HelpInfo.build(dir, TargetCommand.description);
         }
     }
 
-    get help(): HelpInfo {
+    getHelp(): HelpInfo {
         return HelpInfo.build(this.root);
     }
 }
@@ -188,28 +192,16 @@ export interface ParsedArgs {
 }
 
 export class ArgsParser {
-    private paramDefinitions: ParamDefinition<any>[];
-    private requiredParamsNumber: number;
-
-    private paramsDefinition: ParamsDefinition<any>;
-
-    private optionDefinitions: OptionDefinition<any>[];
     private optionDefinitionMap: HashTable<OptionDefinition<any>>;
     private optionFlagMapping: HashTable<string>;
 
     constructor(
-        paramDefinitions: ParamDefinition<any>[],
-        paramsDefinition: ParamsDefinition<any>,
-        optionDefinitions: OptionDefinition<any>[],
-        requiredParamsNumber: number
+        private helpProvider: HelpProvider,
+        private paramDefinitions: ParamDefinition<any>[],
+        private paramsDefinition: ParamsDefinition<any>,
+        private optionDefinitions: OptionDefinition<any>[],
+        private requiredParamsNumber: number
     ) {
-        this.paramDefinitions = paramDefinitions || [];
-        this.requiredParamsNumber = requiredParamsNumber;
-
-        this.paramsDefinition = paramsDefinition;
-
-        this.optionDefinitions = optionDefinitions;
-
         if (this.optionDefinitions) {
             this.optionFlagMapping = {};
             this.optionDefinitionMap = {};
@@ -233,6 +225,8 @@ export class ArgsParser {
     }
 
     parse(sequence: string[], args: string[], cwd: string): ParsedArgs {
+        let that = this;
+
         args = args.concat();
 
         let commandArgs: any[] = [];
@@ -273,7 +267,7 @@ export class ArgsParser {
             }
         }
 
-        let paramDefinitions = this.paramDefinitions;
+        let paramDefinitions = this.paramDefinitions || [];
         let pendingParamDefinitions = paramDefinitions.concat();
 
         let paramsDefinition = this.paramsDefinition;
@@ -308,7 +302,7 @@ export class ArgsParser {
                     .slice(0, expecting - got)
                     .map(definition => `\`${definition.name}\``);
 
-                throw new Error(`Expecting argument(s) ${missingArgNames.join(', ')}`);
+                throw new UsageError(this.helpProvider, `Expecting argument(s) ${missingArgNames.join(', ')}`);
             }
         }
 
@@ -316,7 +310,7 @@ export class ArgsParser {
             let missingOptionNames = requiredOptionMap && Object.keys(requiredOptionMap);
 
             if (missingOptionNames && missingOptionNames.length) {
-                throw new Error(`Missing required option(s) \`${missingOptionNames.join('`, `')}\``);
+                throw new UsageError(this.helpProvider, `Missing required option(s) \`${missingOptionNames.join('`, `')}\``);
             }
         }
 
@@ -329,10 +323,10 @@ export class ArgsParser {
                 let expecting = paramDefinitions.length;
                 let got = commandExtraArgs.length + expecting;
 
-                throw new Error(`Expecting ${expecting} parameter(s) at most but got ${got} instead`);
+                throw new UsageError(this.helpProvider, `Expecting ${expecting} parameter(s) at most but got ${got} instead`);
             }
         } else if (paramsDefinition && paramsDefinition.required) {
-            throw new Error(`Expecting at least one element for variadic parameters \`${paramsDefinition.name}\``);
+            throw new UsageError(this.helpProvider, `Expecting at least one element for variadic parameters \`${paramsDefinition.name}\``);
         }
 
         return {
@@ -347,7 +341,7 @@ export class ArgsParser {
                 let flag = flags[i];
 
                 if (!optionFlagMapping || !optionFlagMapping.hasOwnProperty(flag)) {
-                    throw new Error(`Unknown option flag "${flag}"`);
+                    throw new UsageError(that.helpProvider, `Unknown option flag "${flag}"`);
                 }
 
                 let name = optionFlagMapping[flag];
@@ -361,7 +355,7 @@ export class ArgsParser {
                     commandOptions[name] = true;
                 } else {
                     if (i !== flags.length - 1) {
-                        throw new Error('Only the last flag in a sequence can refer to an option instead of a toggle');
+                        throw new UsageError(that.helpProvider, 'Only the last flag in a sequence can refer to an option instead of a toggle');
                     }
 
                     consumeOption(name, definition);
@@ -371,7 +365,7 @@ export class ArgsParser {
 
         function consumeToggleOrOption(name: string): void {
             if (!optionDefinitionMap || !optionDefinitionMap.hasOwnProperty(name)) {
-                throw new Error(`Unknown option \`${name}\``);
+                throw new UsageError(that.helpProvider, `Unknown option \`${name}\``);
             }
 
             let definition = optionDefinitionMap[name];
@@ -391,11 +385,11 @@ export class ArgsParser {
             let arg = args.shift();
 
             if (arg === undefined) {
-                throw new Error(`Expecting value for option \`${name}\``);
+                throw new UsageError(that.helpProvider, `Expecting value for option \`${name}\``);
             }
 
             if (arg[0] === '-') {
-                throw new Error(`Expecting a value instead of an option or toggle "${arg}" for option \`${name}\``);
+                throw new UsageError(that.helpProvider, `Expecting a value instead of an option or toggle "${arg}" for option \`${name}\``);
             }
 
             commandOptions[name] = castArgument(arg, definition.type);
@@ -436,6 +430,26 @@ export class ArgsParser {
             }
         }
     }
+}
 
+export interface HelpProvider {
+    getHelp(): HelpInfo;
+}
 
+export class UsageError extends ExtendableError implements Printable {
+    constructor(
+        public helpProvider: HelpProvider,
+        message: string
+    ) {
+        super(message);
+    }
+
+    print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream) {
+        stderr.write(`${this.message}.\n`);
+
+        this
+            .helpProvider
+            .getHelp()
+            .print(stdout, stderr);
+    }
 }

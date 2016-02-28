@@ -8,9 +8,7 @@
 			"program": "${workspaceRoot}/src/debug/launch.ts",
 			"stopOnEntry": false,
 			"args": [
-                "system",
-                "--def", "123",
-                "--help"
+                "system"
             ],
 			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
