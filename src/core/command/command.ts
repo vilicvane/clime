@@ -24,6 +24,12 @@ export interface Context {
     commands: string[];
 }
 
+export interface Validator<T> {
+    validate(value: T, name: string): void;
+}
+
+export type GeneralValidator<T> = Validator<T> | RegExp;
+
 export abstract class Command {
     /**
      * @returns A promise or normal value.

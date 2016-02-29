@@ -1,11 +1,18 @@
 import {
-    Command
+    Command,
+    GeneralValidator
 } from './command';
+
+import {
+    Reflection
+} from '../../utils';
 
 export interface ParamOptions<T> {
     type?: Constructor<T>;
     description?: string;
     required?: boolean;
+    validator?: GeneralValidator<T>;
+    validators?: GeneralValidator<T>[];
     default?: T;
 }
 
@@ -15,10 +22,24 @@ export interface ParamDefinition<T> {
     type: Constructor<T>;
     description: string;
     required: boolean;
+    validators: GeneralValidator<T>[];
     default: T;
 }
 
-export function param<T>(options: ParamOptions<T> = {}) {
+export function param<T>(
+    {
+        type,
+        required,
+        validator,
+        validators,
+        default: defaultValue,
+        description
+    }: ParamOptions<T> = {}
+) {
+    if (!validators) {
+        validators = validator ? [validator] : [];
+    }
+
     return (target: Command, name: 'execute', index: number) => {
         let constructor = target.constructor as typeof Command;
 
@@ -30,31 +51,17 @@ export function param<T>(options: ParamOptions<T> = {}) {
             definitions = constructor.paramDefinitions = [];
         }
 
-        let type = options.type ||
+        type = type ||
             Reflect.getMetadata('design:paramtypes', target, 'execute')[index] as Constructor<T>;
 
-        // TODO: Avoid unnecessary parsing.
-        let groups = target
-            .execute
-            .toString()
-            .match(/^[^{=]*\(([\w\d$-,\s]*)\)/);
-
-        let paramNames = groups && groups[1].trim().split(/\s*,\s*/);
-        let paramName: string;
-
-        if (paramNames && paramNames.length > index) {
-            paramName = paramNames[index];
-        } else {
-            paramName = 'param' + index;
-        }
-
         definitions[index] = {
-            name: paramName,
+            name: Reflection.getFunctionParameterName(target.execute, index),
             index,
             type,
-            required: options.required,
-            default: options.default,
-            description: options.description
+            required,
+            validators,
+            default: defaultValue,
+            description
         };
     };
 }
