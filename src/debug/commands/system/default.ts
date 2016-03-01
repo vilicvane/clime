@@ -7,7 +7,8 @@ import {
     option,
     HelpInfo,
     Context,
-    metadata
+    metadata,
+    Validation
 } from '../../../';
 
 export class SystemOptions extends Options {
@@ -32,12 +33,14 @@ export default class extends Command {
     execute(
         @param({
             description: 'yo yo yo~',
+            validator: /@/,
             required: true
         })
         foo: string,
 
         @param({
             default: 456,
+            validator: Validation.integer,
             required: true
         })
         bar: number,

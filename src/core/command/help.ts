@@ -21,7 +21,6 @@ import {
     buildTableOutput
 } from '../../utils';
 
-
 export class HelpInfo implements Printable {
     private texts: string[] = [];
 

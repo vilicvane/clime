@@ -1,22 +1,27 @@
 import * as FS from 'fs';
 import * as Path from 'path';
 
-import Promise, { Resolvable } from 'thenfail';
 import ExtendableError from 'extendable-error';
+import Promise, { Resolvable } from 'thenfail';
 
 import {
     Command,
     Context,
+    HelpInfo,
+    OptionDefinition,
     ParamDefinition,
     ParamsDefinition,
-    OptionDefinition,
-    HelpInfo
+    GeneralValidator
 } from './command';
 
 import {
-    isStringCastable,
-    Printable
+    Printable,
+    isStringCastable
 } from './object';
+
+import {
+    ExpectedError
+} from './error';
 
 export interface DescriptiveObject {
     brief?: string;
@@ -271,7 +276,6 @@ export class ArgsParser {
         let pendingParamDefinitions = paramDefinitions.concat();
 
         let paramsDefinition = this.paramsDefinition;
-        let paramsType = paramsDefinition && paramsDefinition.type;
 
         while (args.length) {
             let arg = args.shift();
@@ -392,42 +396,68 @@ export class ArgsParser {
                 throw new UsageError(that.helpProvider, `Expecting a value instead of an option or toggle "${arg}" for option \`${name}\``);
             }
 
-            commandOptions[name] = castArgument(arg, definition.type);
+            commandOptions[name] = castArgument(arg, definition.name, definition.type, definition.validators);
         }
 
         function consumeArgument(arg: string): void {
             if (pendingParamDefinitions.length) {
                 let definition = pendingParamDefinitions.shift();
-                commandArgs.push(castArgument(arg, definition.type))
+                commandArgs.push(castArgument(arg, definition.name, definition.type, definition.validators))
             } else {
                 commandExtraArgs.push(
-                    paramsType ?
-                        castArgument(arg, paramsType) :
+                    paramsDefinition ?
+                        castArgument(arg, paramsDefinition.name, paramsDefinition.type, paramsDefinition.validators) :
                         arg
                 );
             }
         }
 
-        function castArgument(arg: string, type: Constructor<any>): any {
+        // TODO: support casting provider object.
+        function castArgument(arg: string, name: string, type: Constructor<any>, validators: GeneralValidator<any>[]): any {
+            let casted: any;
+
             switch (type) {
                 case String:
-                    return arg;
+                    casted = arg;
+                    break;
                 case Number:
-                    return Number(arg);
+                    casted = Number(arg);
+
+                    if (isNaN(casted)) {
+                        throw new ExpectedError(`Value "${arg}" cannot be casted to number`);
+                    }
+
+                    break;
                 case Boolean:
                     if (arg.toLowerCase() === 'false') {
-                        return false;
+                        casted = false;
                     } else {
                         let n = Number(arg);
-                        return isNaN(n) ? true : Boolean(n);
+                        casted = isNaN(n) ? true : Boolean(n);
                     }
+
+                    break;
                 default:
                     if (isStringCastable(type)) {
-                        return type.cast(arg, context)
+                        casted = type.cast(arg, context)
                     } else {
-                        return undefined;
+                        throw new Error(`Type \`${(<any>type).name || type}\` cannot be casted from a string, see \`StringCastable\` interface for more information`);
                     }
+
+                    break;
             }
+
+            for (let validator of validators) {
+                if (validator instanceof RegExp) {
+                    if (!validator.test(casted)) {
+                        throw new ExpectedError(`Invalid value for "${name}"`);
+                    }
+                } else {
+                    validator.validate(arg, name);
+                }
+            }
+
+            return casted;
         }
     }
 }

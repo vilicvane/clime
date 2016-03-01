@@ -1,10 +1,17 @@
 import {
-    Command
+    Command,
+    GeneralValidator
 } from './command';
+
+import {
+    Reflection,
+} from '../../utils';
 
 export interface ParamsOptions<T> {
     type: Constructor<T>;
     required?: boolean;
+    validator?: GeneralValidator<T>;
+    validators?: GeneralValidator<T>[];
     description?: string;
 }
 
@@ -13,10 +20,23 @@ export interface ParamsDefinition<T> {
     index: number;
     type: Constructor<T>;
     required: boolean;
+    validators: GeneralValidator<T>[];
     description: string;
 }
 
-export function params<T>(options: ParamsOptions<T>) {
+export function params<T>(
+    {
+        type,
+        required,
+        validator,
+        validators,
+        description
+    }: ParamsOptions<T>
+) {
+    if (!validators) {
+        validators = validator ? [validator] : [];
+    }
+
     return (target: Command, name: 'execute', index: number) => {
         let constructor = target.constructor as typeof Command;
 
@@ -26,30 +46,16 @@ export function params<T>(options: ParamsOptions<T>) {
 
         let paramDefinitions = constructor.paramDefinitions || [];
 
-        let type = options.type ||
+        type = type ||
             Reflect.getMetadata('design:paramtypes', target, 'execute')[index] as Constructor<T>;
 
-        // TODO: Avoid unnecessary parsing.
-        let groups = target
-            .execute
-            .toString()
-            .match(/^[^{=]*\(([\w\d$-,\s]*)\)/);
-
-        let paramNames = groups && groups[1].trim().split(/\s*,\s*/);
-        let paramName: string;
-
-        if (paramNames && paramNames.length > index) {
-            paramName = paramNames[index];
-        } else {
-            paramName = 'params';
-        }
-
         constructor.paramsDefinition = {
-            name: paramName,
+            name: Reflection.getFunctionParameterName(target.execute, index),
             index,
             type,
-            required: options.required,
-            description: options.description
+            required,
+            validators,
+            description
         };
     };
 }

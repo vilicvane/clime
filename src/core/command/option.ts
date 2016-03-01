@@ -1,7 +1,11 @@
+import { GeneralValidator } from './';
+
 export interface OptionOptions<T> {
-    type?: Constructor<T>;
     flag?: string;
+    type?: Constructor<T>;
     required?: boolean;
+    validator?: GeneralValidator<T>;
+    validators?: GeneralValidator<T>[];
     toggle?: boolean;
     default?: T;
     description?: string;
@@ -12,27 +16,33 @@ export interface OptionDefinition<T> {
     flag: string;
     toggle: boolean;
     type: Constructor<T>;
-    description: string;
     required: boolean;
+    validators: GeneralValidator<T>[];
     default: T;
+    description: string;
 }
 
 export class Options {
     private _optionsMark: void;
-
     static definitions: OptionDefinition<any>[];
 }
 
 export function option<T>(
     {
-        type,
         flag,
         toggle,
+        type,
         required,
+        validator,
+        validators,
         default: defaultValue,
         description
     }: OptionOptions<T> = {}
 ) {
+    if (!validators) {
+        validators = validator ? [validator] : [];
+    }
+
     return (target: Options, name: string) => {
         let constructor = target.constructor as typeof Options;
         let definitions = constructor.definitions;
@@ -47,11 +57,12 @@ export function option<T>(
 
         definitions.push({
             name,
-            type,
             flag,
             toggle,
-            default: defaultValue,
+            type,
             required,
+            validators,
+            default: defaultValue,
             description
         });
     };
