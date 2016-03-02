@@ -362,7 +362,7 @@ export class ArgsParser {
                         throw new UsageError(that.helpProvider, 'Only the last flag in a sequence can refer to an option instead of a toggle');
                     }
 
-                    consumeOption(name, definition);
+                    consumeOption(definition);
                 }
             }
         }
@@ -381,11 +381,18 @@ export class ArgsParser {
             if (definition.toggle) {
                 commandOptions[name] = true;
             } else {
-                consumeOption(name, definition);
+                consumeOption(definition);
             }
         }
 
-        function consumeOption(name: string, definition: OptionDefinition<any>) {
+        function consumeOption(definition: OptionDefinition<any>) {
+            let {
+                name,
+                key,
+                type,
+                validators
+            } = definition;
+
             let arg = args.shift();
 
             if (arg === undefined) {
@@ -396,7 +403,7 @@ export class ArgsParser {
                 throw new UsageError(that.helpProvider, `Expecting a value instead of an option or toggle "${arg}" for option \`${name}\``);
             }
 
-            commandOptions[name] = castArgument(arg, definition.name, definition.type, definition.validators);
+            commandOptions[key] = castArgument(arg, name, type, validators);
         }
 
         function consumeArgument(arg: string): void {

@@ -3,6 +3,7 @@ import Promise from 'thenfail';
 
 import {
     CLI,
+    ExpectedError,
     isPrintable
 } from '../core';
 
@@ -47,15 +48,21 @@ export class Shim {
 
                 process.exit();
             }, reason => {
+                let exitCode = 1;
+
                 if (isPrintable(reason)) {
                     reason.print(process.stdout, process.stderr);
+
+                    if (reason instanceof ExpectedError) {
+                        exitCode = (reason as ExpectedError).code;
+                    }
                 } else if (reason instanceof Error) {
                     console.error(reason.stack);
                 } else {
                     console.error(reason);
                 }
 
-                process.exit(1);
+                process.exit(exitCode);
             });
     }
 }

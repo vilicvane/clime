@@ -18,7 +18,8 @@ import {
 } from '../cli';
 
 import {
-    buildTableOutput
+    buildTableOutput,
+    indent
 } from '../../utils';
 
 export class HelpInfo implements Printable {
@@ -50,7 +51,7 @@ export class HelpInfo implements Printable {
 
     private buildDescription(description: string): void {
         if (description) {
-            this.texts.push(`  ${description}\n`);
+            this.texts.push(`${indent(description)}\n`);
         }
     }
 
@@ -106,7 +107,7 @@ export class HelpInfo implements Printable {
         let optionDefinitions = CommandClass.optionDefinitions || [];
         let requiredOptionUsageItems = optionDefinitions
             .filter(definition => definition.required)
-            .map(definition => `--${definition.name} <${definition.name}>`);
+            .map(({ name, placeholder }) => `--${name} <${placeholder || name}>`);
 
         let usageLine = [
             Chalk.bold(CommandClass.sequence.join(' ')),
@@ -134,6 +135,7 @@ export class HelpInfo implements Printable {
                     let {
                         name,
                         flag,
+                        placeholder,
                         toggle: isToggle,
                         description
                     } = definition;
@@ -143,7 +145,7 @@ export class HelpInfo implements Printable {
                     triggerStr += `--${name}`;
 
                     if (!isToggle) {
-                        triggerStr += ` <${name}>`;
+                        triggerStr += ` <${placeholder || name}>`;
                     }
 
                     return [

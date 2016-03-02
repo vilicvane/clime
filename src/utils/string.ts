@@ -59,3 +59,11 @@ export function buildTableOutput(rows: string[][], {
         })
         .join('\n') + '\n';
 }
+
+export function indent(text: string, indent: string | number = 2): string {
+    let indentStr = typeof indent === 'string' ?
+        indent.replace(/\r/g, '') :
+        Array(indent + 1).join(' ');
+
+    return text.replace(/^/mg, indentStr);
+}

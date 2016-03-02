@@ -1,7 +1,9 @@
 import { GeneralValidator } from './';
 
 export interface OptionOptions<T> {
+    name?: string;
     flag?: string;
+    placeholder?: string;
     type?: Clime.Constructor<T>;
     required?: boolean;
     validator?: GeneralValidator<T>;
@@ -13,7 +15,9 @@ export interface OptionOptions<T> {
 
 export interface OptionDefinition<T> {
     name: string;
+    key: string;
     flag: string;
+    placeholder: string;
     toggle: boolean;
     type: Clime.Constructor<T>;
     required: boolean;
@@ -29,7 +33,9 @@ export class Options {
 
 export function option<T>(
     {
+        name: optionName,
         flag,
+        placeholder,
         toggle,
         type,
         required,
@@ -56,8 +62,10 @@ export function option<T>(
         type = type || Reflect.getMetadata('design:type', target, name);
 
         definitions.push({
-            name,
+            name: optionName || name,
+            key: name,
             flag,
+            placeholder,
             toggle,
             type,
             required,

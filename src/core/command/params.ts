@@ -8,6 +8,7 @@ import {
 } from '../../utils';
 
 export interface ParamsOptions<T> {
+    name?: string;
     type: Clime.Constructor<T>;
     required?: boolean;
     validator?: GeneralValidator<T>;
@@ -26,6 +27,7 @@ export interface ParamsDefinition<T> {
 
 export function params<T>(
     {
+        name: paramName,
         type,
         required,
         validator,
@@ -49,8 +51,10 @@ export function params<T>(
         type = type ||
             Reflect.getMetadata('design:paramtypes', target, 'execute')[index] as Clime.Constructor<T>;
 
+        paramName = paramName || Reflection.getFunctionParameterName(target.execute, index);
+
         constructor.paramsDefinition = {
-            name: Reflection.getFunctionParameterName(target.execute, index),
+            name: paramName,
             index,
             type,
             required,
