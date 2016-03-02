@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 
-export * from './core';
-// export * from './cli';
+import './lang';
 
+export * from './core';
 export * from './utils';
 export * from './shim';

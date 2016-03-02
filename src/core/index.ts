@@ -5,10 +5,4 @@ export * from './error';
 
 import * as Interaction from './interaction';
 
-export const enum XXX {
-    a,
-    b,
-    c
-}
-
 export { Interaction }

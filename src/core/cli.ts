@@ -129,7 +129,7 @@ export class CLI {
 
     private loadCommand(path: string, sequence: string[], args: string[], cwd: string): any {
         let module = require(path);
-        let TargetCommand: Constructor<Command> & typeof Command = module.default || module;
+        let TargetCommand: Clime.Constructor<Command> & typeof Command = module.default || module;
 
         if (TargetCommand.prototype instanceof Command) {
             TargetCommand.path = path;
@@ -191,14 +191,14 @@ export class CLI {
 export interface ParsedArgs {
     args?: any[];
     extraArgs?: any[];
-    options?: HashTable<any>;
+    options?: Clime.HashTable<any>;
     context?: Context;
     help?: boolean;
 }
 
 export class ArgsParser {
-    private optionDefinitionMap: HashTable<OptionDefinition<any>>;
-    private optionFlagMapping: HashTable<string>;
+    private optionDefinitionMap: Clime.HashTable<OptionDefinition<any>>;
+    private optionFlagMapping: Clime.HashTable<string>;
 
     constructor(
         private helpProvider: HelpProvider,
@@ -235,13 +235,13 @@ export class ArgsParser {
         args = args.concat();
 
         let commandArgs: any[] = [];
-        let commandOptions: HashTable<any>;
+        let commandOptions: Clime.HashTable<any>;
         let commandExtraArgs: any[] = [];
 
         let optionDefinitions = this.optionDefinitions;
         let optionDefinitionMap = this.optionDefinitionMap;
         let optionFlagMapping = this.optionFlagMapping;
-        let requiredOptionMap: HashTable<boolean>;
+        let requiredOptionMap: Clime.HashTable<boolean>;
 
         let context: Context = {
             cwd,
@@ -413,7 +413,7 @@ export class ArgsParser {
         }
 
         // TODO: support casting provider object.
-        function castArgument(arg: string, name: string, type: Constructor<any>, validators: GeneralValidator<any>[]): any {
+        function castArgument(arg: string, name: string, type: Clime.Constructor<any>, validators: GeneralValidator<any>[]): any {
             let casted: any;
 
             switch (type) {

@@ -2,7 +2,7 @@ import { GeneralValidator } from './';
 
 export interface OptionOptions<T> {
     flag?: string;
-    type?: Constructor<T>;
+    type?: Clime.Constructor<T>;
     required?: boolean;
     validator?: GeneralValidator<T>;
     validators?: GeneralValidator<T>[];
@@ -15,7 +15,7 @@ export interface OptionDefinition<T> {
     name: string;
     flag: string;
     toggle: boolean;
-    type: Constructor<T>;
+    type: Clime.Constructor<T>;
     required: boolean;
     validators: GeneralValidator<T>[];
     default: T;

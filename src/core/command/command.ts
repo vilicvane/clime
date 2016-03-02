@@ -96,7 +96,7 @@ export function command(options: CommandOptions = {}) {
         }
 
         // Prepare option defintions.
-        let types = Reflect.getMetadata('design:paramtypes', target.prototype, 'execute') as Constructor<any>[];
+        let types = Reflect.getMetadata('design:paramtypes', target.prototype, 'execute') as Clime.Constructor<any>[];
 
         if (!types) {
             throw new Error(`No parameter type information found, please add \`@metadata\` decorator to method \`execute\` if no other decorator applied`);

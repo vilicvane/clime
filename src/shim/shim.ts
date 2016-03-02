@@ -2,12 +2,12 @@ import * as Inquirer from 'inquirer';
 import Promise from 'thenfail';
 
 import {
-    Interaction,
-    XXX
+    CLI,
+    isPrintable
 } from '../core';
 
-export type InteractionProvider = Interaction.InteractionProvider;
-export type SelectionType<T> = Interaction.SelectionType<T>;
+// export type InteractionProvider = Interaction.InteractionProvider;
+// export type SelectionType<T> = Interaction.SelectionType<T>;
 
 // export const interfactionProvider: InteractionProvider = {
 //     prompt(message, defaultValue) {
@@ -30,27 +30,32 @@ export type SelectionType<T> = Interaction.SelectionType<T>;
 // };
 
 export class Shim {
-    constructor() {
+    constructor(
+        public cli: CLI
+    ) { }
 
-    }
-}
+    execute(argv: string[], cwd?: string): void {
+        this
+            .cli
+            .execute(argv, cwd)
+            .then(result => {
+                if (isPrintable(result)) {
+                    result.print(process.stdout, process.stderr);
+                } else if (result !== undefined) {
+                    console.log(result);
+                }
 
-const enum ErrorCode {
-    abc,
-    def
-}
+                process.exit();
+            }, reason => {
+                if (isPrintable(reason)) {
+                    reason.print(process.stdout, process.stderr);
+                } else if (reason instanceof Error) {
+                    console.error(reason.stack);
+                } else {
+                    console.error(reason);
+                }
 
-const enum ErrorCode {
-    ghi = 100,
-    jkl
-}
-
-let x = XXX.e;
-
-declare module '../core' {
-    const enum XXX {
-        d = 3,
-        e,
-        f
+                process.exit(1);
+            });
     }
 }
