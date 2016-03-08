@@ -27,22 +27,24 @@ export class HelpInfo implements Printable {
 
     constructor() { }
 
-    static build(dir: string, description: string): HelpInfo;
-    static build(dir: string, CommandClass?: typeof Command): HelpInfo;
-    static build(dir: string, arg?: typeof Command | string): HelpInfo {
+    static build(dir: string, description?: string): HelpInfo;
+    static build(CommandClass: typeof Command): HelpInfo;
+    static build(arg: typeof Command | string, description?: string): HelpInfo {
         let info = new HelpInfo();
 
         if (typeof arg === 'string') {
-            info.buildDescription(arg);
-            info.buildTextForSubCommands(dir);
-        } else if (arg) {
+            info.buildDescription(description);
+            info.buildTextForSubCommands(arg);
+        } else {
             info.buildDescription(arg.description);
             info.buildTextsForParamsAndOptions(arg);
 
-            if (Path.basename(arg.path) === 'default.js') {
-                info.buildTextForSubCommands(dir);
+            let dir = Path.dirname(arg.path);
+
+            if (Path.basename(arg.path) !== 'default.js') {
+                dir = Path.join(dir, Path.basename(arg.path, '.js'));
             }
-        } else {
+
             info.buildTextForSubCommands(dir);
         }
 
@@ -162,6 +164,10 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
     }
 
     buildTextForSubCommands(dir: string): void {
+        if (!FS.existsSync(dir) || !FS.statSync(dir).isDirectory()) {
+            return;
+        }
+
         let rows = FS
             .readdirSync(dir)
             .map(name => {

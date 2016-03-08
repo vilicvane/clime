@@ -37,8 +37,7 @@ export abstract class Command {
     abstract execute(...args: any[]): any;
 
     static getHelp(): HelpInfo {
-        let dir = Path.dirname(this.path);
-        return HelpInfo.build(dir, this);
+        return HelpInfo.build(this);
     }
 
     static path: string;
