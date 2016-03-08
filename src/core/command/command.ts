@@ -1,5 +1,4 @@
 import * as Path from 'path';
-import memorize from 'memorize-decorator';
 
 import {
     Printable

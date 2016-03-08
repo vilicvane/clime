@@ -1,4 +1,3 @@
-import * as Inquirer from 'inquirer';
 import Promise from 'thenfail';
 
 import {
