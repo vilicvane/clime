@@ -48,6 +48,7 @@ export abstract class Command {
 
     static paramDefinitions: ParamDefinition<any>[];
     static paramsDefinition: ParamsDefinition<any>;
+    static optionConstructor: Clime.Constructor<Clime.HashTable<any>>;
     static optionDefinitions: OptionDefinition<any>[];
 
     static requiredParamsNumber = 0;
@@ -106,6 +107,7 @@ export function command(options: CommandOptions = {}) {
         let candidate = types[candidateIndex];
 
         if (candidate && candidate.prototype instanceof Options) {
+            target.optionConstructor = candidate;
             target.optionDefinitions = (candidate as typeof Options).definitions;
         }
     };

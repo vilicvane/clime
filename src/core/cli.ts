@@ -138,6 +138,7 @@ export class CLI {
             let {
                 paramDefinitions,
                 paramsDefinition,
+                optionConstructor,
                 optionDefinitions,
                 requiredParamsNumber
             } = TargetCommand;
@@ -146,6 +147,7 @@ export class CLI {
                 TargetCommand,
                 paramDefinitions,
                 paramsDefinition,
+                optionConstructor,
                 optionDefinitions,
                 requiredParamsNumber
             );
@@ -204,6 +206,7 @@ export class ArgsParser {
         private helpProvider: HelpProvider,
         private paramDefinitions: ParamDefinition<any>[],
         private paramsDefinition: ParamsDefinition<any>,
+        private optionConstructor: Clime.Constructor<Clime.HashTable<any>>,
         private optionDefinitions: OptionDefinition<any>[],
         private requiredParamsNumber: number
     ) {
@@ -238,6 +241,7 @@ export class ArgsParser {
         let commandOptions: Clime.HashTable<any>;
         let commandExtraArgs: any[] = [];
 
+        let OptionConstructor = this.optionConstructor;
         let optionDefinitions = this.optionDefinitions;
         let optionDefinitionMap = this.optionDefinitionMap;
         let optionFlagMapping = this.optionFlagMapping;
@@ -248,8 +252,8 @@ export class ArgsParser {
             commands: sequence
         };
 
-        if (optionDefinitions) {
-            commandOptions = {};
+        if (OptionConstructor) {
+            commandOptions = new OptionConstructor();
             requiredOptionMap = {};
 
             for (let definition of optionDefinitions) {
