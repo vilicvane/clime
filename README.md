@@ -14,15 +14,15 @@ export default class extends Command {
 # Features
 
 - ☑ Type and schema based parameters/options casting.
-- ☑ Object and promise based structure.
+- ☑ Object and promise based architecture.
 - ☑ File path based multi-level sub commands.
 - ☑ Automatic usage generating.
 - ☐ Interaction integration.
 
-## Parameter type and options schema
+## Parameter types and options schema
 
-Clime provides a way in which you can get parameters and options you really want to: get them **typed** at compile time and **casted** at run time.
-To make this work, you'll need to set both of `experimentalDecorators` and `emitDecoratorMetadata` in your `tsconfig.json` as `true`.
+Clime provides a way in which you can get parameters and options you really want to: **typed** at compile time and **casted** at run time.
+To make this work, you'll need to set both of `experimentalDecorators` and `emitDecoratorMetadata` in your `tsconfig.json` to `true`.
 
 ```ts
 export class SomeOptions extends Options {
@@ -84,8 +84,8 @@ Options
 
 ### Casting from string
 
-Clime will automatically cast parameter to `number`, `boolean` based on parameter type.
-It also defines interface `StringCastable` that allow user-defined class to be casted from parameter.
+Clime will automatically cast parameters to `number`, `boolean` based on their types.
+It also defines interface `StringCastable` that allows user-defined classes to be casted from parameters.
 
 For example:
 
@@ -113,7 +113,7 @@ And a validator for example, usually throw instances of `ExpectedError`.
 
 ### Preserving metadata without command-line parameters
 
-As TypeScript only emits metadata for target decorated by decorators, if no commandT-line parameter added, Clime won't be able to know information of options and context parameter.
+As TypeScript only emits metadata for target decorated by decorators, if no command-line parameter added, Clime won't be able to know information of options and context parameter.
 Thus a `@metadata` decorator that does nothing at run time is provided for preserving these metadata:
 
 ```ts
@@ -182,7 +182,7 @@ or at the same level of the folder of level-(n+1) commands (like `foo.ts` and fo
 
 ### Command entry with description only
 
-Clime allow an entry of a group of sub commands to provide only descriptions rather than an actual command.
+Clime allows an entry of a group of sub commands to provide only descriptions rather than an actual command.
 Just export `description` and `brief` directly from the entry module to do so:
 
 ```ts
@@ -194,7 +194,7 @@ export const brief = 'brief description';
 
 # CLI and shim
 
-Clime in its core provide an object-based command line structure, a pure Clime CLI object could be like this:
+Clime in its core provides an object-based command line structure, a pure Clime CLI object could be like this:
 
 ```ts
 // The second parameter is the path to folder that contains command files.
