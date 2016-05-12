@@ -17,10 +17,12 @@ export interface CommandOptions {
     description?: string;
 }
 
-export interface Context {
-    cwd: string;
-    /** Commands sequence including entry and sub commands. */
-    commands: string[];
+export class Context {
+    constructor(
+        public cwd: string,
+        /** Commands sequence including entry and sub commands. */
+        public commands: string[]
+    ) { }
 }
 
 export interface Validator<T> {
@@ -46,8 +48,9 @@ export abstract class Command {
 
     static paramDefinitions: ParamDefinition<any>[];
     static paramsDefinition: ParamsDefinition<any>;
-    static optionConstructor: Clime.Constructor<Clime.HashTable<any>>;
+    static optionsConstructor: Clime.Constructor<Clime.HashTable<any>>;
     static optionDefinitions: OptionDefinition<any>[];
+    static contextConstructor: Clime.Constructor<Context>;
 
     static requiredParamsNumber = 0;
 }
@@ -101,12 +104,29 @@ export function command(options: CommandOptions = {}) {
             throw new Error(`No parameter type information found, please add \`@metadata\` decorator to method \`execute\` if no other decorator applied`);
         }
 
-        let candidateIndex = paramDefinitions.length + (target.paramsDefinition ? 1 : 0);
-        let candidate = types[candidateIndex];
+        let optionsConstructorCandidateIndex = paramDefinitions.length + (target.paramsDefinition ? 1 : 0);
+        let optionsConstructorCandidate = types[optionsConstructorCandidateIndex];
 
-        if (candidate && candidate.prototype instanceof Options) {
-            target.optionConstructor = candidate;
-            target.optionDefinitions = (candidate as typeof Options).definitions;
+        let contextConstructorCandidateIndex: number;
+
+        if (optionsConstructorCandidate && optionsConstructorCandidate.prototype instanceof Options) {
+            target.optionsConstructor = optionsConstructorCandidate;
+            target.optionDefinitions = (optionsConstructorCandidate as typeof Options).definitions;
+
+            contextConstructorCandidateIndex = optionsConstructorCandidateIndex + 1;
+        } else {
+            contextConstructorCandidateIndex = optionsConstructorCandidateIndex;
+        }
+
+        let contextConstructorCandidate = types[contextConstructorCandidateIndex];
+
+        if (
+            contextConstructorCandidate && (
+                contextConstructorCandidate === Context ||
+                contextConstructorCandidate.prototype instanceof Context
+            )
+        ) {
+            target.contextConstructor = contextConstructorCandidate;
         }
     };
 }

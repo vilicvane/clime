@@ -1,3 +1,5 @@
+import * as assert from 'assert';
+
 import {
     Command,
     GeneralValidator
@@ -42,7 +44,10 @@ export function param<T>(
         validators = validator ? [validator] : [];
     }
 
-    return (target: Command, name: 'execute', index: number) => {
+    // TODO: name: 'execute'
+    return (target: Command, name: string, index: number) => {
+        assert.equal(name, 'execute');
+
         let constructor = target.constructor as typeof Command;
 
         let definitions = constructor.paramDefinitions;

@@ -137,20 +137,14 @@ export class CLI {
 
             let {
                 paramDefinitions,
+                requiredParamsNumber,
                 paramsDefinition,
-                optionConstructor,
+                optionsConstructor,
                 optionDefinitions,
-                requiredParamsNumber
+                contextConstructor
             } = TargetCommand;
 
-            let argsParser = new ArgsParser(
-                TargetCommand,
-                paramDefinitions,
-                paramsDefinition,
-                optionConstructor,
-                optionDefinitions,
-                requiredParamsNumber
-            );
+            let argsParser = new ArgsParser(TargetCommand);
 
             let {
                 args: commandArgs,
@@ -176,7 +170,9 @@ export class CLI {
                 executeMethodArgs.push(commandOptions);
             }
 
-            executeMethodArgs.push(context)
+            if (context) {
+                executeMethodArgs.push(context)
+            }
 
             return command.execute(...executeMethodArgs);
         } else if (Path.basename(path) === 'default.js') {
@@ -198,18 +194,35 @@ export interface ParsedArgs {
     help?: boolean;
 }
 
-export class ArgsParser {
+class ArgsParser {
+    private helpProvider: HelpProvider;
+
+    private paramDefinitions: ParamDefinition<any>[];
+    private requiredParamsNumber: number;
+
+    private paramsDefinition: ParamsDefinition<any>;
+
     private optionDefinitionMap: Clime.HashTable<OptionDefinition<any>>;
     private optionFlagMapping: Clime.HashTable<string>;
 
-    constructor(
-        private helpProvider: HelpProvider,
-        private paramDefinitions: ParamDefinition<any>[],
-        private paramsDefinition: ParamsDefinition<any>,
-        private optionConstructor: Clime.Constructor<Clime.HashTable<any>>,
-        private optionDefinitions: OptionDefinition<any>[],
-        private requiredParamsNumber: number
-    ) {
+    private optionsConstructor: Clime.Constructor<Clime.HashTable<any>>;
+    private optionDefinitions: OptionDefinition<any>[];
+
+    private contextConstructor: Clime.Constructor<Context>;
+
+    constructor(command: typeof Command) {
+        this.helpProvider = command;
+
+        this.paramDefinitions = command.paramDefinitions;
+        this.requiredParamsNumber = command.requiredParamsNumber;
+
+        this.paramsDefinition = command.paramsDefinition;
+
+        this.optionsConstructor = command.optionsConstructor;
+        this.optionDefinitions = command.optionDefinitions;
+
+        this.contextConstructor = command.contextConstructor;
+
         if (this.optionDefinitions) {
             this.optionFlagMapping = {};
             this.optionDefinitionMap = {};
@@ -241,16 +254,19 @@ export class ArgsParser {
         let commandOptions: Clime.HashTable<any>;
         let commandExtraArgs: any[] = [];
 
-        let OptionConstructor = this.optionConstructor;
+        let OptionConstructor = this.optionsConstructor;
         let optionDefinitions = this.optionDefinitions;
         let optionDefinitionMap = this.optionDefinitionMap;
         let optionFlagMapping = this.optionFlagMapping;
         let requiredOptionMap: Clime.HashTable<boolean>;
 
-        let context: Context = {
-            cwd,
-            commands: sequence
-        };
+        let ContextConstructor = this.contextConstructor;
+
+        let context: Context;
+
+        if (ContextConstructor) {
+            context = new ContextConstructor(cwd, sequence);
+        }
 
         if (OptionConstructor) {
             commandOptions = new OptionConstructor();

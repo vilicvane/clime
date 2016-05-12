@@ -76,7 +76,7 @@ USAGE
   bar  - optional parameter bar
   args - extra parameters
 
-Options
+OPTIONS
 
   -t, --timeout <timeout> - timeout that does nothing
 
