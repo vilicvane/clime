@@ -1,3 +1,5 @@
+import hyphenate from 'hyphenate';
+
 import { GeneralValidator } from './';
 
 export interface OptionOptions<T> {
@@ -62,7 +64,7 @@ export function option<T>(
         type = type || Reflect.getMetadata('design:type', target, name);
 
         definitions.push({
-            name: optionName || name,
+            name: hyphenate(optionName || name, { lowerCase: true }),
             key: name,
             flag,
             placeholder,

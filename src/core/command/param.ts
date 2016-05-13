@@ -1,5 +1,7 @@
 import * as assert from 'assert';
 
+import hyphenate from 'hyphenate';
+
 import {
     Command,
     GeneralValidator
@@ -64,7 +66,7 @@ export function param<T>(
         paramName = paramName || Reflection.getFunctionParameterName(target.execute, index);
 
         definitions[index] = {
-            name: paramName,
+            name: hyphenate(paramName, { lowerCase: true }),
             index,
             type,
             required,

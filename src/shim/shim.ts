@@ -23,7 +23,7 @@ export class Shim {
                 }
 
                 process.exit();
-            }, reason => {
+            }, (reason: Object) => {
                 let exitCode = 1;
 
                 if (isPrintable(reason)) {

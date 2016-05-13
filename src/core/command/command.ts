@@ -17,12 +17,31 @@ export interface CommandOptions {
     description?: string;
 }
 
+export interface ContextOptions {
+    cwd: string;
+    /** Commands sequence including entry and sub commands. */
+    commands: string[];
+    stdout?: NodeJS.WritableStream;
+    stderr?: NodeJS.WritableStream;
+}
+
 export class Context {
-    constructor(
-        public cwd: string,
-        /** Commands sequence including entry and sub commands. */
-        public commands: string[]
-    ) { }
+    cwd: string;
+    commands: string[];
+    stdout: NodeJS.WritableStream;
+    stderr: NodeJS.WritableStream;
+
+    constructor({
+        cwd,
+        commands,
+        stdout,
+        stderr
+    }: ContextOptions) {
+        this.cwd = cwd;
+        this.commands = commands;
+        this.stdout = stdout || process.stdout;
+        this.stderr = stderr || process.stderr;
+    }
 }
 
 export interface Validator<T> {
@@ -50,7 +69,7 @@ export abstract class Command {
     static paramsDefinition: ParamsDefinition<any>;
     static optionsConstructor: Clime.Constructor<Clime.HashTable<any>>;
     static optionDefinitions: OptionDefinition<any>[];
-    static contextConstructor: Clime.Constructor<Context>;
+    static contextConstructor: typeof Context;
 
     static requiredParamsNumber = 0;
 }

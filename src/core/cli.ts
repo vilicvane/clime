@@ -2,6 +2,7 @@ import * as FS from 'fs';
 import * as Path from 'path';
 
 import ExtendableError from 'extendable-error';
+import hyphenate from 'hyphenate';
 import Promise, { Resolvable } from 'thenfail';
 
 import {
@@ -208,7 +209,7 @@ class ArgsParser {
     private optionsConstructor: Clime.Constructor<Clime.HashTable<any>>;
     private optionDefinitions: OptionDefinition<any>[];
 
-    private contextConstructor: Clime.Constructor<Context>;
+    private contextConstructor: typeof Context;
 
     constructor(command: typeof Command) {
         this.helpProvider = command;
@@ -265,7 +266,10 @@ class ArgsParser {
         let context: Context;
 
         if (ContextConstructor) {
-            context = new ContextConstructor(cwd, sequence);
+            context = new ContextConstructor({
+                cwd,
+                commands: sequence
+            });
         }
 
         if (OptionConstructor) {
@@ -275,6 +279,7 @@ class ArgsParser {
             for (let definition of optionDefinitions) {
                 let {
                     name,
+                    key,
                     required,
                     toggle,
                     default: defaultValue
@@ -285,9 +290,9 @@ class ArgsParser {
                 }
 
                 if (toggle) {
-                    commandOptions[name] = false;
+                    commandOptions[key] = false;
                 } else {
-                    commandOptions[name] = defaultValue;
+                    commandOptions[key] = defaultValue;
                 }
             }
         }
@@ -376,7 +381,7 @@ class ArgsParser {
                 }
 
                 if (definition.toggle) {
-                    commandOptions[name] = true;
+                    commandOptions[definition.key] = true;
                 } else {
                     if (i !== flags.length - 1) {
                         throw new UsageError(that.helpProvider, 'Only the last flag in a sequence can refer to an option instead of a toggle');
@@ -399,7 +404,7 @@ class ArgsParser {
             }
 
             if (definition.toggle) {
-                commandOptions[name] = true;
+                commandOptions[definition.key] = true;
             } else {
                 consumeOption(definition);
             }
@@ -501,7 +506,7 @@ export class UsageError extends ExtendableError implements Printable {
         super(message);
     }
 
-    print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream) {
+    print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream): void {
         stderr.write(`${this.message}.\n`);
 
         this
