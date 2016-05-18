@@ -63,10 +63,16 @@ export function param<T>(
         type = type ||
             Reflect.getMetadata('design:paramtypes', target, 'execute')[index] as Clime.Constructor<T>;
 
-        paramName = paramName || Reflection.getFunctionParameterName(target.execute, index);
+        paramName = paramName ||
+            hyphenate(
+                Reflection.getFunctionParameterName(target.execute, index),
+                {
+                    lowerCase: true
+                }
+            );
 
         definitions[index] = {
-            name: hyphenate(paramName, { lowerCase: true }),
+            name: paramName,
             index,
             type,
             required,

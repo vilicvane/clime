@@ -63,8 +63,10 @@ export function option<T>(
 
         type = type || Reflect.getMetadata('design:type', target, name);
 
+        optionName = optionName || hyphenate(name, { lowerCase: true });
+
         definitions.push({
-            name: hyphenate(optionName || name, { lowerCase: true }),
+            name: optionName,
             key: name,
             flag,
             placeholder,
