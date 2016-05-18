@@ -1,5 +1,7 @@
 import * as Path from 'path';
 
+import { Resolvable } from 'thenfail';
+
 import {
     Printable
 } from '../object';
@@ -12,68 +14,105 @@ import {
     HelpInfo
 } from './';
 
+/**
+ * Options for command.
+ */
 export interface CommandOptions {
+    /** Shown on usage as subcommand description. */
     brief?: string;
+    /** Shown on usage as the description of current command. */
     description?: string;
 }
 
+/**
+ * Options for context.
+ */
 export interface ContextOptions {
+    /** Current working directory. */
     cwd: string;
     /** Commands sequence including entry and sub commands. */
     commands: string[];
-    stdout?: NodeJS.WritableStream;
-    stderr?: NodeJS.WritableStream;
 }
 
+/**
+ * Command context.
+ */
 export class Context {
+    /** Current working directory. */
     cwd: string;
+    /** Commands sequence including entry and sub commands. */
     commands: string[];
-    stdout: NodeJS.WritableStream;
-    stderr: NodeJS.WritableStream;
 
     constructor({
         cwd,
-        commands,
-        stdout,
-        stderr
+        commands
     }: ContextOptions) {
         this.cwd = cwd;
         this.commands = commands;
-        this.stdout = stdout || process.stdout;
-        this.stderr = stderr || process.stderr;
     }
 }
 
+/**
+ * Validator interface for parameters or options.
+ */
 export interface Validator<T> {
+    /**
+     * A method that validates a value.
+     * It should throw an error (usually an instance of `ExpectedError`) if the
+     * validation fails.
+     * @param value - Value to be validated.
+     * @param name - Name of the parameter or option, used for generating error
+     * message.
+     */
     validate(value: T, name: string): void;
 }
 
 export type GeneralValidator<T> = Validator<T> | RegExp;
 
+/**
+ * The abstract `Command` class to be extended.
+ */
 export abstract class Command {
     /**
      * @returns A promise or normal value.
      */
-    abstract execute(...args: any[]): any;
+    abstract execute(...args: any[]): Resolvable<any>;
 
+    /**
+     * Get the help object of current command.
+     */
+    // Note: we are using method instead of getter here to avoid issue with
+    // `__extends` helper emitted by TypeScript.
     static getHelp(): HelpInfo {
         return HelpInfo.build(this);
     }
 
+    /** @internal */
     static path: string;
+    /** @internal */
     static sequence: string[];
+    /** @internal */
     static brief: string;
+    /** @internal */
     static description: string;
 
+    /** @internal */
     static paramDefinitions: ParamDefinition<any>[];
+    /** @internal */
     static paramsDefinition: ParamsDefinition<any>;
+    /** @internal */
     static optionsConstructor: Clime.Constructor<Clime.HashTable<any>>;
+    /** @internal */
     static optionDefinitions: OptionDefinition<any>[];
+    /** @internal */
     static contextConstructor: typeof Context;
-
+    /** @internal */
     static requiredParamsNumber = 0;
 }
 
+/**
+ * The `command()` decorator that decorates concrete class of `Command`.
+ */
 export function command(options: CommandOptions = {}) {
     return (target: typeof Command) => {
         target.brief = options.brief;
@@ -130,7 +169,7 @@ export function command(options: CommandOptions = {}) {
 
         if (optionsConstructorCandidate && optionsConstructorCandidate.prototype instanceof Options) {
             target.optionsConstructor = optionsConstructorCandidate;
-            target.optionDefinitions = (optionsConstructorCandidate as typeof Options).definitions;
+            target.optionDefinitions = (<any>optionsConstructorCandidate as typeof Options).definitions;
 
             contextConstructorCandidateIndex = optionsConstructorCandidateIndex + 1;
         } else {
@@ -150,4 +189,9 @@ export function command(options: CommandOptions = {}) {
     };
 }
 
+/**
+ * The `metadata` decorator does nothing at runtime. It is only used to have
+ * TypeScript emits type metadata for `execute` method that has no other
+ * decorators.
+ */
 export const metadata: MethodDecorator = () => { };

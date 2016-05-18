@@ -1,7 +1,5 @@
 import * as assert from 'assert';
 
-import hyphenate from 'hyphenate';
-
 import {
     Command,
     GeneralValidator
@@ -11,16 +9,33 @@ import {
     Reflection
 } from '../../utils';
 
+/**
+ * Options for command parameter.
+ */
 export interface ParamOptions<T> {
+    /**
+     * Parameter name shown on usage, defaults to the name of correspondent
+     * function parameter.
+     */
     name?: string;
+    /** Parameter type, defaults to type of emitted "design:type" metadata. */
     type?: Clime.Constructor<T>;
-    description?: string;
+    /** Indicates whether this parameter is required, defaults to `false`. */
     required?: boolean;
+    /**
+     * The parameter validator, could be either a regular expression or an
+     * object that matches `Validator` interface.
+     */
     validator?: GeneralValidator<T>;
+    /** The parameter validators. */
     validators?: GeneralValidator<T>[];
+    /** Default value for this parameter. */
     default?: T;
+    /** Description shown on usage. */
+    description?: string;
 }
 
+/** @internal */
 export interface ParamDefinition<T> {
     name: string;
     index: number;
@@ -31,6 +46,12 @@ export interface ParamDefinition<T> {
     default: T;
 }
 
+/**
+ * The `param()` decorator that decorates parameters of method `execute` on a
+ * concrete `Command` class.
+ * This decorator could only be applied to continuous parameters of which the
+ * index starts from 0.
+ */
 export function param<T>(
     {
         name: paramName,

@@ -62,10 +62,10 @@ export class HelpInfo implements Printable {
         let paramsDefinition = CommandClass.paramsDefinition;
 
         let parameterDescriptionRows: string[][] = [];
+        let parameterUsageTexts: string[] = [];
 
-        let parameterUsageItems = CommandClass
-            .paramDefinitions
-            .map(definition => {
+        if (paramDefinitions) {
+            parameterUsageTexts = paramDefinitions.map(definition => {
                 let {
                     name,
                     required,
@@ -84,6 +84,9 @@ export class HelpInfo implements Printable {
                     `<${name}>` :
                     `[${name}${defaultValue !== undefined ? '=' + defaultValue : ''}]`;
             });
+        } else {
+            parameterUsageTexts = [];
+        }
 
         if (paramsDefinition) {
             let {
@@ -99,7 +102,7 @@ export class HelpInfo implements Printable {
                 ]);
             }
 
-            parameterUsageItems.push(
+            parameterUsageTexts.push(
                 required ?
                     `<...${name}>` :
                     `[...${name}]`
@@ -113,7 +116,7 @@ export class HelpInfo implements Printable {
 
         let usageLine = [
             Chalk.bold(CommandClass.sequence.join(' ')),
-            ...parameterUsageItems,
+            ...parameterUsageTexts,
             ...requiredOptionUsageItems
         ].join(' ');
 
@@ -121,21 +124,26 @@ export class HelpInfo implements Printable {
             usageLine += ' [...options]';
         }
 
-        let text = `\
+        let usageContent = `\
   ${Chalk.green('USAGE')}\n
     ${usageLine}\n`;
 
-        if (parameterDescriptionRows.length) {
-            text += `\n${buildTableOutput(parameterDescriptionRows, { indent: 4, spaces: ' - '})}`;
-        }
+        this.texts.push(usageContent);
 
-        this.texts.push(text);
+        if (parameterDescriptionRows.length) {
+            let paramsContent = `\
+  ${Chalk.green('PARAMETERS')}\n
+${buildTableOutput(parameterDescriptionRows, { indent: 4, spaces: ' - '})}`;
+
+            this.texts.push(paramsContent);
+        }
 
         if (optionDefinitions.length) {
             let optionRows = optionDefinitions
                 .map(definition => {
                     let {
                         name,
+                        key,
                         flag,
                         placeholder,
                         toggle: isToggle,
@@ -147,7 +155,7 @@ export class HelpInfo implements Printable {
                     triggerStr += `--${name}`;
 
                     if (!isToggle) {
-                        triggerStr += ` <${placeholder || name}>`;
+                        triggerStr += ` <${placeholder || key}>`;
                     }
 
                     return [

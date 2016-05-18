@@ -1,5 +1,9 @@
 /src/
 /typings/
+
+/bld/examples/
+/bld/test/
+
 /tsconfig.json
 
 .*

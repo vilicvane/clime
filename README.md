@@ -3,8 +3,18 @@
 The command-line interface framework for TypeScript.
 
 ```ts
-@command()
+import {
+    command,
+    metadata,
+    Command
+} from 'clime';
+
+@command({
+    brief: 'print a greeting message.',
+    description: 'This is a command for printing a greeting message.'
+})
 export default class extends Command {
+    @metadata
     execute() {
         return 'Hello, Clime!';
     }
@@ -25,6 +35,15 @@ Clime provides a way in which you can get parameters and options you really want
 To make this work, you'll need to set both of `experimentalDecorators` and `emitDecoratorMetadata` in your `tsconfig.json` to `true`.
 
 ```ts
+import {
+    command,
+    option,
+    param,
+    params,
+    Command,
+    Options
+} from 'clime';
+
 export class SomeOptions extends Options {
     @option({
         flag: 't',
@@ -90,6 +109,8 @@ It also defines interface `StringCastable` that allows user-defined classes to b
 For example:
 
 ```ts
+import { StringCastable } from 'clime';
+
 class File implements StringCastable {
     constructor(
         public path: string
@@ -197,13 +218,13 @@ export const brief = 'brief description';
 Clime in its core provides an object-based command line structure, a pure Clime CLI object could be like this:
 
 ```ts
-// The second parameter is the path to folder that contains command files.
+import * as Path from 'path';
+import { CLI, Shim } from 'clime';
+
+// The second parameter is the path to folder that contains command modules.
 let cli = new CLI('command', Path.join(__dirname, 'commands'));
-```
 
-To make it work with stdio-based shell, we need to apply a shim:
-
-```ts
+// To make it work with stdio-based shell, we need to apply a shim:
 let shim = new Shim(cli);
 shim.execute(process.argv);
 ```

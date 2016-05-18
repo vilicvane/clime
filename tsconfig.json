@@ -8,6 +8,7 @@
         "noImplicitReturns": true,
         "noImplicitAny": true,
         "noEmitOnError": true,
+        "stripInternal": true,
         "sourceMap": true,
         "rootDir": "src",
         "outDir": "bld"

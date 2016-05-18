@@ -1,25 +1,41 @@
 import * as assert from 'assert';
 
-import hyphenate from 'hyphenate';
-
 import {
     Command,
     GeneralValidator
 } from './command';
 
 import {
-    Reflection,
+    Reflection
 } from '../../utils';
 
+/**
+ * Options for variadic command parameters.
+ */
 export interface ParamsOptions<T> {
+    /**
+     * Variadic parameters name shown on usage, defaults to the name of
+     * correspondent function parameter.
+     */
     name?: string;
+    /** Type of every element in variadic parameters. */
     type: Clime.Constructor<T>;
+    /**
+     * Indicates whether at least one element is required, defaults to `false`.
+     */
     required?: boolean;
+    /**
+     * The variadic parameters validator, could be either a regular expression
+     * or an object that matches `Validator` interface.
+     */
     validator?: GeneralValidator<T>;
+    /** The variadic parameters validators. */
     validators?: GeneralValidator<T>[];
+    /** Description shown on usage. */
     description?: string;
 }
 
+/** @internal */
 export interface ParamsDefinition<T> {
     name: string;
     index: number;
@@ -29,6 +45,10 @@ export interface ParamsDefinition<T> {
     description: string;
 }
 
+/**
+ * The `params()` decorator that decorates one array parameter of method
+ * `execute` of a concrete `Command` class.
+ */
 export function params<T>(
     {
         name: paramName,
@@ -76,5 +96,3 @@ export function params<T>(
         };
     };
 }
-
-let x: Clime.Constructor<any>;

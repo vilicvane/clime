@@ -39,7 +39,9 @@ export class CLI {
     description: string;
 
     constructor(
+        /** Command entry name. */
         public name: string,
+        /** Root directory of command modules. */
         root: string
     ) {
         this.root = Path.resolve(root);
@@ -331,7 +333,7 @@ class ArgsParser {
                     .slice(0, expecting - got)
                     .map(definition => `\`${definition.name}\``);
 
-                throw new UsageError(this.helpProvider, `Expecting argument(s) ${missingArgNames.join(', ')}`);
+                throw new UsageError(`Expecting argument(s) ${missingArgNames.join(', ')}`, this.helpProvider);
             }
         }
 
@@ -339,7 +341,7 @@ class ArgsParser {
             let missingOptionNames = requiredOptionMap && Object.keys(requiredOptionMap);
 
             if (missingOptionNames && missingOptionNames.length) {
-                throw new UsageError(this.helpProvider, `Missing required option(s) \`${missingOptionNames.join('`, `')}\``);
+                throw new UsageError(`Missing required option(s) \`${missingOptionNames.join('`, `')}\``, this.helpProvider);
             }
         }
 
@@ -352,10 +354,10 @@ class ArgsParser {
                 let expecting = paramDefinitions.length;
                 let got = commandExtraArgs.length + expecting;
 
-                throw new UsageError(this.helpProvider, `Expecting ${expecting} parameter(s) at most but got ${got} instead`);
+                throw new UsageError(`Expecting ${expecting} parameter(s) at most but got ${got} instead`, this.helpProvider);
             }
         } else if (paramsDefinition && paramsDefinition.required) {
-            throw new UsageError(this.helpProvider, `Expecting at least one element for variadic parameters \`${paramsDefinition.name}\``);
+            throw new UsageError(`Expecting at least one element for variadic parameters \`${paramsDefinition.name}\``, this.helpProvider);
         }
 
         return {
@@ -370,7 +372,7 @@ class ArgsParser {
                 let flag = flags[i];
 
                 if (!optionFlagMapping || !optionFlagMapping.hasOwnProperty(flag)) {
-                    throw new UsageError(that.helpProvider, `Unknown option flag "${flag}"`);
+                    throw new UsageError(`Unknown option flag "${flag}"`, that.helpProvider);
                 }
 
                 let name = optionFlagMapping[flag];
@@ -384,7 +386,7 @@ class ArgsParser {
                     commandOptions[definition.key] = true;
                 } else {
                     if (i !== flags.length - 1) {
-                        throw new UsageError(that.helpProvider, 'Only the last flag in a sequence can refer to an option instead of a toggle');
+                        throw new UsageError('Only the last flag in a sequence can refer to an option instead of a toggle', that.helpProvider);
                     }
 
                     consumeOption(definition);
@@ -394,7 +396,7 @@ class ArgsParser {
 
         function consumeToggleOrOption(name: string): void {
             if (!optionDefinitionMap || !optionDefinitionMap.hasOwnProperty(name)) {
-                throw new UsageError(that.helpProvider, `Unknown option \`${name}\``);
+                throw new UsageError(`Unknown option \`${name}\``, that.helpProvider);
             }
 
             let definition = optionDefinitionMap[name];
@@ -421,11 +423,11 @@ class ArgsParser {
             let arg = args.shift();
 
             if (arg === undefined) {
-                throw new UsageError(that.helpProvider, `Expecting value for option \`${name}\``);
+                throw new UsageError(`Expecting value for option \`${name}\``, that.helpProvider);
             }
 
             if (arg[0] === '-') {
-                throw new UsageError(that.helpProvider, `Expecting a value instead of an option or toggle "${arg}" for option \`${name}\``);
+                throw new UsageError(`Expecting a value instead of an option or toggle "${arg}" for option \`${name}\``, that.helpProvider);
             }
 
             commandOptions[key] = castArgument(arg, name, type, validators);
@@ -498,16 +500,16 @@ export interface HelpProvider {
     getHelp(): HelpInfo;
 }
 
-export class UsageError extends ExtendableError implements Printable {
+export class UsageError extends ExpectedError implements Printable {
     constructor(
-        public helpProvider: HelpProvider,
-        message: string
+        message: string,
+        public helpProvider: HelpProvider
     ) {
         super(message);
     }
 
     print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream): void {
-        stderr.write(`${this.message}.\n`);
+        super.print(stdout, stderr);
 
         this
             .helpProvider

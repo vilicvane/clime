@@ -2,19 +2,39 @@ import hyphenate from 'hyphenate';
 
 import { GeneralValidator } from './';
 
+/**
+ * Options for command options.
+ */
 export interface OptionOptions<T> {
+    /**
+     * Option name shown on usage, defaults to hyphenated name of correspondent
+     * property.
+     */
     name?: string;
+    /** A single charactor as the shorthand of the option. */
     flag?: string;
+    /** The placeholder shown on usage as `--option <placeholder>`. */
     placeholder?: string;
+    /** Parameter type, defaults to type of emitted "design:type" metadata. */
     type?: Clime.Constructor<T>;
+    /** Indicates whether this option is required, defaults to `false`. */
     required?: boolean;
+    /**
+     * The option validator, could be either a regular expression or an object
+     * that matches `Validator` interface.
+     */
     validator?: GeneralValidator<T>;
+    /** The option validators. */
     validators?: GeneralValidator<T>[];
+    /** Indicates whether this is a switch. */
     toggle?: boolean;
+    /** Default value for this option. */
     default?: T;
+    /** Description shown on usage. */
     description?: string;
 }
 
+/** @internal */
 export interface OptionDefinition<T> {
     name: string;
     key: string;
@@ -28,11 +48,19 @@ export interface OptionDefinition<T> {
     description: string;
 }
 
-export class Options {
-    private _optionsMark: void;
+/**
+ * The abstract `Options` class to be extended.
+ */
+export abstract class Options {
+    private _options_mark: void;
+
+    /** @internal */
     static definitions: OptionDefinition<any>[];
 }
 
+/**
+ * The `option()` decorator that decorates concrete class of `Options`.
+ */
 export function option<T>(
     {
         name: optionName,

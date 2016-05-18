@@ -6,11 +6,19 @@ import {
     isPrintable
 } from '../core';
 
+/**
+ * A Clime command line interface shim for pure Node.js.
+ */
 export class Shim {
     constructor(
         public cli: CLI
     ) { }
 
+    /**
+     * Execute CLI with an array as `argv`.
+     * @param argv - The `argv` array to execute, typically `process.argv`.
+     * @param cwd - Current working directory.
+     */
     execute(argv: string[], cwd?: string): void {
         this
             .cli
