@@ -2,21 +2,50 @@
 
 The command-line interface framework for TypeScript.
 
+# Install
+
+```shell
+npm install clime --save
+```
+
+# Usage
+
+**src/cli.ts**
+
+```ts
+import * as Path from 'path';
+import { CLI, Shim } from 'clime';
+
+// The second parameter is the path to folder that contains command modules.
+let cli = new CLI('command', Path.join(__dirname, 'commands'));
+
+// Clime in its core provides an object-based command-line infrastructure.
+// To have the CLI work with Node.js, a shim need to be applied:
+let shim = new Shim(cli);
+shim.execute(process.argv);
+```
+
+**src/commands/default.ts**
+
 ```ts
 import {
     command,
-    metadata,
+    param,
     Command
 } from 'clime';
 
 @command({
-    brief: 'print a greeting message.',
     description: 'This is a command for printing a greeting message.'
 })
 export default class extends Command {
-    @metadata
-    execute() {
-        return 'Hello, Clime!';
+    execute(
+        @param({
+            description: 'Your loud name',
+            required: true
+        })
+        name: string
+    ) {
+        return `Hello, ${name}!`;
     }
 }
 ```
@@ -198,8 +227,8 @@ The file structure could be:
     - pia.ts
 ```
 
-You may notice that the level-n entry could be either at the same level of the level-(n+1) commands with name `default.ts` (like `default.ts` in `bar`),
-or at the same level of the folder of level-(n+1) commands (like `foo.ts` and folder `foo`).
+You may notice that the level-`n` entry could be either at the same level of the level-`(n+1)` commands with name `default.ts` (like `default.ts` in `bar`),
+or at the same level of the folder of level-`(n+1)` commands (like `foo.ts` and folder `foo`).
 
 ### Command entry with description only
 
@@ -211,31 +240,6 @@ export const description = 'Some detailed description';
 
 // Used when listing as sub commands, optional.
 export const brief = 'brief description';
-```
-
-# CLI and shim
-
-Clime in its core provides an object-based command line structure, a pure Clime CLI object could be like this:
-
-```ts
-import * as Path from 'path';
-import { CLI, Shim } from 'clime';
-
-// The second parameter is the path to folder that contains command modules.
-let cli = new CLI('command', Path.join(__dirname, 'commands'));
-
-// To make it work with stdio-based shell, we need to apply a shim:
-let shim = new Shim(cli);
-shim.execute(process.argv);
-```
-
-If you look into the code of objects like `HelpInfo`, you will find it implements the `Printable` interface.
-This is how the shim going to print an object to stdout or stderr.
-
-# Install
-
-```shell
-npm install clime --save
 ```
 
 # License
