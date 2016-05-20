@@ -1,3 +1,5 @@
+import * as assert from 'assert';
+
 import hyphenate from 'hyphenate';
 
 import { GeneralValidator } from './';
@@ -75,6 +77,8 @@ export function option<T>(
         description
     }: OptionOptions<T> = {}
 ) {
+    assert(/^[a-z]$/i.test(flag), 'The option flag is expected to be a letter');
+
     if (!validators) {
         validators = validator ? [validator] : [];
     }

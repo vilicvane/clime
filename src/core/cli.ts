@@ -24,19 +24,21 @@ import {
     ExpectedError
 } from './error';
 
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
+const COMMAND_NAME_REGEX = /^[\w\d]+(?:-[\w\d]+)*$/;
+const HELP_OPTION_REGEX = /^(?:-[h?]|--help)$/;
+
 export interface DescriptiveObject {
     brief?: string;
     description?: string;
 }
-
-const validCommandNameRegex = /^[\w\d]+(?:-[\w\d]+)*$/;
 
 /**
  * Clime command line interface.
  */
 export class CLI {
     root: string;
-    description: string;
 
     constructor(
         /** Command entry name. */
@@ -55,17 +57,54 @@ export class CLI {
                 path
             } = this.preProcessArguments(argv);
 
-            if (path) {
-                // command file or directory exists
-                let isFile = FS.statSync(path).isFile();
+            let isFile = FS.statSync(path).isFile();
+            let description: string;
 
-                if (isFile) {
-                    return this.loadCommand(path, commands, args, cwd);
+            if (isFile) {
+                let module = require(path);
+                let TargetCommand: Clime.Constructor<Command> & typeof Command = module.default || module;
+
+                if (TargetCommand.prototype instanceof Command) {
+                    TargetCommand.path = path;
+                    TargetCommand.sequence = commands;
+
+                    let argsParser = new ArgsParser(TargetCommand);
+
+                    let {
+                        args: commandArgs,
+                        extraArgs: commandExtraArgs,
+                        options: commandOptions,
+                        context,
+                        help
+                    } = argsParser.parse(commands, args, cwd);
+
+                    let command = new TargetCommand();
+
+                    if (help) {
+                        return HelpInfo.build(TargetCommand);
+                    }
+
+                    return this.executeCommand(
+                        command,
+                        commandArgs,
+                        commandExtraArgs,
+                        commandOptions,
+                        context
+                    );
+                } else if (Path.basename(path) === 'default.js') {
+                    path = Path.dirname(path);
+                    description = TargetCommand.description;
                 } else {
-                    throw HelpInfo.build(path);
+                    throw new Error(`Module "${path}" is expected to be a command`);
                 }
+            }
+
+            let helpInfo = HelpInfo.build(path, description);
+
+            if (args.some(arg => HELP_OPTION_REGEX.test(arg))) {
+                return helpInfo;
             } else {
-                throw this.getHelp();
+                throw helpInfo;
             }
         });
     }
@@ -80,23 +119,13 @@ export class CLI {
         let argsIndex = 2;
 
         let entryPath = Path.join(this.root, 'default.js');
-        let targetPath: string;
-
-        if (FS.existsSync(entryPath)) {
-            targetPath = entryPath;
-
-            let module = require(entryPath);
-            let object = (module.default || module) as DescriptiveObject;
-            this.description = object.description;
-        } else {
-            targetPath = searchPath;
-        }
+        let targetPath = FS.existsSync(entryPath) ? entryPath : searchPath;
 
         outer:
         for (let i = 2; i < argv.length; i++) {
             let arg = argv[i];
 
-            if (validCommandNameRegex.test(arg)) {
+            if (COMMAND_NAME_REGEX.test(arg)) {
                 searchPath = Path.join(searchPath, arg);
 
                 let possiblePaths = [
@@ -130,58 +159,28 @@ export class CLI {
         };
     }
 
-    private loadCommand(path: string, sequence: string[], args: string[], cwd: string): any {
-        let module = require(path);
-        let TargetCommand: Clime.Constructor<Command> & typeof Command = module.default || module;
+    private executeCommand(
+        command: Command,
+        commandArgs: string[],
+        commandExtraArgs: string[],
+        commandOptions: Clime.HashTable<any>,
+        context: Context
+    ): any {
+        let executeMethodArgs: any[] = commandArgs.concat();
 
-        if (TargetCommand.prototype instanceof Command) {
-            TargetCommand.path = path;
-            TargetCommand.sequence = sequence;
-
-            let {
-                paramDefinitions,
-                requiredParamsNumber,
-                paramsDefinition,
-                optionsConstructor,
-                optionDefinitions,
-                contextConstructor
-            } = TargetCommand;
-
-            let argsParser = new ArgsParser(TargetCommand);
-
-            let {
-                args: commandArgs,
-                extraArgs: commandExtraArgs,
-                options: commandOptions,
-                context,
-                help
-            } = argsParser.parse(sequence, args, cwd);
-
-            let command = new TargetCommand();
-
-            if (help) {
-                return TargetCommand.getHelp();
-            }
-
-            let executeMethodArgs = commandArgs.concat();
-
-            if (paramsDefinition) {
-                executeMethodArgs.push(commandExtraArgs);
-            }
-
-            if (optionDefinitions) {
-                executeMethodArgs.push(commandOptions);
-            }
-
-            if (context) {
-                executeMethodArgs.push(context)
-            }
-
-            return command.execute(...executeMethodArgs);
-        } else if (Path.basename(path) === 'default.js') {
-            let dir = Path.dirname(path);
-            throw HelpInfo.build(dir, TargetCommand.description);
+        if (commandExtraArgs) {
+            executeMethodArgs.push(commandExtraArgs);
         }
+
+        if (commandOptions) {
+            executeMethodArgs.push(commandOptions);
+        }
+
+        if (context) {
+            executeMethodArgs.push(context)
+        }
+
+        return command.execute(...executeMethodArgs);
     }
 
     getHelp(): HelpInfo {
@@ -253,26 +252,25 @@ class ArgsParser {
 
         args = args.concat();
 
-        let commandArgs: any[] = [];
-        let commandOptions: Clime.HashTable<any>;
-        let commandExtraArgs: any[] = [];
-
         let OptionConstructor = this.optionsConstructor;
         let optionDefinitions = this.optionDefinitions;
-        let optionDefinitionMap = this.optionDefinitionMap;
-        let optionFlagMapping = this.optionFlagMapping;
+        let optionDefinitionMap = this.optionDefinitionMap || {};
+        let optionFlagMapping = this.optionFlagMapping || {};
         let requiredOptionMap: Clime.HashTable<boolean>;
 
         let ContextConstructor = this.contextConstructor;
 
         let context: Context;
 
-        if (ContextConstructor) {
-            context = new ContextConstructor({
-                cwd,
-                commands: sequence
-            });
-        }
+        let paramDefinitions = this.paramDefinitions || [];
+        let pendingParamDefinitions = paramDefinitions.concat();
+
+        let paramsDefinition = this.paramsDefinition;
+        let argsNumber = args.length;
+
+        let commandArgs: any[] = [];
+        let commandExtraArgs: any[] = paramsDefinition && [];
+        let commandOptions: Clime.HashTable<any>;
 
         if (OptionConstructor) {
             commandOptions = new OptionConstructor();
@@ -299,15 +297,21 @@ class ArgsParser {
             }
         }
 
-        let paramDefinitions = this.paramDefinitions || [];
-        let pendingParamDefinitions = paramDefinitions.concat();
-
-        let paramsDefinition = this.paramsDefinition;
+        if (ContextConstructor) {
+            context = new ContextConstructor({
+                cwd,
+                commands: sequence
+            });
+        }
 
         while (args.length) {
             let arg = args.shift();
 
-            if (/^(?:-[h?]|--help)$/.test(arg)) {
+            if (
+                arg === '-?' ||
+                (arg === '-h' && !hasOwnProperty.call(optionFlagMapping, 'h')) ||
+                (arg === '--help' && !hasOwnProperty.call(optionDefinitionMap, 'help'))
+            ) {
                 return {
                     help: true
                 };
@@ -319,8 +323,16 @@ class ArgsParser {
                 } else {
                     consumeFlags(arg.substr(1))
                 }
-            } else {
+            } else if (pendingParamDefinitions.length) {
                 consumeArgument(arg);
+            } else if (paramsDefinition) {
+                let casted = castArgument(arg, paramsDefinition.name, paramsDefinition.type, paramsDefinition.validators);
+                commandExtraArgs.push(casted);
+            } else {
+                throw new UsageError(
+                    `Expecting ${paramDefinitions.length} parameter(s) at most but got ${argsNumber} instead`,
+                    this.helpProvider
+                );
             }
         }
 
@@ -349,20 +361,17 @@ class ArgsParser {
             commandArgs.push(definition.default);
         }
 
-        if (commandExtraArgs.length) {
-            if (!paramsDefinition) {
-                let expecting = paramDefinitions.length;
-                let got = commandExtraArgs.length + expecting;
-
-                throw new UsageError(`Expecting ${expecting} parameter(s) at most but got ${got} instead`, this.helpProvider);
-            }
-        } else if (paramsDefinition && paramsDefinition.required) {
+        if (
+            paramsDefinition &&
+            paramsDefinition.required &&
+            !commandExtraArgs.length
+        ) {
             throw new UsageError(`Expecting at least one element for variadic parameters \`${paramsDefinition.name}\``, this.helpProvider);
         }
 
         return {
             args: commandArgs,
-            extraArgs: commandExtraArgs,
+            extraArgs: paramsDefinition && commandExtraArgs,
             options: commandOptions,
             context
         };
@@ -371,7 +380,7 @@ class ArgsParser {
             for (let i = 0; i < flags.length; i++) {
                 let flag = flags[i];
 
-                if (!optionFlagMapping || !optionFlagMapping.hasOwnProperty(flag)) {
+                if (!optionFlagMapping.hasOwnProperty(flag)) {
                     throw new UsageError(`Unknown option flag "${flag}"`, that.helpProvider);
                 }
 
@@ -395,7 +404,7 @@ class ArgsParser {
         }
 
         function consumeToggleOrOption(name: string): void {
-            if (!optionDefinitionMap || !optionDefinitionMap.hasOwnProperty(name)) {
+            if (!optionDefinitionMap.hasOwnProperty(name)) {
                 throw new UsageError(`Unknown option \`${name}\``, that.helpProvider);
             }
 
@@ -436,7 +445,9 @@ class ArgsParser {
         function consumeArgument(arg: string): void {
             if (pendingParamDefinitions.length) {
                 let definition = pendingParamDefinitions.shift();
-                commandArgs.push(castArgument(arg, definition.name, definition.type, definition.validators))
+                let casted = castArgument(arg, definition.name, definition.type, definition.validators);
+
+                commandArgs.push(casted);
             } else {
                 commandExtraArgs.push(
                     paramsDefinition ?
