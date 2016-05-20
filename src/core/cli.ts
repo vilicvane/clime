@@ -324,7 +324,9 @@ class ArgsParser {
                     consumeFlags(arg.substr(1))
                 }
             } else if (pendingParamDefinitions.length) {
-                consumeArgument(arg);
+                let definition = pendingParamDefinitions.shift();
+                let casted = castArgument(arg, definition.name, definition.type, definition.validators);
+                commandArgs.push(casted);
             } else if (paramsDefinition) {
                 let casted = castArgument(arg, paramsDefinition.name, paramsDefinition.type, paramsDefinition.validators);
                 commandExtraArgs.push(casted);
@@ -440,21 +442,6 @@ class ArgsParser {
             }
 
             commandOptions[key] = castArgument(arg, name, type, validators);
-        }
-
-        function consumeArgument(arg: string): void {
-            if (pendingParamDefinitions.length) {
-                let definition = pendingParamDefinitions.shift();
-                let casted = castArgument(arg, definition.name, definition.type, definition.validators);
-
-                commandArgs.push(casted);
-            } else {
-                commandExtraArgs.push(
-                    paramsDefinition ?
-                        castArgument(arg, paramsDefinition.name, paramsDefinition.type, paramsDefinition.validators) :
-                        arg
-                );
-            }
         }
 
         // TODO: support casting provider object.
