@@ -380,7 +380,7 @@ class ArgsParser {
             for (let i = 0; i < flags.length; i++) {
                 let flag = flags[i];
 
-                if (!optionFlagMapping.hasOwnProperty(flag)) {
+                if (!hasOwnProperty.call(optionFlagMapping, flag)) {
                     throw new UsageError(`Unknown option flag "${flag}"`, that.helpProvider);
                 }
 
@@ -404,7 +404,7 @@ class ArgsParser {
         }
 
         function consumeToggleOrOption(name: string): void {
-            if (!optionDefinitionMap.hasOwnProperty(name)) {
+            if (!hasOwnProperty.call(optionDefinitionMap, name)) {
                 throw new UsageError(`Unknown option \`${name}\``, that.helpProvider);
             }
 
