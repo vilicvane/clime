@@ -2,7 +2,6 @@ import * as Path from 'path';
 import * as FS from 'fs';
 
 import * as Chalk from 'chalk';
-import * as globby from 'globby';
 import Promise, { invoke } from 'thenfail';
 
 import {
