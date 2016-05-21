@@ -77,7 +77,7 @@ export function option<T>(
         description
     }: OptionOptions<T> = {}
 ) {
-    assert(/^[a-z]$/i.test(flag), 'The option flag is expected to be a letter');
+    assert(!flag || /^[a-z]$/i.test(flag), 'The option flag is expected to be a letter');
 
     if (!validators) {
         validators = validator ? [validator] : [];

@@ -22,7 +22,7 @@ export class Shim {
     execute(argv: string[], cwd?: string): void {
         this
             .cli
-            .execute(argv, cwd)
+            .execute(argv.slice(2), cwd)
             .then(result => {
                 if (isPrintable(result)) {
                     result.print(process.stdout, process.stderr);

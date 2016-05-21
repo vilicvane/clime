@@ -26,6 +26,10 @@ export class HelpInfo implements Printable {
 
     constructor() { }
 
+    get text(): string {
+        return this.texts.join('\n');
+    }
+
     static build(dir: string, description?: string): HelpInfo;
     static build(CommandClass: typeof Command): HelpInfo;
     static build(arg: typeof Command | string, description?: string): HelpInfo {
@@ -214,6 +218,6 @@ ${buildTableOutput(rows, { indent: 4, spaces: ' - ' })}`);
     }
 
     print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream): void {
-        stderr.write(`\n${this.texts.join('\n')}\n`);
+        stderr.write(`\n${this.text}\n`);
     }
 }

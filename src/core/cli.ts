@@ -116,13 +116,13 @@ export class CLI {
     } {
         let commands = [this.name];
         let searchPath = this.root;
-        let argsIndex = 2;
+        let argsIndex = 0;
 
         let entryPath = Path.join(this.root, 'default.js');
         let targetPath = FS.existsSync(entryPath) ? entryPath : searchPath;
 
         outer:
-        for (let i = 2; i < argv.length; i++) {
+        for (let i = argsIndex; i < argv.length; i++) {
             let arg = argv[i];
 
             if (COMMAND_NAME_REGEX.test(arg)) {
