@@ -54,7 +54,7 @@ export default class extends Command {
 
 - ☑ Type and schema based parameters/options casting.
 - ☑ Object and promise based architecture.
-- ☑ File path based multi-level sub commands.
+- ☑ File path based multi-level subcommands.
 - ☑ Automatic usage generating.
 - ☐ Interaction integration.
 
@@ -193,12 +193,12 @@ export default class extends Command {
 }
 ```
 
-## Sub commands
+## Subcommands
 
-Clime provides an easy way to create sub commands. The default entry of a clime command is `default.js` (`default.ts` before compilation).
+Clime provides an easy way to create subcommands. The default entry of a clime command is `default.js` (`default.ts` before compilation).
 Any other `.js` files under the same folder are considered as sub-command files.
 
-Clime allows multi-level sub commands via folders, for three-level commands like:
+Clime allows multi-level subcommands via folders, for three-level commands like:
 
 ```text
 command
@@ -232,13 +232,13 @@ or at the same level of the folder of level-`(n+1)` commands (like `foo.ts` and 
 
 ### Command entry with description only
 
-Clime allows an entry of a group of sub commands to provide only descriptions rather than an actual command.
+Clime allows an entry of a group of subcommands to provide only descriptions rather than an actual command.
 Just export `description` and `brief` directly from the entry module to do so:
 
 ```ts
 export const description = 'Some detailed description';
 
-// Used when listing as sub commands, optional.
+// Used when listing as subcommands, optional.
 export const brief = 'brief description';
 ```
 

@@ -212,7 +212,7 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
 
         if (rows.length) {
             this.texts.push(`\
-  ${Chalk.green('SUB COMMANDS')}\n
+  ${Chalk.green('SUBCOMMANDS')}\n
 ${buildTableOutput(rows, { indent: 4, spaces: ' - ' })}`);
         }
     }

@@ -30,7 +30,7 @@ export interface CommandOptions {
 export interface ContextOptions {
     /** Current working directory. */
     cwd: string;
-    /** Commands sequence including entry and sub commands. */
+    /** Commands sequence including entry and subcommands. */
     commands: string[];
 }
 
@@ -40,7 +40,7 @@ export interface ContextOptions {
 export class Context {
     /** Current working directory. */
     cwd: string;
-    /** Commands sequence including entry and sub commands. */
+    /** Commands sequence including entry and subcommands. */
     commands: string[];
 
     constructor({
