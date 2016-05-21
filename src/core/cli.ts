@@ -250,6 +250,12 @@ class ArgsParser {
     parse(sequence: string[], args: string[], cwd: string): ParsedArgs {
         let that = this;
 
+        let ContextConstructor = this.contextConstructor || Context;
+        let context = new ContextConstructor({
+            cwd,
+            commands: sequence
+        });
+
         args = args.concat();
 
         let OptionConstructor = this.optionsConstructor;
@@ -257,10 +263,6 @@ class ArgsParser {
         let optionDefinitionMap = this.optionDefinitionMap || {};
         let optionFlagMapping = this.optionFlagMapping || {};
         let requiredOptionMap: Clime.HashTable<boolean>;
-
-        let ContextConstructor = this.contextConstructor;
-
-        let context: Context;
 
         let paramDefinitions = this.paramDefinitions || [];
         let pendingParamDefinitions = paramDefinitions.concat();
@@ -295,13 +297,6 @@ class ArgsParser {
                     commandOptions[key] = defaultValue;
                 }
             }
-        }
-
-        if (ContextConstructor) {
-            context = new ContextConstructor({
-                cwd,
-                commands: sequence
-            });
         }
 
         while (args.length) {
