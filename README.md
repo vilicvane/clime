@@ -60,7 +60,6 @@ export default class extends Command {
 - ☑ Object and promise based architecture.
 - ☑ File path based multi-level subcommands.
 - ☑ Automatic usage generating.
-- ☐ Interaction integration.
 
 ### Parameter types and options schema
 
