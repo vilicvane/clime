@@ -88,6 +88,8 @@ export abstract class Command {
     }
 
     /** @internal */
+    static decorated = false;
+    /** @internal */
     static path: string;
     /** @internal */
     static sequence: string[];
@@ -186,6 +188,8 @@ export function command(options: CommandOptions = {}) {
         ) {
             target.contextConstructor = contextConstructorCandidate;
         }
+
+        target.decorated = true;
     };
 }
 

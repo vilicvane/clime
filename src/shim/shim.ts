@@ -1,3 +1,6 @@
+import * as Util from 'util';
+
+import * as Chalk from 'chalk';
 import Promise from 'thenfail';
 
 import {
@@ -41,9 +44,9 @@ export class Shim {
                         exitCode = (reason as ExpectedError).code;
                     }
                 } else if (reason instanceof Error) {
-                    console.error(reason.stack);
+                    console.error(Chalk.red(reason.stack));
                 } else {
-                    console.error(reason);
+                    console.error(Chalk.red(Util.format(reason)));
                 }
 
                 process.exit(exitCode);

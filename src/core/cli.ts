@@ -65,6 +65,10 @@ export class CLI {
                 let TargetCommand: Clime.Constructor<Command> & typeof Command = module.default || module;
 
                 if (TargetCommand.prototype instanceof Command) {
+                    if (!TargetCommand.decorated) {
+                        throw new TypeError(`Command defined in module "${path}" does not seem to be intialized, make sure to decorate it with \`@command()\``);
+                    }
+
                     TargetCommand.path = path;
                     TargetCommand.sequence = commands;
 
@@ -95,7 +99,7 @@ export class CLI {
                     path = Path.dirname(path);
                     description = TargetCommand.description;
                 } else {
-                    throw new Error(`Module "${path}" is expected to be a command`);
+                    throw new TypeError(`Module "${path}" is expected to be a command`);
                 }
             }
 
@@ -342,7 +346,7 @@ class ArgsParser {
                     .slice(0, expecting - got)
                     .map(definition => `\`${definition.name}\``);
 
-                throw new UsageError(`Expecting argument(s) ${missingArgNames.join(', ')}`, this.helpProvider);
+                throw new UsageError(`Expecting parameter(s) ${missingArgNames.join(', ')}`, this.helpProvider);
             }
         }
 
