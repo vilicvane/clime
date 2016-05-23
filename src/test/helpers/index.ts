@@ -2,7 +2,7 @@ import * as Path from 'path';
 
 import { CLI } from '../../';
 
-export type CLICreator = (path: string) => CLI;
+export type CLICreator = (label?: string) => CLI;
 
 export function getCLICreator(filename: string): CLICreator {
     let dirname = Path.dirname(filename);
@@ -10,5 +10,5 @@ export function getCLICreator(filename: string): CLICreator {
 
     let casesDirname = Path.join(dirname, `${basename}-cases`);
 
-    return (path: string) => new CLI('test', Path.join(casesDirname, path));
+    return (label?: string) => new CLI('test', label ? Path.join(casesDirname, label) : casesDirname);
 }

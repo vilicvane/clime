@@ -1,6 +1,10 @@
 import * as Path from 'path';
 
-import { CLI } from '../';
+import {
+    CLI,
+    HelpInfo
+} from '../';
+
 import { getCLICreator } from './helpers';
 
 let createCLI = getCLICreator(__filename);
@@ -11,7 +15,7 @@ describe('Command Locating', () => {
 
     describe('Single Command', () => {
         before(() => {
-            label = 'single/0';
+            label = 'single';
             cli = createCLI(label);
         });
 
@@ -42,7 +46,7 @@ describe('Command Locating', () => {
 
     describe('Multiple Commands', () => {
         before(() => {
-            label = 'multiple/0';
+            label = 'multiple';
             cli = createCLI(label);
         });
 
@@ -74,6 +78,35 @@ describe('Command Locating', () => {
             return cli
                 .execute(['world'])
                 .should.eventually.equal(`${label}/world`);
+        });
+    });
+
+    describe('Multi-level Commands', () => {
+        before(() => {
+            label = 'multiple';
+            cli = createCLI(label);
+        });
+
+        it('Should locate `commands/foo/default.js` with empty args', () => {
+            return cli
+                .execute(['foo'])
+                .then(() => {
+                    throw new Error('Should not fulfill');
+                }, (helpInfo: HelpInfo) => {
+                    helpInfo.text.should.contain('Foo!');
+                });
+        });
+
+        it('Should locate `commands/foo/biu.js` with emptry extra args', () => {
+            return cli
+                .execute(['foo', 'biu'])
+                .should.eventually.equal(`${label}/foo/biu`);
+        });
+
+        it('Should locate `commands/foo/pia.js` with emptry extra args', () => {
+            return cli
+                .execute(['foo', 'pia'])
+                .should.eventually.equal(`${label}/foo/pia`);
         });
     });
 });

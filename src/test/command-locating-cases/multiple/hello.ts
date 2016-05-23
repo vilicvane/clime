@@ -6,7 +6,7 @@ import {
     params,
     Command,
     Options
-} from '../../../../';
+} from '../../../';
 
 export class TestOptions extends Options {
     @option()
@@ -23,6 +23,6 @@ export default class TestCommand extends Command {
 
         options: TestOptions
     ) {
-        return 'multiple/0/hello';
+        return 'multiple/hello';
     }
 }

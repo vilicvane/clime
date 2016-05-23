@@ -374,7 +374,7 @@ class ArgsParser {
             args: commandArgs,
             extraArgs: paramsDefinition && commandExtraArgs,
             options: commandOptions,
-            context
+            context: this.contextConstructor ? context : undefined
         };
 
         function consumeFlags(flags: string): void {

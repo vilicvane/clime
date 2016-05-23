@@ -23,6 +23,6 @@ export default class TestCommand extends Command {
 
         options: TestOptions
     ) {
-        return 'single/0';
+        return 'multiple/foo/pia';
     }
 }
