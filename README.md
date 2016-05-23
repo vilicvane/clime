@@ -1,3 +1,6 @@
+[![NPM Package](https://badge.fury.io/js/clime.svg)](https://www.npmjs.com/package/clime)
+[![Build Status](https://travis-ci.org/vilic/clime.svg)](https://travis-ci.org/vilic/clime)
+
 # Clime
 
 The command-line interface framework for TypeScript.

@@ -5,7 +5,7 @@
   "main": "bld/index.js",
   "typings": "bld/index.d.ts",
   "scripts": {
-    "test": "node node_modules/mocha/bin/_mocha",
+    "test": "mocha",
     "build": "tsc"
   },
   "repository": {
