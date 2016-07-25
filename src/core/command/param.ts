@@ -30,7 +30,7 @@ export interface ParamOptions<T> {
     /** The parameter validators. */
     validators?: GeneralValidator<T>[];
     /** Default value for this parameter. */
-    default?: T;
+    default?: T | string;
     /** Description shown on usage. */
     description?: string;
 }
@@ -43,7 +43,7 @@ export interface ParamDefinition<T> {
     description: string;
     required: boolean;
     validators: GeneralValidator<T>[];
-    default: T;
+    default: T | string;
 }
 
 /**

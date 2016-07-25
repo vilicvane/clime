@@ -236,10 +236,7 @@ class ArgsParser {
             for (let definition of this.optionDefinitions) {
                 let {
                     name,
-                    flag,
-                    required,
-                    toggle,
-                    default: defaultValue
+                    flag
                 } = definition;
 
                 this.optionDefinitionMap[name] = definition;
@@ -286,7 +283,9 @@ class ArgsParser {
                 let {
                     name,
                     key,
+                    type,
                     required,
+                    validators,
                     toggle,
                     default: defaultValue
                 } = definition;
@@ -298,7 +297,9 @@ class ArgsParser {
                 if (toggle) {
                     commandOptions[key] = false;
                 } else {
-                    commandOptions[key] = defaultValue;
+                    commandOptions[key] = typeof defaultValue === 'string' ?
+                        castArgument(defaultValue, name, type, validators) :
+                        defaultValue;
                 }
             }
         }
@@ -359,7 +360,13 @@ class ArgsParser {
         }
 
         for (let definition of pendingParamDefinitions) {
-            commandArgs.push(definition.default);
+            let defaultValue = definition.default;
+
+            let value = typeof defaultValue === 'string' ?
+                castArgument(defaultValue, definition.name, definition.type, definition.validators) :
+                defaultValue;
+
+            commandArgs.push(value);
         }
 
         if (
@@ -445,32 +452,32 @@ class ArgsParser {
 
         // TODO: support casting provider object.
         function castArgument(arg: string, name: string, type: Clime.Constructor<any>, validators: GeneralValidator<any>[]): any {
-            let casted: any;
+            let value: any;
 
             switch (type) {
                 case String:
-                    casted = arg;
+                    value = arg;
                     break;
                 case Number:
-                    casted = Number(arg);
+                    value = Number(arg);
 
-                    if (isNaN(casted)) {
+                    if (isNaN(value)) {
                         throw new ExpectedError(`Value "${arg}" cannot be casted to number`);
                     }
 
                     break;
                 case Boolean:
-                    if (arg.toLowerCase() === 'false') {
-                        casted = false;
+                    if (/^(?:f|false)$/i.test(arg)) {
+                        value = false;
                     } else {
                         let n = Number(arg);
-                        casted = isNaN(n) ? true : Boolean(n);
+                        value = isNaN(n) ? true : Boolean(n);
                     }
 
                     break;
                 default:
                     if (isStringCastable(type)) {
-                        casted = type.cast(arg, context)
+                        value = type.cast(arg, context)
                     } else {
                         throw new Error(`Type \`${(<any>type).name || type}\` cannot be casted from a string, see \`StringCastable\` interface for more information`);
                     }
@@ -480,7 +487,7 @@ class ArgsParser {
 
             for (let validator of validators) {
                 if (validator instanceof RegExp) {
-                    if (!validator.test(casted)) {
+                    if (!validator.test(value)) {
                         throw new ExpectedError(`Invalid value for "${name}"`);
                     }
                 } else {
@@ -488,7 +495,7 @@ class ArgsParser {
                 }
             }
 
-            return casted;
+            return value;
         }
     }
 }

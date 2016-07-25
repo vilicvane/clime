@@ -31,7 +31,7 @@ export interface OptionOptions<T> {
     /** Indicates whether this is a switch. */
     toggle?: boolean;
     /** Default value for this option. */
-    default?: T;
+    default?: T | string;
     /** Description shown on usage. */
     description?: string;
 }
@@ -46,7 +46,7 @@ export interface OptionDefinition<T> {
     type: Clime.Constructor<T>;
     required: boolean;
     validators: GeneralValidator<T>[];
-    default: T;
+    default: T | string;
     description: string;
 }
 
