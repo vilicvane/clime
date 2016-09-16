@@ -42,7 +42,7 @@ export interface ParamsDefinition<T> {
     type: Clime.Constructor<T>;
     required: boolean;
     validators: GeneralValidator<T>[];
-    description: string;
+    description: string | undefined;
 }
 
 /**
@@ -59,10 +59,6 @@ export function params<T>(
         description
     }: ParamsOptions<T>
 ) {
-    if (!validators) {
-        validators = validator ? [validator] : [];
-    }
-
     // TODO: name: 'execute'
     return (target: Command, name: string, index: number) => {
         assert.equal(name, 'execute');
@@ -80,11 +76,15 @@ export function params<T>(
 
         paramName = paramName || Reflection.getFunctionParameterName(target.execute, index);
 
+        if (!validators) {
+            validators = validator ? [validator] : [];
+        }
+
         constructor.paramsDefinition = {
             name: paramName,
             index,
             type,
-            required,
+            required: !!required,
             validators,
             description
         };

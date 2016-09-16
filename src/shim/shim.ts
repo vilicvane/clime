@@ -1,11 +1,11 @@
 import * as Util from 'util';
 
 import * as Chalk from 'chalk';
-import Promise from 'thenfail';
 
 import {
     CLI,
     ExpectedError,
+    Printable,
     isPrintable
 } from '../core';
 
@@ -22,34 +22,31 @@ export class Shim {
      * @param argv - The `argv` array to execute, typically `process.argv`.
      * @param cwd - Current working directory.
      */
-    execute(argv: string[], cwd?: string): void {
-        this
-            .cli
-            .execute(argv.slice(2), cwd)
-            .then(result => {
-                if (isPrintable(result)) {
-                    result.print(process.stdout, process.stderr);
-                } else if (result !== undefined) {
-                    console.log(result);
+    async execute(argv: string[], cwd?: string): Promise<void> {
+        try {
+            let result = await this.cli.execute(argv.slice(2), cwd);
+
+            if (isPrintable(result)) {
+                await result.print(process.stdout, process.stderr);
+            } else if (result !== undefined) {
+                console.log(result);
+            }
+        } catch (error) {
+            let exitCode = 1;
+
+            if (isPrintable(error)) {
+                await error.print(process.stdout, process.stderr);
+
+                if (error instanceof ExpectedError) {
+                    exitCode = (error as ExpectedError).code;
                 }
+            } else if (error instanceof Error) {
+                console.error(Chalk.red(error.stack || error.message));
+            } else {
+                console.error(Chalk.red(Util.format(error)));
+            }
 
-                process.exit();
-            }, (reason: Object) => {
-                let exitCode = 1;
-
-                if (isPrintable(reason)) {
-                    reason.print(process.stdout, process.stderr);
-
-                    if (reason instanceof ExpectedError) {
-                        exitCode = (reason as ExpectedError).code;
-                    }
-                } else if (reason instanceof Error) {
-                    console.error(Chalk.red(reason.stack));
-                } else {
-                    console.error(Chalk.red(Util.format(reason)));
-                }
-
-                process.exit(exitCode);
-            });
+            process.exit(exitCode);
+        }
     }
 }

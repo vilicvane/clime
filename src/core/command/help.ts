@@ -2,7 +2,6 @@ import * as Path from 'path';
 import * as FS from 'fs';
 
 import * as Chalk from 'chalk';
-import Promise, { invoke } from 'thenfail';
 
 import {
     Command
@@ -13,13 +12,29 @@ import {
 } from '../object';
 
 import {
-    DescriptiveObject
+    CLI,
+    CommandModule,
+    SubcommandDescriptor
 } from '../cli';
 
 import {
+    TableRow,
     buildTableOutput,
-    indent
+    indent,
+    invoke,
+    safeStat
 } from '../../utils';
+
+export interface HelpInfoBuildClassOptions {
+    TargetCommand: typeof Command;
+}
+
+export interface HelpInfoBuildPathOptions {
+    dir: string;
+    description?: string;
+}
+
+export type HelpInfoBuildOptions = HelpInfoBuildClassOptions | HelpInfoBuildPathOptions;
 
 export class HelpInfo implements Printable {
     private texts: string[] = [];
@@ -30,39 +45,40 @@ export class HelpInfo implements Printable {
         return this.texts.join('\n');
     }
 
-    static build(dir: string, description?: string): HelpInfo;
-    static build(CommandClass: typeof Command): HelpInfo;
-    static build(arg: typeof Command | string, description?: string): HelpInfo {
+    /** @internal */
+    static async build(options: HelpInfoBuildOptions): Promise<HelpInfo> {
         let info = new HelpInfo();
 
-        if (typeof arg === 'string') {
-            info.buildDescription(description);
-            info.buildTextForSubCommands(arg);
+        if (isHelpInfoBuildPathOptions(options)) {
+            info.buildDescription(options.description);
+            await info.buildTextForSubCommands(options.dir);
         } else {
-            info.buildDescription(arg.description);
-            info.buildTextsForParamsAndOptions(arg);
+            let TargetCommand = options.TargetCommand;
 
-            let dir = Path.dirname(arg.path);
+            info.buildDescription(TargetCommand.description);
+            info.buildTextsForParamsAndOptions(TargetCommand);
 
-            if (Path.basename(arg.path) !== 'default.js') {
-                dir = Path.join(dir, Path.basename(arg.path, '.js'));
+            let dir = Path.dirname(TargetCommand.path);
+
+            if (Path.basename(TargetCommand.path) !== 'default.js') {
+                dir = Path.join(dir, Path.basename(TargetCommand.path, '.js'));
             }
 
-            info.buildTextForSubCommands(dir);
+            await info.buildTextForSubCommands(dir);
         }
 
         return info;
     }
 
-    private buildDescription(description: string): void {
+    private buildDescription(description: string | undefined): void {
         if (description) {
             this.texts.push(`${indent(description)}\n`);
         }
     }
 
-    private buildTextsForParamsAndOptions(CommandClass: typeof Command): void {
-        let paramDefinitions = CommandClass.paramDefinitions;
-        let paramsDefinition = CommandClass.paramsDefinition;
+    private buildTextsForParamsAndOptions(TargetCommand: typeof Command): void {
+        let paramDefinitions = TargetCommand.paramDefinitions;
+        let paramsDefinition = TargetCommand.paramsDefinition;
 
         let parameterDescriptionRows: string[][] = [];
         let parameterUsageTexts: string[] = [];
@@ -112,13 +128,13 @@ export class HelpInfo implements Printable {
             );
         }
 
-        let optionDefinitions = CommandClass.optionDefinitions || [];
+        let optionDefinitions = TargetCommand.optionDefinitions || [];
         let requiredOptionUsageItems = optionDefinitions
             .filter(definition => definition.required)
             .map(({ name, placeholder }) => `--${name} <${placeholder || name}>`);
 
         let usageLine = [
-            Chalk.bold(CommandClass.sequence.join(' ')),
+            Chalk.bold(TargetCommand.sequence.join(' ')),
             ...parameterUsageTexts,
             ...requiredOptionUsageItems
         ].join(' ');
@@ -174,16 +190,39 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
         }
     }
 
-    buildTextForSubCommands(dir: string): void {
-        if (!FS.existsSync(dir) || !FS.statSync(dir).isDirectory()) {
-            return;
-        }
+    async buildTextForSubCommands(dir: string): Promise<void> {
+        let rows: TableRow[];
+        let subcommands = await CLI.getSubcommandDescriptors(dir);
 
-        let rows = FS
-            .readdirSync(dir)
-            .map(name => {
+        if (subcommands) {
+            rows = subcommands.map(subcommand => {
+                let aliases = subcommand.aliases || subcommand.alias && [subcommand.alias];
+                let subcommandNamesStr = Chalk.bold(subcommand.name);
+
+                if (aliases) {
+                    subcommandNamesStr += ` [${Chalk.dim(aliases.join(','))}]`;
+                }
+
+                return [
+                    subcommandNamesStr,
+                    subcommand.brief
+                ];
+            });
+        } else {
+            let stats = await safeStat(dir);
+
+            if (!stats || !stats.isDirectory()) {
+                return;
+            }
+
+            let names = await invoke<string[]>(FS.readdir, dir);
+            let unfilteredRows = await Promise.all(names.map(async name => {
                 let path = Path.join(dir, name);
-                let stats = FS.statSync(path);
+                let stats = await safeStat(path);
+
+                if (!stats) {
+                    return undefined;
+                }
 
                 if (stats.isFile()) {
                     if (name === 'default.js' || Path.extname(path) !== '.js') {
@@ -193,13 +232,14 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                     name = Path.basename(name, '.js');
                 } else {
                     path = Path.join(path, 'default.js');
+                    stats = await safeStat(path);
                 }
 
-                let description: string;
+                let description: string | undefined;
 
-                if (FS.existsSync(path)) {
+                if (stats) {
                     let module = require(path);
-                    let CommandClass = (module.default || module) as DescriptiveObject;
+                    let CommandClass = (module.default || module) as CommandModule;
                     description = CommandClass && (CommandClass.brief || CommandClass.description);
                 }
 
@@ -207,8 +247,10 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                     Chalk.bold(name),
                     description
                 ];
-            })
-            .filter(row => !!row);
+            })) as (TableRow | undefined)[];
+
+            rows = unfilteredRows.filter(row => !!row) as TableRow[];
+        }
 
         if (rows.length) {
             this.texts.push(`\
@@ -220,4 +262,8 @@ ${buildTableOutput(rows, { indent: 4, spaces: ' - ' })}`);
     print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream): void {
         stderr.write(`\n${this.text}\n`);
     }
+}
+
+function isHelpInfoBuildPathOptions(options: HelpInfoBuildOptions): options is HelpInfoBuildPathOptions {
+    return 'dir' in options;
 }

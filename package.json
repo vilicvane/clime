@@ -1,6 +1,6 @@
 {
   "name": "clime",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "The command-line interface framework for TypeScript.",
   "main": "bld/index.js",
   "typings": "bld/index.d.ts",
@@ -29,8 +29,7 @@
     "chalk": "^1.1.1",
     "extendable-error": "^0.1.2",
     "hyphenate": "^0.2.1",
-    "reflect-metadata": "^0.1.3",
-    "thenfail": "^0.4.1"
+    "reflect-metadata": "^0.1.3"
   },
   "devDependencies": {
     "chai": "^3.5.0",

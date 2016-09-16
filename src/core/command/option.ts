@@ -40,14 +40,14 @@ export interface OptionOptions<T> {
 export interface OptionDefinition<T> {
     name: string;
     key: string;
-    flag: string;
-    placeholder: string;
+    flag: string | undefined;
+    placeholder: string | undefined;
     toggle: boolean;
     type: Clime.Constructor<T>;
     required: boolean;
     validators: GeneralValidator<T>[];
-    default: T | string;
-    description: string;
+    default: T | string | undefined;
+    description: string | undefined;
 }
 
 /**
@@ -79,10 +79,6 @@ export function option<T>(
 ) {
     assert(!flag || /^[a-z]$/i.test(flag), 'The option flag is expected to be a letter');
 
-    if (!validators) {
-        validators = validator ? [validator] : [];
-    }
-
     return (target: Options, name: string) => {
         let constructor = target.constructor as typeof Options;
         let definitions = constructor.definitions;
@@ -93,18 +89,22 @@ export function option<T>(
             definitions = constructor.definitions = [];
         }
 
-        type = type || Reflect.getMetadata('design:type', target, name);
+        type = type || Reflect.getMetadata('design:type', target, name) as Clime.Constructor<T>;
 
         optionName = optionName || hyphenate(name, { lowerCase: true });
+
+        if (!validators) {
+            validators = validator ? [validator] : [];
+        }
 
         definitions.push({
             name: optionName,
             key: name,
             flag,
             placeholder,
-            toggle,
+            toggle: !!toggle,
             type,
-            required,
+            required: !!required,
             validators,
             default: defaultValue,
             description

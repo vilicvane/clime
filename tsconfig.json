@@ -1,22 +1,22 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "es6",
         "module": "commonjs",
         "declaration": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
+        "strictNullChecks": true,
         "noImplicitReturns": true,
         "noImplicitAny": true,
+        "noImplicitThis": true,
         "noEmitOnError": true,
         "stripInternal": true,
         "sourceMap": true,
+        "skipDefaultLibCheck": true,
         "rootDir": "src",
         "outDir": "bld"
     },
     "exclude": [
-        "demo",
-        "draft",
-        "node_modules",
-        "bld"
+        "node_modules"
     ]
 }

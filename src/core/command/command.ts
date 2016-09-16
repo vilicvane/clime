@@ -1,7 +1,5 @@
 import * as Path from 'path';
 
-import { Resolvable } from 'thenfail';
-
 import {
     Printable
 } from '../object';
@@ -76,15 +74,15 @@ export abstract class Command {
     /**
      * @returns A promise or normal value.
      */
-    abstract execute(...args: any[]): Resolvable<any>;
+    abstract execute(...args: any[]): Promise<any> | any;
 
     /**
      * Get the help object of current command.
      */
-    // Note: we are using method instead of getter here to avoid issue with
-    // `__extends` helper emitted by TypeScript.
-    static getHelp(): HelpInfo {
-        return HelpInfo.build(this);
+    static async getHelp(): Promise<HelpInfo> {
+        return await HelpInfo.build({
+            TargetCommand: this
+        });
     }
 
     /** @internal */
@@ -94,16 +92,16 @@ export abstract class Command {
     /** @internal */
     static sequence: string[];
     /** @internal */
-    static brief: string;
+    static brief: string | undefined;
     /** @internal */
-    static description: string;
+    static description: string | undefined;
 
     /** @internal */
     static paramDefinitions: ParamDefinition<any>[];
     /** @internal */
     static paramsDefinition: ParamsDefinition<any>;
     /** @internal */
-    static optionsConstructor: Clime.Constructor<Clime.HashTable<any>>;
+    static optionsConstructor: Clime.Constructor<Map<string, any>>;
     /** @internal */
     static optionDefinitions: OptionDefinition<any>[];
     /** @internal */
@@ -111,6 +109,8 @@ export abstract class Command {
     /** @internal */
     static requiredParamsNumber = 0;
 }
+
+export type CommandClass = Clime.Constructor<Command> & typeof Command;
 
 /**
  * The `command()` decorator that decorates concrete class of `Command`.

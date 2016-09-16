@@ -1,6 +1,8 @@
 import * as Chalk from 'chalk';
 
-export function buildTableOutput(rows: string[][], {
+export type TableRow = (string | undefined)[];
+
+export function buildTableOutput(rows: TableRow[], {
     spaces = 4 as string | number,
     indent = 0 as string | number
 } = {}): string {
