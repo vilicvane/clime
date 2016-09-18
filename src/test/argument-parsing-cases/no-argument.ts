@@ -10,6 +10,6 @@ import {
 export default class TestCommand extends Command {
     @metadata
     execute() {
-        arguments.should.have.lengthOf(0);
+        return arguments;
     }
 }

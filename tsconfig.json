@@ -13,6 +13,7 @@
         "stripInternal": true,
         "sourceMap": true,
         "skipDefaultLibCheck": true,
+        "newLine": "LF",
         "rootDir": "src",
         "outDir": "bld"
     },

@@ -64,7 +64,7 @@ export class CLI {
         this.root = Path.resolve(root);
     }
 
-    async execute(argv: string[], cwd = process.cwd()): Promise<Printable | void> {
+    async execute(argv: string[], cwd = process.cwd()): Promise<any> {
         let {
             sequence,
             args,
