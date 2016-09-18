@@ -165,17 +165,17 @@ export class CLI {
             if (subcommands && subcommands.length) {
                 let metadata = new Map<string, SubcommandDescriptor>();
 
-                for (let command of subcommands) {
-                    metadata.set(command.name, command);
+                for (let subcommand of subcommands) {
+                    metadata.set(subcommand.name, subcommand);
 
-                    let aliases = command.aliases || command.alias && [command.alias];
+                    let aliases = subcommand.aliases || subcommand.alias && [subcommand.alias];
 
                     if (!aliases) {
                         continue;
                     }
 
                     for (let alias of aliases) {
-                        metadata.set(alias, command);
+                        metadata.set(alias, subcommand);
                     }
                 }
 
