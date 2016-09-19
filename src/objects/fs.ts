@@ -1,7 +1,7 @@
 import * as FS from 'fs';
 import * as PathModule from 'path';
 
-import { acall } from 'villa';
+import { call as acall } from 'villa';
 
 import {
     Context,
