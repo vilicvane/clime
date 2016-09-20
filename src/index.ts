@@ -6,4 +6,6 @@ export * from './core';
 export * from './util';
 export * from './shim';
 
-export * from './object';
+import * as Object from './object';
+
+export { Object };
