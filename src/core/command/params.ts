@@ -7,7 +7,7 @@ import {
 
 import {
     Reflection
-} from '../../utils';
+} from '../../util';
 
 /**
  * Options for variadic command parameters.

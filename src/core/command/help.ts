@@ -2,6 +2,7 @@ import * as Path from 'path';
 import * as FS from 'fs';
 
 import * as Chalk from 'chalk';
+import { call as acall, map as amap } from 'villa';
 
 import {
     Command
@@ -21,9 +22,8 @@ import {
     TableRow,
     buildTableOutput,
     indent,
-    invoke,
     safeStat
-} from '../../utils';
+} from '../../util';
 
 export interface HelpInfoBuildClassOptions {
     TargetCommand: typeof Command;
@@ -215,8 +215,8 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                 return;
             }
 
-            let names = await invoke<string[]>(FS.readdir, dir);
-            let unfilteredRows = await Promise.all(names.map(async name => {
+            let names = await acall<string[]>(FS.readdir, dir);
+            let unfilteredRows = await amap(names, async name => {
                 let path = Path.join(dir, name);
                 let stats = await safeStat(path);
 
@@ -246,8 +246,8 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                 return [
                     Chalk.bold(name),
                     description
-                ];
-            })) as (TableRow | undefined)[];
+                ] as TableRow;
+            });
 
             rows = unfilteredRows.filter(row => !!row) as TableRow[];
         }
