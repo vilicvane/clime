@@ -1,3 +1,5 @@
+import { Resolvable } from 'villa';
+
 import {
     Context
 } from './command';
@@ -13,7 +15,7 @@ export function isPrintable(object: any): object is Printable {
 }
 
 export interface StringCastable<T> extends Clime.Constructor<T> {
-    cast(source: string, context: Context): T;
+    cast(source: string, context: Context): Resolvable<T>;
 }
 
 export function isStringCastable<T>(constructor: Clime.Constructor<T>): constructor is StringCastable<T>  {

@@ -90,7 +90,7 @@ export class CLI {
                 TargetCommand.sequence = sequence;
 
                 let argsParser = new ArgsParser(TargetCommand);
-                let parsedArgs = argsParser.parse(sequence, args, cwd);
+                let parsedArgs = await argsParser.parse(sequence, args, cwd);
 
                 if (!parsedArgs) {
                     return await HelpInfo.build({ TargetCommand });
@@ -330,7 +330,7 @@ class ArgsParser {
         }
     }
 
-    parse(sequence: string[], args: string[], cwd: string): ParsedArgs | undefined {
+    async parse(sequence: string[], args: string[], cwd: string): Promise<ParsedArgs | undefined> {
         let that = this;
 
         let ContextConstructor = this.contextConstructor || Context;
@@ -380,7 +380,7 @@ class ArgsParser {
                     commandOptions[key] = false;
                 } else {
                     commandOptions[key] = typeof defaultValue === 'string' ?
-                        castArgument(defaultValue, name, type, validators) :
+                        await castArgument(defaultValue, name, type, validators) :
                         defaultValue;
                 }
             }
@@ -399,16 +399,16 @@ class ArgsParser {
 
             if (arg[0] === '-') {
                 if (arg[1] === '-') {
-                    consumeToggleOrOption(arg.substr(2));
+                    await consumeToggleOrOption(arg.substr(2));
                 } else {
-                    consumeFlags(arg.substr(1))
+                    await consumeFlags(arg.substr(1))
                 }
             } else if (pendingParamDefinitions.length) {
                 let definition = pendingParamDefinitions.shift() as ParamDefinition<any>;
-                let casted = castArgument(arg, definition.name, definition.type, definition.validators);
+                let casted = await castArgument(arg, definition.name, definition.type, definition.validators);
                 commandArgs.push(casted);
             } else if (paramsDefinition) {
-                let casted = castArgument(arg, paramsDefinition.name, paramsDefinition.type, paramsDefinition.validators);
+                let casted = await castArgument(arg, paramsDefinition.name, paramsDefinition.type, paramsDefinition.validators);
                 commandExtraArgs.push(casted);
             } else {
                 throw new UsageError(
@@ -443,7 +443,7 @@ class ArgsParser {
             let defaultValue = definition.default;
 
             let value = typeof defaultValue === 'string' ?
-                castArgument(defaultValue, definition.name, definition.type, definition.validators) :
+                await castArgument(defaultValue, definition.name, definition.type, definition.validators) :
                 defaultValue;
 
             commandArgs.push(value);
@@ -464,7 +464,7 @@ class ArgsParser {
             context: this.contextConstructor ? context : undefined
         };
 
-        function consumeFlags(flags: string): void {
+        async function consumeFlags(flags: string): Promise<void> {
             for (let i = 0; i < flags.length; i++) {
                 let flag = flags[i];
 
@@ -486,12 +486,12 @@ class ArgsParser {
                         throw new UsageError('Only the last flag in a sequence can refer to an option instead of a toggle', that.helpProvider);
                     }
 
-                    consumeOption(definition);
+                    await consumeOption(definition);
                 }
             }
         }
 
-        function consumeToggleOrOption(name: string): void {
+        async function consumeToggleOrOption(name: string): Promise<void> {
             if (!optionDefinitionMap.has(name)) {
                 throw new UsageError(`Unknown option \`${name}\``, that.helpProvider);
             }
@@ -505,11 +505,11 @@ class ArgsParser {
             if (definition.toggle) {
                 commandOptions![definition.key] = true;
             } else {
-                consumeOption(definition);
+                await consumeOption(definition);
             }
         }
 
-        function consumeOption(definition: OptionDefinition<any>) {
+        async function consumeOption(definition: OptionDefinition<any>): Promise<void> {
             let {
                 name,
                 key,
@@ -527,11 +527,11 @@ class ArgsParser {
                 throw new UsageError(`Expecting a value instead of an option or toggle "${arg}" for option \`${name}\``, that.helpProvider);
             }
 
-            commandOptions![key] = castArgument(arg, name, type, validators);
+            commandOptions![key] = await castArgument(arg, name, type, validators);
         }
 
         // TODO: support casting provider object.
-        function castArgument(arg: string, name: string, type: Clime.Constructor<any>, validators: GeneralValidator<any>[]): any {
+        async function castArgument(arg: string, name: string, type: Clime.Constructor<any>, validators: GeneralValidator<any>[]): Promise<any> {
             let value: any;
 
             switch (type) {
@@ -557,7 +557,7 @@ class ArgsParser {
                     break;
                 default:
                     if (isStringCastable(type)) {
-                        value = type.cast(arg, context)
+                        value = await type.cast(arg, context)
                     } else {
                         throw new Error(`Type \`${(<any>type).name || type}\` cannot be casted from a string, see \`StringCastable\` interface for more information`);
                     }
