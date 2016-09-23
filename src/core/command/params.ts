@@ -1,5 +1,7 @@
 import * as assert from 'assert';
 
+import hyphenate from 'hyphenate';
+
 import {
     Command,
     GeneralValidator
@@ -59,8 +61,7 @@ export function params<T>(
         description
     }: ParamsOptions<T>
 ) {
-    // TODO: name: 'execute'
-    return (target: Command, name: string, index: number) => {
+    return (target: Command, name: 'execute', index: number) => {
         assert.equal(name, 'execute');
 
         let constructor = target.constructor as typeof Command;
@@ -74,7 +75,8 @@ export function params<T>(
         type = type ||
             Reflect.getMetadata('design:paramtypes', target, 'execute')[index] as Clime.Constructor<T>;
 
-        paramName = paramName || Reflection.getFunctionParameterName(target.execute, index);
+        paramName = paramName ||
+            hyphenate(Reflection.getFunctionParameterName(target.execute, index), { lowerCase: true });
 
         if (!validators) {
             validators = validator ? [validator] : [];
