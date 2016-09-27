@@ -1,7 +1,7 @@
 import * as FS from 'fs';
 import * as PathModule from 'path';
 
-import { call as acall } from 'villa';
+import * as v from 'villa';
 
 import {
     Context,
@@ -28,11 +28,21 @@ export class File {
         }
     }
 
+    async buffer(): Promise<Buffer> {
+        await this.assert();
+        return v.call<Buffer>(FS.readFile, this.fullName);
+    }
+
+    async text(encoding = 'utf-8'): Promise<string> {
+        await this.assert();
+        return v.call<string>(FS.readFile, this.fullName, encoding);
+    }
+
     async assert(exists = true): Promise<void> {
         let stats: FS.Stats | undefined;
 
         try {
-            stats = await acall<FS.Stats>(FS.stat, this.fullName);
+            stats = await v.call<FS.Stats>(FS.stat, this.fullName);
         } catch (error) { }
 
         if (exists) {

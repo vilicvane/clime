@@ -2,7 +2,7 @@ import * as Path from 'path';
 import * as FS from 'fs';
 
 import * as Chalk from 'chalk';
-import { call as acall, map as amap } from 'villa';
+import * as v from 'villa';
 
 import {
     Command
@@ -215,8 +215,8 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                 return;
             }
 
-            let names = await acall<string[]>(FS.readdir, dir);
-            let unfilteredRows = await amap(names, async name => {
+            let names = await v.call<string[]>(FS.readdir, dir);
+            let unfilteredRows = await v.map(names, async name => {
                 let path = Path.join(dir, name);
                 let stats = await safeStat(path);
 
