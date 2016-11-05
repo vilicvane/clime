@@ -3,7 +3,7 @@ import { CLI, Shim } from '../../';
 
 let cli = new CLI('greet', [
     Path.join(__dirname, './commands'),
-    Path.join(__dirname, './extend-commands')
+    { dir: Path.join(__dirname, './extend-commands'), title: "EXTEND-COMMANDS" }
 ]);
 
 let shim = new Shim(cli);

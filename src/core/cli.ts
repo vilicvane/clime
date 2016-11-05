@@ -42,6 +42,11 @@ export interface SubcommandDescriptor {
     brief?: string;
 }
 
+export interface RootInfo {
+    title?: string; 
+    dir: string;
+}
+
 interface PreProcessResult {
     sequence: string[];
     args: string[];
@@ -53,15 +58,23 @@ interface PreProcessResult {
  * Clime command line interface.
  */
 export class CLI {
-    root: string;
+    roots: RootInfo[];
 
     constructor(
         /** Command entry name. */
         public name: string,
         /** Root directory of command modules. */
-        root: string
+        roots: string | (RootInfo | string)[]
     ) {
-        this.root = Path.resolve(root);
+        roots = typeof roots == 'string' ? [{ dir: roots }] : roots;
+        this.roots = roots.map((root) => {
+            if (typeof root == 'string') {
+                return { dir: Path.resolve(root) };
+            } else {
+                root.dir = Path.resolve(root.dir);
+                return root;
+            }
+        });
     }
 
     async execute(argv: string[], cwd = process.cwd()): Promise<any> {
@@ -122,7 +135,14 @@ export class CLI {
             }
         }
 
-        let helpInfo = await HelpInfo.build({ dir: path, description });
+        let helpInfo: HelpInfo;
+        
+        // 如果未找到任何子命令，并且还是多roots情况，需要显示所有subcommands的帮助信息
+        if (sequence.length == 1 && this.roots.length > 1) {
+            helpInfo = await HelpInfo.buildMulti(this.name, this.roots);
+        } else {
+            helpInfo = await HelpInfo.build({ dir: path, description });
+        }
 
         if (possibleUnknownCommandName) {
             throw new UsageError(`Unknown subcommand "${possibleUnknownCommandName}"`, {
@@ -144,11 +164,12 @@ export class CLI {
      */
     private async preProcessArguments(argv: string[]): Promise<PreProcessResult> {
         let sequence = [this.name];
-        let searchPath = this.root;
+        let rootIndex = this.roots.length - 1;
+        let searchPath = this.roots[rootIndex].dir; // 从最后一项开始搜索
         let argsIndex = 0;
 
-        let entryPath = Path.join(this.root, 'default.js');
-        let targetPath = await safeStat(entryPath) ? entryPath : searchPath;
+        let entryPath = Path.join(searchPath, 'default.js');
+        let targetPath = await CLI.isTargetCommandPath(entryPath) ? entryPath : null;
         let possibleUnknownCommandName: string | undefined;
         let aliases: string[] | undefined;
 
@@ -181,21 +202,20 @@ export class CLI {
 
                 if (!metadata.has(possibleCommandName)) {
                     possibleUnknownCommandName = possibleCommandName;
-                    break;
-                }
+                } else {
+                    let descriptor = metadata.get(possibleCommandName);
 
-                let descriptor = metadata.get(possibleCommandName);
+                    // If `possibleCommandName` is an alias.
+                    if (descriptor.name !== possibleCommandName) {
+                        possibleCommandName = descriptor.name;
+                    }
 
-                // If `possibleCommandName` is an alias.
-                if (descriptor.name !== possibleCommandName) {
-                    possibleCommandName = descriptor.name;
-                }
-
-                if (descriptor.filename) {
-                    targetPath = Path.resolve(searchPath, descriptor.filename);
-                    argsIndex = i + 1;
-                    sequence.push(possibleCommandName);
-                    continue outer;
+                    if (descriptor.filename) {
+                        targetPath = Path.resolve(searchPath, descriptor.filename);
+                        argsIndex = i + 1;
+                        sequence.push(possibleCommandName);
+                        continue outer;
+                    }
                 }
             }
 
@@ -220,6 +240,22 @@ export class CLI {
 
             // If a directory at path `searchPath` does not exist, stop searching.
             if (!await safeStat(searchPath)) {
+                // 如果是第一级，会尝试搜索上一root目录位置
+                if (sequence.length == 1 && rootIndex > 0) {
+                    // 重置搜索位置
+                    searchPath = this.roots[--rootIndex].dir;
+                    entryPath = Path.join(searchPath, 'default.js');
+                    possibleUnknownCommandName = undefined;
+                    i--; // 索引保持
+                    
+                    // 需要处理多 roots 里 default.js的 选择
+                    // 选择规则是从下往上的顺序找 最先符合要求的就作为选中对象
+                    if (!targetPath && await CLI.isTargetCommandPath(entryPath)) {
+                        targetPath = entryPath;
+                    }
+
+                    continue outer;
+                }
                 break;
             }
         }
@@ -227,7 +263,7 @@ export class CLI {
         return {
             sequence,
             args: argv.slice(argsIndex),
-            path: targetPath,
+            path: targetPath || (await safeStat(entryPath) ? entryPath: searchPath),
             possibleUnknownCommandName
         };
     }
@@ -257,21 +293,32 @@ export class CLI {
     }
 
     async getHelp(): Promise<HelpInfo> {
-        return await HelpInfo.build({
-            dir: this.root
-        });
+        return await HelpInfo.buildMulti(this.name, this.roots);
     }
 
     /** @internal */
     static async getSubcommandDescriptors(dir: string): Promise<SubcommandDescriptor[] | undefined> {
         let path = Path.join(dir, 'default.js');
+        let stats = await safeStat(path);
 
-        if (!await safeStat(path)) {
+        if (!stats) {
             return undefined;
         }
 
         let commandModule = require(path) as CommandModule;
         return commandModule.subcommands;
+    }
+
+    /** @internal */
+    static async isTargetCommandPath(path: string) {
+        if (!await safeStat(path)) {
+            return false;
+        }
+        
+        let module = require(path);
+        let TargetCommand = (module.default || module) as CommandClass;
+
+        return TargetCommand.prototype instanceof Command;
     }
 }
 
