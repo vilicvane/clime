@@ -236,6 +236,7 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
 
     async buildTextForSubCommands(targets: { dir: string; title?: string }[]): Promise<void> {
         let rows: TableRow[] = [];
+        let subcommandMap: Map<string, boolean> = new Map();
 
         await v.each(targets, async (target, index) => {
             let subCommandTableRows = await HelpInfo.getSubCommandTabbleRows(target.dir);
@@ -250,7 +251,26 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
             }
         });
         
+
         if (rows.length) {
+            // 处理同名子命令的筛选
+            for (let i = rows.length - 1; i >= 0; i--) {
+                let row = rows[i];
+                let subcommandName = row[0] as string;
+
+                if (row[0] == TABLE_CAPTION_FLAG) {
+                    continue;
+                }
+
+                if (subcommandMap.has(subcommandName)) {
+                    rows.splice(i, 1);
+                    continue;
+                }
+
+                subcommandMap.set(subcommandName, true);
+                rows[i].splice(0, 1);
+            }
+
             this.texts.push(buildTableOutput(rows, { indent: 4, spaces: ' - ' }));
         }
     }
@@ -273,6 +293,7 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                 }
 
                 return [
+                    subcommand.name,
                     subcommandNamesStr,
                     subcommand.brief
                 ];
@@ -313,6 +334,7 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                 }
 
                 return [
+                    name,
                     Chalk.bold(name),
                     description
                 ] as TableRow;
