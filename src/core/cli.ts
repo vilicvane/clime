@@ -98,15 +98,21 @@ export class CLI {
                 if (!TargetCommand.decorated) {
                     throw new TypeError(`Command defined in module "${path}" does not seem to be intialized, make sure to decorate it with \`@command()\``);
                 }
-
+                console.log("1")
                 TargetCommand.path = path;
                 TargetCommand.sequence = sequence;
 
                 let argsParser = new ArgsParser(TargetCommand);
+                console.log("2")
                 let parsedArgs = await argsParser.parse(sequence, args, cwd);
+                console.log("3")
 
                 if (!parsedArgs) {
-                    return await HelpInfo.build({ TargetCommand });
+                    if (sequence.length == 1) {
+                        return await this.getHelp();
+                    } else {
+                        return await HelpInfo.build({ TargetCommand });
+                    }
                 }
 
                 let command = new TargetCommand();
@@ -136,10 +142,10 @@ export class CLI {
         }
 
         let helpInfo: HelpInfo;
-        
-        // 如果未找到任何子命令，并且还是多roots情况，需要显示所有subcommands的帮助信息
-        if (sequence.length == 1 && this.roots.length > 1) {
-            helpInfo = await HelpInfo.buildMulti(this.name, this.roots);
+        console.log(sequence);
+        // 如果未找到任何子命令，需要显示所有subcommands的帮助信息
+        if (sequence.length == 1) {
+            helpInfo = await this.getHelp();
         } else {
             helpInfo = await HelpInfo.build({ dir: path, description });
         }
