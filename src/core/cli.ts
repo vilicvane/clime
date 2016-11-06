@@ -139,7 +139,6 @@ export class CLI {
         }
 
         let helpInfo: HelpInfo;
-        console.log(sequence);
         // 如果未找到任何子命令，需要显示所有subcommands的帮助信息
         if (sequence.length == 1) {
             helpInfo = await this.getHelp();
