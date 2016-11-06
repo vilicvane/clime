@@ -98,14 +98,11 @@ export class CLI {
                 if (!TargetCommand.decorated) {
                     throw new TypeError(`Command defined in module "${path}" does not seem to be intialized, make sure to decorate it with \`@command()\``);
                 }
-                console.log("1")
                 TargetCommand.path = path;
                 TargetCommand.sequence = sequence;
 
                 let argsParser = new ArgsParser(TargetCommand);
-                console.log("2")
                 let parsedArgs = await argsParser.parse(sequence, args, cwd);
-                console.log("3")
 
                 if (!parsedArgs) {
                     if (sequence.length == 1) {
