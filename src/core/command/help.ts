@@ -5,7 +5,8 @@ import * as Chalk from 'chalk';
 import * as v from 'villa';
 
 import {
-    Command
+    Command,
+    CommandClass
 } from './';
 
 import {
@@ -21,6 +22,7 @@ import {
 import {
     TableRow,
     buildTableOutput,
+    TABLE_CAPTION_FLAG,
     indent,
     safeStat
 } from '../../util';
@@ -35,6 +37,9 @@ export interface HelpInfoBuildPathOptions {
 }
 
 export type HelpInfoBuildOptions = HelpInfoBuildClassOptions | HelpInfoBuildPathOptions;
+
+
+const SUBCOMMAND_CAPTION = Chalk.green('SUBCOMMANDS');
 
 export class HelpInfo implements Printable {
     private texts: string[] = [];
@@ -51,7 +56,7 @@ export class HelpInfo implements Printable {
 
         if (isHelpInfoBuildPathOptions(options)) {
             info.buildDescription(options.description);
-            await info.buildTextForSubCommands(options.dir);
+            await info.buildTextForSubCommands([{ dir : options.dir, title: SUBCOMMAND_CAPTION }]);
         } else {
             let TargetCommand = options.TargetCommand;
 
@@ -64,8 +69,47 @@ export class HelpInfo implements Printable {
                 dir = Path.join(dir, Path.basename(TargetCommand.path, '.js'));
             }
 
-            await info.buildTextForSubCommands(dir);
+            await info.buildTextForSubCommands([{ dir: dir, title: SUBCOMMAND_CAPTION }]);
         }
+
+        return info;
+    }
+
+    static async buildMulti(name: string, targets: { dir: string, title?: string }[]) {
+        let info = new HelpInfo();
+
+        // 获取最先定义的 description
+        for (let i = 0, l = targets.length; i < l; i++) {
+            let target = targets[i];
+            let entryPath = Path.join(target.dir, 'default.js');
+            let stats = await safeStat(entryPath);
+
+            if (!stats) {
+                continue;
+            }
+
+            let module = require(entryPath);
+
+            if (typeof module.description == 'string') {
+                info.buildDescription(module.description);
+                break;
+            }
+
+            let TargetCommand = (module.default || module) as CommandClass;
+            if (TargetCommand.prototype instanceof Command && TargetCommand.decorated) {
+                TargetCommand.path = entryPath;
+                TargetCommand.sequence = [name];
+                info.buildDescription(TargetCommand.description);
+                info.buildTextsForParamsAndOptions(TargetCommand);
+                break;
+            }
+        }
+
+        if (!targets[0].title) {
+            targets[0].title = SUBCOMMAND_CAPTION;
+        }
+
+        await info.buildTextForSubCommands(targets);
 
         return info;
     }
@@ -190,10 +234,55 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
         }
     }
 
-    async buildTextForSubCommands(dir: string): Promise<void> {
+    async buildTextForSubCommands(targets: { dir: string; title?: string }[]): Promise<void> {
+        let rows: TableRow[] = [];
+        let subcommandMap: Map<string, boolean> = new Map();
+
+        await v.each(targets, async (target, index) => {
+            let subCommandTableRows = await HelpInfo.getSubCommandTabbleRows(target.dir);
+
+            // 只有有 subcommands 的才显示
+            if (subCommandTableRows.length > 0) {
+                if (target.title) {
+                    rows.push([TABLE_CAPTION_FLAG, `  ${Chalk.green(target.title)}`]);
+                }
+
+                rows.push(...subCommandTableRows);
+            }
+        });
+        
+
+        if (rows.length) {
+            // 处理同名子命令的筛选
+            for (let i = rows.length - 1; i >= 0; i--) {
+                let row = rows[i];
+                let subcommandName = row[0] as string;
+
+                if (row[0] == TABLE_CAPTION_FLAG) {
+                    continue;
+                }
+
+                if (subcommandMap.has(subcommandName)) {
+                    rows.splice(i, 1);
+                    continue;
+                }
+
+                subcommandMap.set(subcommandName, true);
+                rows[i].splice(0, 1);
+            }
+
+            this.texts.push(buildTableOutput(rows, { indent: 4, spaces: ' - ' }));
+        }
+    }
+    
+    print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream): void {
+        stderr.write(`\n${this.text}\n`);
+    }
+
+    private static async getSubCommandTabbleRows(dir: string): Promise<TableRow[]> {
         let rows: TableRow[];
         let subcommands = await CLI.getSubcommandDescriptors(dir);
-
+        
         if (subcommands) {
             rows = subcommands.map(subcommand => {
                 let aliases = subcommand.aliases || subcommand.alias && [subcommand.alias];
@@ -204,6 +293,7 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                 }
 
                 return [
+                    subcommand.name,
                     subcommandNamesStr,
                     subcommand.brief
                 ];
@@ -212,7 +302,7 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
             let stats = await safeStat(dir);
 
             if (!stats || !stats.isDirectory()) {
-                return;
+                return [];
             }
 
             let names = await v.call<string[]>(FS.readdir, dir);
@@ -244,6 +334,7 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                 }
 
                 return [
+                    name,
                     Chalk.bold(name),
                     description
                 ] as TableRow;
@@ -252,15 +343,7 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
             rows = unfilteredRows.filter(row => !!row) as TableRow[];
         }
 
-        if (rows.length) {
-            this.texts.push(`\
-  ${Chalk.green('SUBCOMMANDS')}\n
-${buildTableOutput(rows, { indent: 4, spaces: ' - ' })}`);
-        }
-    }
-
-    print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream): void {
-        stderr.write(`\n${this.text}\n`);
+        return rows;
     }
 }
 

@@ -26,11 +26,24 @@ import { CLI, Shim } from 'clime';
 // The second parameter is the path to folder that contains command modules.
 let cli = new CLI('greet', Path.join(__dirname, 'commands'));
 
+//
+// Support assignment multiple commands root directory
+// 
+// let cli = new CLI('greet', [
+//     Path.join(__dirname, 'commands'),
+//     Path.join(__dirname, 'commands2'),
+//     {
+//         dir: Path.join(__dirname, 'commands'),
+//         title: "EXTEND SUBCOMMANDS", // set this group subcommands caption
+//     }
+// ]);
+
 // Clime in its core provides an object-based command-line infrastructure.
 // To have it work as a common CLI, a shim needs to be applied:
 let shim = new Shim(cli);
 shim.execute(process.argv);
 ```
+
 
 **src/commands/default.ts**
 

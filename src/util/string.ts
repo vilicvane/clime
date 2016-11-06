@@ -2,6 +2,7 @@ import * as Chalk from 'chalk';
 
 export type TableRow = (string | undefined)[];
 
+export const TABLE_CAPTION_FLAG = 'TABLE_OUTPUT_CAPTION_FLAG';
 export function buildTableOutput(rows: TableRow[], {
     spaces = 4 as string | number,
     indent = 0 as string | number
@@ -10,6 +11,10 @@ export function buildTableOutput(rows: TableRow[], {
 
     for (let row of rows) {
         let lastNoneEmptyIndex = 0;
+
+        if (row[0] == TABLE_CAPTION_FLAG) {
+            continue;
+        }
 
         for (let i = 0; i < row.length; i++) {
             let text = row[i] || '';
@@ -36,8 +41,12 @@ export function buildTableOutput(rows: TableRow[], {
         new Array(indent + 1).join(' ');
 
     return rows
-        .map(row => {
+        .map((row, index) => {
             let line = indentStr;
+
+            if (row[0] == TABLE_CAPTION_FLAG) {
+                return (index > 0 ? '\n' : '') + row[1] + '\n';
+            }
 
             for (let i = 0; i < row.length; i++) {
                 let text = row[i] || '';

@@ -109,4 +109,74 @@ describe('Command Locating', () => {
                 .should.eventually.equal(`${label}/foo/pia`);
         });
     });
+
+    describe('Multi-root Commands', () => {
+        before(() => {
+            cli = new CLI('greet', [
+                Path.join(__dirname, './command-locating-cases/multiple-root/commands'),
+                Path.join(__dirname, './command-locating-cases/multiple-root/extend-commands'),
+            ]);
+        });
+
+        it('Help info', () => {
+            return cli
+                .getHelp()
+                .then(helpInfo => {
+                    helpInfo.text.should.contain('Foo!');
+                    helpInfo.text.should.contain('biu');
+                    helpInfo.text.should.contain('pia');
+                });
+        });
+
+        it('Should locate `commands/biu.js`', () => {
+            return cli
+                .execute(['biu'])
+                .catch((helpInfo: HelpInfo) => {
+                    throw new Error('Should not fulfill');
+                });
+        });
+
+        it('Should locate `extend-commands/pia.js`', () => {
+            return cli
+                .execute(['pia'])
+                .catch((helpInfo: HelpInfo) => {
+                    throw new Error('Should not fulfill');
+                });
+        });
+    });
+
+    describe('Multi-root single command and root title', () => {
+        before(() => {
+            cli = new CLI('greet', [
+                Path.join(__dirname, './command-locating-cases/single'),
+                { dir: Path.join(__dirname, './command-locating-cases/multiple-root/extend-commands'), title: "EXTEND COMMANDS" },
+            ]);
+        });
+
+        it('Help info', () => {
+            return cli
+                .getHelp()
+                .then(helpInfo => {
+                    helpInfo.text.should.contain('greet');
+                    helpInfo.text.should.contain('EXTEND COMMANDS');
+                    helpInfo.text.should.contain('pia');
+                });
+        });
+        
+        it('Should locate `single/default.js`', () => {
+            return cli
+                .execute(['hello'])
+                .then((v) => {
+                    v.should.contain('single');
+                })
+        });
+
+        it('Should locate `extend-commands/pia.js`', () => {
+            return cli
+                .execute(['pia'])
+                .catch((helpInfo: HelpInfo) => {
+                    throw new Error('Should not fulfill');
+                });
+        });
+    });
 });
