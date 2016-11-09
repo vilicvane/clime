@@ -14,12 +14,14 @@ import {
 
 import {
     CLI,
+    RootInfo,
     CommandModule,
     SubcommandDescriptor
 } from '../cli';
 
 import {
     TableRow,
+    TableCaption,
     buildTableOutput,
     indent,
     safeStat
@@ -31,7 +33,7 @@ export interface HelpInfoBuildClassOptions {
 }
 
 export interface HelpInfoBuildPathOptions {
-    dir: string | string[];
+    dir: string | string[] | RootInfo[];
     description?: string;
 }
 
@@ -195,13 +197,44 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
         }
     }
 
-    async buildTextForSubCommands(dir: string | string[]): Promise<void> {
-        let subcommandRowIndexMap = new Map<string, number>();
-        let rows: TableRow[] = [];
-        let subcommands = await CLI.getSubcommandDescriptors(dir, true);
+    async buildTextForSubCommands(dir: string | string[] | RootInfo[]): Promise<void> {
+        let dirs: string[];
+        let rootTitleMapping = new Map<string, string>();
 
-        if (subcommands) {
+        if (typeof dir === 'string') {
+            dirs = [dir];
+        } else if (isRootInfos(dir)) {
+            dirs = dir.map(rootInfo => {
+                if (rootInfo.title) {
+                    rootTitleMapping.set(rootInfo.dir, rootInfo.title);
+                }
+                return rootInfo.dir;
+            });
+        } else {
+            dirs = dir;
+        }
+
+        let rows: TableRow[];
+        let unFilterRows: TableRow[] = [];
+        let subcommands = await CLI.getSubcommandDescriptors(dirs, true);
+        let subcommandRowIndexMapping = new Map<string, number>();
+        let removeRowIndexMapping = new Map<number, boolean>();
+
+        if (subcommands && subcommands.length) {
+            let groupDir: string;
+            let groupTitle: string;
+
+            if (rootTitleMapping.has(dirs[0])) {
+                groupDir = dirs[0];
+                groupTitle = rootTitleMapping.get(groupDir);
+            } else {
+                groupTitle = 'SUBCOMMANDS';
+            }
+
+            unFilterRows.push(new TableCaption(`  ${Chalk.green(groupTitle)}`));
+
             subcommands.forEach(subcommand => {
+                let dir = subcommand.dir;
                 let aliases = subcommand.aliases || subcommand.alias && [subcommand.alias];
                 let subcommandNamesStr = Chalk.bold(subcommand.name);
 
@@ -209,23 +242,29 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                     subcommandNamesStr += ` [${Chalk.dim(aliases.join(','))}]`;
                 }
                 
-                // 删除列表中 重复项目
-                if (subcommandRowIndexMap.has(subcommand.name)) {
-                    rows.splice(subcommandRowIndexMap.get(subcommand.name), 1);
+                if (dir && dir != groupDir && rootTitleMapping.has(dir)) {
+                    groupDir = dir;
+                    groupTitle = rootTitleMapping.get(dir);
+                    unFilterRows.push(new TableCaption(`\n  ${Chalk.green(groupTitle)}`));
+                }
+
+                // 标记 需要删除列表中 重复项目索引
+                if (subcommandRowIndexMapping.has(subcommand.name)) {
+                    removeRowIndexMapping.set(subcommandRowIndexMapping.get(subcommand.name), true);
                 }
                 
-                subcommandRowIndexMap.set(subcommand.name, rows.length);
-                rows.push([
+                subcommandRowIndexMapping.set(subcommand.name, unFilterRows.length);
+                unFilterRows.push([
                     subcommandNamesStr,
                     subcommand.brief
                 ]);
             });
         }
 
+        rows = unFilterRows.filter((row, index) => !removeRowIndexMapping.has(index));
+
         if (rows.length) {
-            this.texts.push(`\
-  ${Chalk.green('SUBCOMMANDS')}\n
-${buildTableOutput(rows, { indent: 4, spaces: ' - ' })}`);
+            this.texts.push(buildTableOutput(rows, { indent: 4, spaces: ' - ' }));
         }
     }
 
@@ -236,4 +275,8 @@ ${buildTableOutput(rows, { indent: 4, spaces: ' - ' })}`);
 
 function isHelpInfoBuildPathOptions(options: HelpInfoBuildOptions): options is HelpInfoBuildPathOptions {
     return 'dir' in options;
+}
+
+function isRootInfos(roots: string[] | RootInfo[]): roots is RootInfo[] {
+    return roots.length > 0 && typeof roots[0] !== 'string';
 }

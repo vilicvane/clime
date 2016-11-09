@@ -354,7 +354,7 @@ export class CLI {
         }
 
         return await HelpInfo.build({
-            dir: this.roots.map(root => root.dir),
+            dir: this.roots,
             description
         });
     }
