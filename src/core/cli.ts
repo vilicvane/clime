@@ -120,7 +120,8 @@ export class CLI {
                 let argsParser = new ArgsParser(TargetCommand);
                 let parsedArgs: ParsedArgs | undefined; 
 
-                if (args.length > 0 || sequence.length > 1) {
+                // 多目录情况下，如果参数列表是空的情况 就不执行 arguments parse
+                if (this.roots.length == 1 || (args.length > 0 || sequence.length > 1)) {
                     parsedArgs = await argsParser.parse(sequence, args, cwd);
                 }
 
