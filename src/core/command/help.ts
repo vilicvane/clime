@@ -27,10 +27,11 @@ import {
 
 export interface HelpInfoBuildClassOptions {
     TargetCommand: typeof Command;
+    subcommandHelpInfo?: HelpInfo;
 }
 
 export interface HelpInfoBuildPathOptions {
-    dir: string;
+    dir: string | string[];
     description?: string;
 }
 
@@ -64,7 +65,11 @@ export class HelpInfo implements Printable {
                 dir = Path.join(dir, Path.basename(TargetCommand.path, '.js'));
             }
 
-            await info.buildTextForSubCommands(dir);
+            if (options.subcommandHelpInfo) {
+                info.texts.push(options.subcommandHelpInfo.text);
+            } else {
+                await info.buildTextForSubCommands(dir);
+            }
         }
 
         return info;
@@ -190,66 +195,31 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
         }
     }
 
-    async buildTextForSubCommands(dir: string): Promise<void> {
-        let rows: TableRow[];
-        let subcommands = await CLI.getSubcommandDescriptors(dir);
+    async buildTextForSubCommands(dir: string | string[]): Promise<void> {
+        let subcommandRowIndexMap = new Map<string, number>();
+        let rows: TableRow[] = [];
+        let subcommands = await CLI.getSubcommandDescriptors(dir, true);
 
         if (subcommands) {
-            rows = subcommands.map(subcommand => {
+            subcommands.forEach(subcommand => {
                 let aliases = subcommand.aliases || subcommand.alias && [subcommand.alias];
                 let subcommandNamesStr = Chalk.bold(subcommand.name);
 
                 if (aliases) {
                     subcommandNamesStr += ` [${Chalk.dim(aliases.join(','))}]`;
                 }
-
-                return [
+                
+                // 删除列表中 重复项目
+                if (subcommandRowIndexMap.has(subcommand.name)) {
+                    rows.splice(subcommandRowIndexMap.get(subcommand.name), 1);
+                }
+                
+                subcommandRowIndexMap.set(subcommand.name, rows.length);
+                rows.push([
                     subcommandNamesStr,
                     subcommand.brief
-                ];
+                ]);
             });
-        } else {
-            let stats = await safeStat(dir);
-
-            if (!stats || !stats.isDirectory()) {
-                return;
-            }
-
-            let names = await v.call<string[]>(FS.readdir, dir);
-            let unfilteredRows = await v.map(names, async name => {
-                let path = Path.join(dir, name);
-                let stats = await safeStat(path);
-
-                if (!stats) {
-                    return undefined;
-                }
-
-                if (stats.isFile()) {
-                    if (name === 'default.js' || Path.extname(path) !== '.js') {
-                        return undefined;
-                    }
-
-                    name = Path.basename(name, '.js');
-                } else {
-                    path = Path.join(path, 'default.js');
-                    stats = await safeStat(path);
-                }
-
-                let description: string | undefined;
-
-                if (stats) {
-                    let module = require(path);
-                    let CommandClass = (module.default || module) as CommandModule;
-                    description = CommandClass && (CommandClass.brief || CommandClass.description);
-                }
-
-                return [
-                    Chalk.bold(name),
-                    description
-                ] as TableRow;
-            });
-
-            rows = unfilteredRows.filter(row => !!row) as TableRow[];
         }
 
         if (rows.length) {
