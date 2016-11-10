@@ -242,7 +242,7 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                     subcommandNamesStr += ` [${Chalk.dim(aliases.join(','))}]`;
                 }
                 
-                if (dir && dir != groupDir && rootTitleMapping.has(dir)) {
+                if (dir && dir != groupDir && !subcommand.hidden && rootTitleMapping.has(dir)) {
                     groupDir = dir;
                     groupTitle = rootTitleMapping.get(dir);
                     unFilterRows.push(new TableCaption(`\n  ${Chalk.green(groupTitle)}`));
@@ -252,7 +252,11 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                 if (subcommandRowIndexMapping.has(subcommand.name)) {
                     removeRowIndexMapping.set(subcommandRowIndexMapping.get(subcommand.name), true);
                 }
-                
+
+                if (subcommand.hidden) {
+                    return;
+                }
+
                 subcommandRowIndexMapping.set(subcommand.name, unFilterRows.length);
                 unFilterRows.push([
                     subcommandNamesStr,
@@ -261,7 +265,19 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
             });
         }
 
-        rows = unFilterRows.filter((row, index) => !removeRowIndexMapping.has(index));
+        rows = unFilterRows
+            .filter((row, index) => {
+                return !removeRowIndexMapping.has(index);
+            })
+            .filter((row, index, array) => {
+                if (row instanceof TableCaption) {
+                    if (index + 1 === array.length || array[index + 1] instanceof TableCaption) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
 
         if (rows.length) {
             this.texts.push(buildTableOutput(rows, { indent: 4, spaces: ' - ' }));

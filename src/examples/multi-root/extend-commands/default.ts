@@ -9,5 +9,9 @@ export const subcommands = [
         name: 'view',
         alias: ['show', 'lookup'],
         brief: 'Show useless message of viewing (EXTEND) '
+    }, 
+    {
+        name: 'init',
+        hidden: true
     }
 ];

@@ -41,7 +41,8 @@ export interface SubcommandDescriptor {
     alias?: string;
     aliases?: string[];
     brief?: string;
-
+    hidden?: boolean; // 可将 subcommand 命令强制隐藏, 设置为不可(找到)使用的命令
+    
     /** @internal */
     dir?: string; // 用来标记 command 文件模块所在位置, 主要还是程序内部使用
 }
@@ -255,6 +256,11 @@ export class CLI {
                     possibleUnknownCommandName = possibleCommandName;
                 } else {
                     let descriptor = metadata.get(possibleCommandName);
+
+                    if (descriptor.hidden) {
+                        possibleUnknownCommandName = possibleCommandName;
+                        break;
+                    }
 
                     // If `possibleCommandName` is an alias.
                     if (descriptor.name !== possibleCommandName) {
