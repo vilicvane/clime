@@ -77,13 +77,13 @@ export class HelpInfo implements Printable {
         return info;
     }
 
-    private buildDescription(description: string | undefined): void {
+    buildDescription(description: string | undefined): void {
         if (description) {
             this.texts.push(`${indent(description)}\n`);
         }
     }
 
-    private buildTextsForParamsAndOptions(TargetCommand: typeof Command): void {
+    buildTextsForParamsAndOptions(TargetCommand: typeof Command): void {
         let paramDefinitions = TargetCommand.paramDefinitions;
         let paramsDefinition = TargetCommand.paramsDefinition;
 
