@@ -568,6 +568,8 @@ class ArgsParser {
                     if (!validator.test(value)) {
                         throw new ExpectedError(`Invalid value for "${name}"`);
                     }
+                } else if (typeof validator === 'function') {
+                    validator(arg, name);
                 } else {
                     validator.validate(arg, name);
                 }
