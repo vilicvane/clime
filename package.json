@@ -5,8 +5,9 @@
   "main": "bld/index.js",
   "typings": "bld/index.d.ts",
   "scripts": {
-    "test": "mocha",
-    "build": "tsc"
+    "tsc": "tsc",
+    "build": "tsc",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -33,10 +34,15 @@
     "villa": "^0.2.8"
   },
   "devDependencies": {
+    "@types/chai": "^3.4.35",
+    "@types/chai-as-promised": "0.0.29",
+    "@types/chalk": "^0.4.31",
+    "@types/mocha": "^2.2.39",
+    "@types/node": "^7.0.5",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "mocha": "^3.0.2",
     "source-map-support": "^0.4.0",
-    "typescript": "^2.0.3"
+    "typescript": "^2.2.1"
   }
 }

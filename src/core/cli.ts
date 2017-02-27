@@ -184,7 +184,7 @@ export class CLI {
                     break;
                 }
 
-                let descriptor = metadata.get(possibleCommandName);
+                let descriptor = metadata.get(possibleCommandName)!;
 
                 // If `possibleCommandName` is an alias.
                 if (descriptor.name !== possibleCommandName) {
@@ -431,12 +431,10 @@ class ArgsParser {
             }
         }
 
-        {
-            let missingOptionNames = requiredOptionSet && requiredOptionSet.keys();
+        let missingOptionNames = requiredOptionSet && Array.from(requiredOptionSet);
 
-            if (missingOptionNames && missingOptionNames.length) {
-                throw new UsageError(`Missing required option(s) \`${missingOptionNames.join('`, `')}\``, this.helpProvider);
-            }
+        if (missingOptionNames && missingOptionNames.length) {
+            throw new UsageError(`Missing required option(s) \`${missingOptionNames.join('`, `')}\``, this.helpProvider);
         }
 
         for (let definition of pendingParamDefinitions) {
@@ -472,8 +470,8 @@ class ArgsParser {
                     throw new UsageError(`Unknown option flag "${flag}"`, that.helpProvider);
                 }
 
-                let name = optionFlagMapping.get(flag);
-                let definition = optionDefinitionMap.get(name);
+                let name = optionFlagMapping.get(flag)!;
+                let definition = optionDefinitionMap.get(name)!;
 
                 if (definition.required) {
                     requiredOptionSet!.delete(name);
@@ -496,7 +494,7 @@ class ArgsParser {
                 throw new UsageError(`Unknown option \`${name}\``, that.helpProvider);
             }
 
-            let definition = optionDefinitionMap.get(name);
+            let definition = optionDefinitionMap.get(name)!;
 
             if (definition.required) {
                 requiredOptionSet!.delete(name);
