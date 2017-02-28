@@ -51,6 +51,7 @@ export class Context {
 }
 
 /**
+ * @deprecated
  * Validator interface for parameters or options.
  */
 export interface Validator<T> {
@@ -65,7 +66,17 @@ export interface Validator<T> {
     validate(value: T, name: string): void;
 }
 
-export type GeneralValidator<T> = Validator<T> | RegExp;
+/**
+ * A function that validates a value.
+ * It should throw an error (usually an instance of `ExpectedError`) if the
+ * validation fails.
+ * @param value - Value to be validated.
+ * @param name - Name of the parameter or option, used for generating error
+ * message.
+ */
+export type ValidatorFunction<T> = (value: T, name: string) => void;
+
+export type GeneralValidator<T> = ValidatorFunction<T> | Validator<T> | RegExp;
 
 /**
  * The abstract `Command` class to be extended.

@@ -1,13 +1,14 @@
 {
   "name": "clime",
-  "version": "0.5.0-dev-lion.1",
+  "version": "0.5.0-dev-lion.3",
   "description": "The command-line interface framework for TypeScript.",
   "main": "bld/index.js",
   "typings": "bld/index.d.ts",
   "scripts": {
-    "test": "mocha",
+    "deploy-dev": "rimraf dist && tsc && mocha && npm publish --tag dev-lion",
+    "tsc": "tsc",
     "build": "tsc",
-    "deploy-dev": "rimraf dist && tsc && mocha && npm publish --tag dev-lion"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -34,11 +35,16 @@
     "villa": "^0.2.8"
   },
   "devDependencies": {
+    "@types/chai": "^3.4.35",
+    "@types/chai-as-promised": "0.0.29",
+    "@types/chalk": "^0.4.31",
+    "@types/mocha": "^2.2.39",
+    "@types/node": "^7.0.5",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "mocha": "^3.0.2",
     "rimraf": "^2.5.4",
     "source-map-support": "^0.4.0",
-    "typescript": "^2.0.3"
+    "typescript": "~2.2.1"
   }
 }

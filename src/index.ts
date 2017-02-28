@@ -6,6 +6,6 @@ export * from './core';
 export * from './util';
 export * from './shim';
 
-import * as Object from './object';
+import * as ClimeObject from './object';
 
-export { Object };
+export { ClimeObject as Object };

@@ -256,8 +256,8 @@ export class CLI {
                     possibleUnknownCommandName = possibleCommandName;
                 } else {
                     let descriptor = metadata.get(possibleCommandName);
-
-                    if (descriptor.hidden) {
+                    
+                    if (!descriptor || descriptor.hidden) {
                         possibleUnknownCommandName = possibleCommandName;
                         break;
                     }
@@ -408,7 +408,7 @@ export class CLI {
             let commandModule: CommandModule;
             
             // 先从缓存里取
-            targetSubcommands = CLI.commandModuleSubcommandsCacheMap.get(dir);
+            targetSubcommands = CLI.commandModuleSubcommandsCacheMap.get(dir) || [];
 
             // 如果缓存没有找到结果，则从提供的 targetDir/default.js 里找被定义的 subcommands
             if (!targetSubcommands && await safeStat(path)) {
@@ -658,12 +658,10 @@ class ArgsParser {
             }
         }
 
-        {
-            let missingOptionNames = requiredOptionSet && requiredOptionSet.keys();
+        let missingOptionNames = requiredOptionSet && Array.from(requiredOptionSet);
 
-            if (missingOptionNames && missingOptionNames.length) {
-                throw new UsageError(`Missing required option(s) \`${missingOptionNames.join('`, `')}\``, this.helpProvider);
-            }
+        if (missingOptionNames && missingOptionNames.length) {
+            throw new UsageError(`Missing required option(s) \`${missingOptionNames.join('`, `')}\``, this.helpProvider);
         }
 
         for (let definition of pendingParamDefinitions) {
@@ -699,8 +697,8 @@ class ArgsParser {
                     throw new UsageError(`Unknown option flag "${flag}"`, that.helpProvider);
                 }
 
-                let name = optionFlagMapping.get(flag);
-                let definition = optionDefinitionMap.get(name);
+                let name = optionFlagMapping.get(flag)!;
+                let definition = optionDefinitionMap.get(name)!;
 
                 if (definition.required) {
                     requiredOptionSet!.delete(name);
@@ -723,7 +721,7 @@ class ArgsParser {
                 throw new UsageError(`Unknown option \`${name}\``, that.helpProvider);
             }
 
-            let definition = optionDefinitionMap.get(name);
+            let definition = optionDefinitionMap.get(name)!;
 
             if (definition.required) {
                 requiredOptionSet!.delete(name);
@@ -797,6 +795,8 @@ class ArgsParser {
                     if (!validator.test(value)) {
                         throw new ExpectedError(`Invalid value for "${name}"`);
                     }
+                } else if (typeof validator === 'function') {
+                    validator(arg, name);
                 } else {
                     validator.validate(arg, name);
                 }

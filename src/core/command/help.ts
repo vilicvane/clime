@@ -226,7 +226,7 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
 
             if (rootTitleMapping.has(dirs[0])) {
                 groupDir = dirs[0];
-                groupTitle = rootTitleMapping.get(groupDir);
+                groupTitle = rootTitleMapping.get(groupDir) || '';
             } else {
                 groupTitle = 'SUBCOMMANDS';
             }
@@ -244,13 +244,16 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                 
                 if (dir && dir != groupDir && !subcommand.hidden && rootTitleMapping.has(dir)) {
                     groupDir = dir;
-                    groupTitle = rootTitleMapping.get(dir);
+                    groupTitle = rootTitleMapping.get(dir) || '';
                     unFilterRows.push(new TableCaption(`\n  ${Chalk.green(groupTitle)}`));
                 }
 
                 // 标记 需要删除列表中 重复项目索引
                 if (subcommandRowIndexMapping.has(subcommand.name)) {
-                    removeRowIndexMapping.set(subcommandRowIndexMapping.get(subcommand.name), true);
+                    let index = subcommandRowIndexMapping.get(subcommand.name);
+                    if (index !== undefined) {
+                        removeRowIndexMapping.set(index, true);
+                    }
                 }
 
                 if (subcommand.hidden) {
