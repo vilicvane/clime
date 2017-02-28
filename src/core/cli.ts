@@ -117,7 +117,7 @@ export class CLI {
 
                 TargetCommand.path = path;
                 TargetCommand.sequence = sequence;
-
+                
                 let argsParser = new ArgsParser(TargetCommand);
                 let parsedArgs: ParsedArgs | undefined; 
 
@@ -126,10 +126,9 @@ export class CLI {
                     parsedArgs = await argsParser.parse(sequence, args, cwd);
                 }
 
-                if (parsedArgs === undefined) {
+                if (!parsedArgs) {
                     // 当参数列表为空，并且 是多root目录情况，要兼顾 全总目录下定义的subcommand的显示
                     if (sequence.length == 1 && this.roots.length > 1) {
-                        let description = await this.getHelpDescription();
                         let subcommandHelpInfo = await this.getHelp(false);
 
                         return await HelpInfo.build({ TargetCommand, subcommandHelpInfo });
@@ -401,14 +400,14 @@ export class CLI {
         } else {
             targetDirs = dirs;
         }
-        
+
         await v.each(targetDirs, async dir => {
-            let targetSubcommands: SubcommandDescriptor[];
+            let targetSubcommands: SubcommandDescriptor[] | undefined;
             let path = Path.join(dir, 'default.js');
             let commandModule: CommandModule;
-            
+
             // 先从缓存里取
-            targetSubcommands = CLI.commandModuleSubcommandsCacheMap.get(dir) || [];
+            targetSubcommands = CLI.commandModuleSubcommandsCacheMap.get(dir);
 
             // 如果缓存没有找到结果，则从提供的 targetDir/default.js 里找被定义的 subcommands
             if (!targetSubcommands && await safeStat(path)) {
@@ -434,7 +433,7 @@ export class CLI {
             if (!targetSubcommands && scanDir && await safeStat(dir)) {
                 let fileNames = await v.call<string[]>(FS.readdir, dir);
                 targetSubcommands = [];
-
+                
                 await v.each(fileNames, async fileName => {
                     if (fileName == 'default.js') {
                         return;
@@ -477,7 +476,7 @@ export class CLI {
                         brief = CommandClass && (CommandClass.brief || CommandClass.description);
                     }
 
-                    targetSubcommands.push({
+                    targetSubcommands && targetSubcommands.push({
                         name,
                         brief,
                         dir
@@ -527,7 +526,7 @@ class ArgsParser {
 
     constructor(command: typeof Command) {
         this.helpProvider = command;
-
+        
         this.paramDefinitions = command.paramDefinitions;
         this.requiredParamsNumber = command.requiredParamsNumber;
 
