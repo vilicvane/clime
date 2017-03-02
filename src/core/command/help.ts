@@ -22,7 +22,8 @@ import {
     TableRow,
     buildTableOutput,
     indent,
-    safeStat
+    safeStat,
+    findPaths
 } from '../../util';
 
 export interface HelpInfoBuildClassOptions {
@@ -30,11 +31,11 @@ export interface HelpInfoBuildClassOptions {
 }
 
 export interface HelpInfoBuildPathOptions {
-    dir: string;
+    dirs: string[];
     description?: string;
 }
 
-export type HelpInfoBuildOptions = HelpInfoBuildClassOptions | HelpInfoBuildPathOptions;
+export type HelpInfoBuildOptions = typeof Command | HelpInfoBuildPathOptions;
 
 export class HelpInfo implements Printable {
     private texts: string[] = [];
@@ -49,22 +50,14 @@ export class HelpInfo implements Printable {
     static async build(options: HelpInfoBuildOptions): Promise<HelpInfo> {
         let info = new HelpInfo();
 
-        if (isHelpInfoBuildPathOptions(options)) {
+        if (typeof options === 'object') {
             info.buildDescription(options.description);
-            await info.buildTextForSubCommands(options.dir);
+            await info.buildTextForSubCommands(options.dirs);
         } else {
-            let TargetCommand = options.TargetCommand;
+            info.buildDescription(options.description);
+            info.buildTextsForParamsAndOptions(options);
 
-            info.buildDescription(TargetCommand.description);
-            info.buildTextsForParamsAndOptions(TargetCommand);
-
-            let dir = Path.dirname(TargetCommand.path);
-
-            if (Path.basename(TargetCommand.path) !== 'default.js') {
-                dir = Path.join(dir, Path.basename(TargetCommand.path, '.js'));
-            }
-
-            await info.buildTextForSubCommands(dir);
+            await info.buildTextForSubCommands(options.searchDirs);
         }
 
         return info;
@@ -190,12 +183,18 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
         }
     }
 
-    async buildTextForSubCommands(dir: string): Promise<void> {
-        let rows: TableRow[];
-        let subcommands = await CLI.getSubcommandDescriptors(dir);
+    async buildTextForSubCommands(dirs: string[]): Promise<void> {
+        let rows: TableRow[] = [];
+        let rowMap = new Map<string, TableRow>();
 
-        if (subcommands) {
-            rows = subcommands.map(subcommand => {
+        let definition = await CLI.getSubcommandsDefinition(dirs);
+
+        if (definition) {
+            for (let subcommand of definition.subcommands) {
+                if (rowMap.has(subcommand.name)) {
+                    throw new Error('Duplicate subcommand definitions');
+                }
+
                 let aliases = subcommand.aliases || subcommand.alias && [subcommand.alias];
                 let subcommandNamesStr = Chalk.bold(subcommand.name);
 
@@ -203,30 +202,36 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                     subcommandNamesStr += ` [${Chalk.dim(aliases.join(','))}]`;
                 }
 
-                return [
+                let row = [
                     subcommandNamesStr,
                     subcommand.brief
                 ];
-            });
-        } else {
-            let stats = await safeStat(dir);
 
-            if (!stats || !stats.isDirectory()) {
-                return;
+                rows.push(row);
+                rowMap.set(subcommand.name, row);
             }
+        }
 
+        let foundDirs = await findPaths('dir', dirs);
+
+        if (!foundDirs) {
+            return;
+        }
+
+        for (let dir of foundDirs) {
             let names = await v.call<string[]>(FS.readdir, dir);
-            let unfilteredRows = await v.map(names, async name => {
+
+            for (let name of names) {
                 let path = Path.join(dir, name);
                 let stats = await safeStat(path);
 
                 if (!stats) {
-                    return undefined;
+                    continue;
                 }
 
                 if (stats.isFile()) {
                     if (name === 'default.js' || Path.extname(path) !== '.js') {
-                        return undefined;
+                        continue;
                     }
 
                     name = Path.basename(name, '.js');
@@ -243,13 +248,20 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                     description = CommandClass && (CommandClass.brief || CommandClass.description);
                 }
 
-                return [
-                    Chalk.bold(name),
-                    description
-                ] as TableRow;
-            });
+                let row = rowMap.get(name);
 
-            rows = unfilteredRows.filter(row => !!row) as TableRow[];
+                if (row) {
+                    row[1] = row[1] || description;
+                } else {
+                    row = [
+                        Chalk.bold(name),
+                        description
+                    ];
+
+                    rows.push(row);
+                    rowMap.set(name, row);
+                }
+            }
         }
 
         if (rows.length) {
@@ -265,5 +277,5 @@ ${buildTableOutput(rows, { indent: 4, spaces: ' - ' })}`);
 }
 
 function isHelpInfoBuildPathOptions(options: HelpInfoBuildOptions): options is HelpInfoBuildPathOptions {
-    return 'dir' in options;
+    return 'dirs' in options;
 }

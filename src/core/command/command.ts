@@ -91,15 +91,15 @@ export abstract class Command {
      * Get the help object of current command.
      */
     static async getHelp(): Promise<HelpInfo> {
-        return await HelpInfo.build({
-            TargetCommand: this
-        });
+        return await HelpInfo.build(this);
     }
 
     /** @internal */
     static decorated = false;
     /** @internal */
     static path: string;
+    /** @internal */
+    static searchDirs: string[];
     /** @internal */
     static sequence: string[];
     /** @internal */
