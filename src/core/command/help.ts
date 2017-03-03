@@ -240,6 +240,12 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                     stats = await safeStat(path);
                 }
 
+                let row = rowMap.get(name);
+
+                if (row && row[1]) {
+                    continue;
+                }
+
                 let description: string | undefined;
 
                 if (stats) {
@@ -248,10 +254,8 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                     description = CommandClass && (CommandClass.brief || CommandClass.description);
                 }
 
-                let row = rowMap.get(name);
-
                 if (row) {
-                    row[1] = row[1] || description;
+                    row[1] = description;
                 } else {
                     row = [
                         Chalk.bold(name),
