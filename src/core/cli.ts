@@ -1,5 +1,6 @@
 import * as FS from 'fs';
 import * as Path from 'path';
+import * as v from 'villa';
 
 import {
     Command,
@@ -42,6 +43,9 @@ export interface SubcommandDescriptor {
     alias?: string;
     aliases?: string[];
     brief?: string;
+
+    /** @internal */
+    dir?: string; // 用来标记 command 文件模块所在位置, 主要还是程序内部使用
 }
 
 export interface SubcommandsDefinition {
@@ -55,6 +59,11 @@ interface PreProcessResult {
     path: string | undefined;
     searchDirs: string[];
     possibleUnknownCommandName: string | undefined;
+}
+
+export interface RootInfo {
+    dir: string;
+    title?: string;
 }
 
 /**
@@ -90,7 +99,6 @@ export class CLI {
 
             if (TargetCommand.prototype instanceof Command) {
                 // This is a command module with an actual command.
-
                 if (!TargetCommand.decorated) {
                     throw new TypeError(`Command defined in module "${path}" does not seem to be intialized, make sure to decorate it with \`@command()\``);
                 }
@@ -100,7 +108,12 @@ export class CLI {
                 TargetCommand.sequence = sequence;
 
                 let argsParser = new ArgsParser(TargetCommand);
-                let parsedArgs = await argsParser.parse(sequence, args, cwd);
+                let parsedArgs: ParsedArgs | undefined; 
+
+                // 多目录情况下，如果参数列表是空的情况 就不执行 arguments parse
+                if (this.roots.length == 1 || (args.length > 0 || sequence.length > 1)) {
+                    parsedArgs = await argsParser.parse(sequence, args, cwd);
+                }
 
                 if (!parsedArgs) {
                     return await HelpInfo.build(TargetCommand);
@@ -163,6 +176,26 @@ export class CLI {
         let targetPath = entryPaths && entryPaths[0];
         let possibleUnknownCommandName: string | undefined;
         let aliases: string[] | undefined;
+        let searchPaths = this.roots.map(rootInfo => rootInfo.dir).reverse(); // 默认从最后一级开始搜索
+        let targetPath: string = searchPaths[0];
+        let entryPaths: string[] = [];
+        
+        for (let searchPath of searchPaths) {
+            let entryPath = Path.join(searchPath, 'default.js');
+            if (await safeStat(entryPath)) {
+                let module = require(entryPath);
+                let TargetCommand = (module.default || module) as CommandClass;
+
+                if (TargetCommand.prototype instanceof Command && TargetCommand.decorated) {
+                    entryPaths.push(entryPath);
+                    break;
+                } else if (entryPaths.length === 0) {
+                    entryPaths.push(entryPath);
+                }
+            }
+        }
+
+        targetPath = entryPaths.pop() as string;
 
         let argsIndex = 0;
 
@@ -193,7 +226,7 @@ export class CLI {
                     if (!aliases) {
                         continue;
                     }
-
+                    
                     for (let alias of aliases) {
                         metadata.set(alias, subcommand);
                     }
@@ -225,6 +258,13 @@ export class CLI {
                 ...searchBases
             ];
 
+                // 找可能的 CommandModule/CommandClass 文件位置
+                possiblePaths.push(Path.join(path, 'default.js'));
+                possiblePaths.push(path + '.js');
+                possiblePaths.push(path);
+                return path;
+            });
+            
             for (let possiblePath of possiblePaths) {
                 let stats = await safeStat(possiblePath);
                 if (stats && stats.isFile()) {
@@ -232,6 +272,19 @@ export class CLI {
                     targetSearchDirs = searchDirs || [];
                     argsIndex = i + 1;
                     sequence.push(possibleCommandName);
+                    
+                    // 因为 searchPaths 可能是多位置情况 所以这里要修正下
+                    if (Path.extname(possiblePath) != '.js') {
+                        searchPaths = [possiblePath];
+                    } else if (Path.basename(possiblePath) === 'default.js') {
+                        searchPaths = [Path.dirname(possiblePath)];   
+                    } else {
+                        searchPaths = [
+                            Path.join(Path.dirname(possiblePath), 
+                            Path.basename(possiblePath, '.js'))
+                        ];
+                    }
+
                     continue outer;
                 }
             }
@@ -276,7 +329,13 @@ export class CLI {
         return command.execute(...executeMethodArgs);
     }
 
-    async getHelp(): Promise<HelpInfo> {
+    async getHelp(printHeadingDescription: boolean = false): Promise<HelpInfo> {
+        let description: string | undefined;
+
+        if (printHeadingDescription) {
+            description = await this.getHelpDescription();
+        }
+
         return await HelpInfo.build({
             dirs: this.roots
         });
@@ -299,6 +358,69 @@ export class CLI {
         if (!subcommands || !subcommands.length) {
             return undefined;
         }
+        
+        await v.each(targetDirs, async dir => {
+            let targetSubcommands: SubcommandDescriptor[];
+            let path = Path.join(dir, 'default.js');
+            let commandModule: CommandModule;
+            
+            // 先从缓存里取
+            targetSubcommands = CLI.commandModuleSubcommandsCacheMap.get(dir);
+
+            // 如果缓存没有找到结果，则从提供的 targetDir/default.js 里找被定义的 subcommands
+            if (!targetSubcommands && await safeStat(path)) {
+                commandModule = require(path) as CommandModule;
+
+                if (commandModule.subcommands && commandModule.subcommands.length) {
+                    targetSubcommands = commandModule.subcommands;
+
+                    // 解决 dir的设置
+                    for (let targetSubcommand of targetSubcommands) {
+                        if (targetSubcommand.dir) {
+                            targetSubcommand.dir = Path.resolve(dir, targetSubcommand.dir);
+                        } else {
+                            targetSubcommand.dir = dir;
+                        }
+                    }
+                }
+            }
+            
+            // 如果没有定义 default.js 或 需要的结构, 并且允许扫描目录， 
+            // 则会遍历目标目录文件结构 来获取可能的 结果
+            // 如果default.js 定义了subcommands，但是列表为空 并不会进行目标扫描
+            if (!targetSubcommands && scanDir && await safeStat(dir)) {
+                let fileNames = await v.call<string[]>(FS.readdir, dir);
+                targetSubcommands = [];
+
+                await v.each(fileNames, async fileName => {
+                    if (fileName == 'default.js') {
+                        return;
+                    }
+
+                    let path = Path.join(dir, fileName);
+                    let name = fileName;
+                    let stats = await safeStat(path);
+
+                    if (!stats) {
+                        return;
+                    }
+                    
+                    if (stats.isFile()) {
+                        if (Path.extname(path) !== '.js') {
+                            return;
+                        }
+
+                        name = Path.basename(name, '.js');
+                    } else {
+                        path = Path.join(path, 'default.js');
+                        stats = await safeStat(path);
+
+                        // 找与目录同名的子文件
+                        if (!stats) {
+                            path = Path.join(path, fileName + '.js');
+                            stats = await safeStat(path);
+                        }
+                    }
 
         return {
             moduleDir: Path.dirname(path),

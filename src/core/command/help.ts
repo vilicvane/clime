@@ -28,6 +28,7 @@ import {
 
 export interface HelpInfoBuildClassOptions {
     TargetCommand: typeof Command;
+    subcommandHelpInfo?: HelpInfo;
 }
 
 export interface HelpInfoBuildPathOptions {
