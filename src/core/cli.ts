@@ -34,6 +34,13 @@ import {
 const COMMAND_NAME_REGEX = /^[\w\d]+(?:-[\w\d]+)*$/;
 const HELP_OPTION_REGEX = /^(?:-[h?]|--help)$/;
 
+export interface CommandRoot {
+    label: string;
+    path: string;
+}
+
+export type GeneralCommandRoot = string | CommandRoot;
+
 export interface CommandModule {
     brief?: string;
     description?: string;
@@ -48,17 +55,25 @@ export interface SubcommandDefinition {
     brief?: string;
 }
 
-interface PreProcessSearchContext {
+export interface SubcommandSearchBaseResult {
     name: string;
     path: string | undefined;
-    searchDir: string | undefined;
+    searchBase: string | undefined;
+}
+
+export interface SubcommandSearchInProgressContext extends SubcommandSearchBaseResult {
+    label: string;
+}
+
+export interface SubcommandSearchContext extends SubcommandSearchInProgressContext {
+    searchBase: string;
 }
 
 interface PreProcessResult {
     sequence: string[];
     args: string[];
     path: string | undefined;
-    searchDirs: string[];
+    searchContexts: SubcommandSearchContext[];
     possibleUnknownCommandName: string | undefined;
 }
 
@@ -66,16 +81,31 @@ interface PreProcessResult {
  * Clime command line interface.
  */
 export class CLI {
-    roots: string[];
+    roots: CommandRoot[];
 
     constructor(
         /** Command entry name. */
         public name: string,
         /** Root directory of command modules. */
-        roots: string | string[]
+        roots: GeneralCommandRoot | GeneralCommandRoot[]
     ) {
-        roots = typeof roots === 'string' ? [roots] : roots;
-        this.roots = roots.map(root => Path.resolve(root));
+        roots = Array.isArray(roots) ? roots : [roots];
+        this.roots = roots.map(root => {
+            let label: string | undefined;
+            let path: string;
+
+            if (typeof root === 'string') {
+                path = root;
+            } else {
+                label = root.label;
+                path = root.path;
+            }
+
+            return {
+                label: label || 'Subcommands',
+                path: Path.resolve(path)
+            };
+        });
     }
 
     async execute(argv: string[], cwd = process.cwd()): Promise<any> {
@@ -83,7 +113,7 @@ export class CLI {
             sequence,
             args,
             path,
-            searchDirs,
+            searchContexts,
             possibleUnknownCommandName
         } = await this.preProcessArguments(argv);
 
@@ -101,7 +131,12 @@ export class CLI {
                 }
 
                 TargetCommand.path = path;
-                TargetCommand.searchDirs = searchDirs;
+                TargetCommand.helpBuildingContexts = searchContexts.map(context => {
+                    return {
+                        label: context.label,
+                        dir: context.searchBase
+                    };
+                });
                 TargetCommand.sequence = sequence;
 
                 let argsParser = new ArgsParser(TargetCommand);
@@ -137,7 +172,12 @@ export class CLI {
         }
 
         let helpInfo = await HelpInfo.build({
-            dirs: searchDirs,
+            contexts: searchContexts.map(context => {
+                return {
+                    label: context.label,
+                    dir: context.searchBase
+                };
+            }),
             description
         });
 
@@ -156,8 +196,8 @@ export class CLI {
         }
     }
 
-    private async preProcessSearchDir(searchDir: string, possibleCommandName: string, aliasMap: Map<string, string>): Promise<PreProcessSearchContext> {
-        let definitions = await CLI.getSubcommandDefinitions(searchDir);
+    private async preProcessSearchBase(searchBase: string, possibleCommandName: string, aliasMap: Map<string, string>): Promise<SubcommandSearchBaseResult> {
+        let definitions = await CLI.getSubcommandDefinitions(searchBase);
         let definitionMap = new Map<string, SubcommandDefinition>();
 
         for (let definition of definitions) {
@@ -187,14 +227,14 @@ export class CLI {
         let targetPath: string | undefined;
 
         let targetDefinition = definitionMap.get(possibleCommandName);
-        searchDir = Path.join(searchDir, possibleCommandName);
+        searchBase = Path.join(searchBase, possibleCommandName);
 
         if (targetDefinition && targetDefinition.filename) {
-            targetPath = Path.resolve(searchDir, targetDefinition.filename);
+            targetPath = Path.resolve(searchBase, targetDefinition.filename);
         } else {
             let possiblePaths = [
-                `${searchDir}.js`,
-                Path.join(searchDir, 'default.js')
+                `${searchBase}.js`,
+                Path.join(searchBase, 'default.js')
             ];
 
             for (let possiblePath of possiblePaths) {
@@ -208,7 +248,7 @@ export class CLI {
         return {
             name: possibleCommandName,
             path: targetPath,
-            searchDir: existsDir(searchDir) ? searchDir : undefined
+            searchBase: existsDir(searchBase) ? searchBase : undefined
         };
     }
 
@@ -217,22 +257,27 @@ export class CLI {
      */
     private async preProcessArguments(argv: string[]): Promise<PreProcessResult> {
         let sequence = [this.name];
-        let targetSearchDirs = this.roots;
 
-        let entryPaths = await findPaths('file', this.roots, 'default.js');
-        let targetPath = entryPaths && entryPaths[entryPaths.length - 1];
         let possibleUnknownCommandName: string | undefined;
         let aliases: string[] | undefined;
 
         let argsIndex = 0;
 
-        let contexts = await v.map(this.roots, async (root): Promise<PreProcessSearchContext> => {
-            let targetPath = Path.join(root, 'default.js');
+        let targetPath: string | undefined;
+
+        let contexts: SubcommandSearchContext[] = await v.map(this.roots, async root => {
+            let candidatePath: string | undefined = Path.join(root.path, 'default.js');
+            candidatePath = await existsFile(candidatePath) ? candidatePath : undefined;
+
+            if (candidatePath) {
+                targetPath = candidatePath;
+            }
 
             return {
+                label: root.label,
                 name: this.name,
-                path: await existsFile(targetPath) ? targetPath : undefined,
-                searchDir: root
+                path: candidatePath,
+                searchBase: root.path
             };
         });
 
@@ -245,8 +290,12 @@ export class CLI {
 
             let aliasMap = new Map<string, string>();
 
-            let nextContexts = await v.map(contexts, async context => {
-                return await this.preProcessSearchDir(context.searchDir!, possibleCommandName, aliasMap);
+            let nextContexts: SubcommandSearchInProgressContext[] = await v.map(contexts, async context => {
+                let searchBaseContext = await this.preProcessSearchBase(context.searchBase, possibleCommandName, aliasMap);
+                return {
+                    label: context.label,
+                    ...searchBaseContext
+                };
             });
 
             let targetContexts = nextContexts.filter(context => !!context.path);
@@ -264,15 +313,14 @@ export class CLI {
             argsIndex = i + 1;
             sequence.push(possibleCommandName);
 
-            contexts = nextContexts.filter(context => !!context.searchDir);
-            targetSearchDirs = contexts.map(context => context.searchDir!);
+            contexts = nextContexts.filter(context => !!context.searchBase) as SubcommandSearchContext[];
         }
 
         return {
             sequence,
             args: argv.slice(argsIndex),
             path: targetPath,
-            searchDirs: targetSearchDirs,
+            searchContexts: contexts,
             possibleUnknownCommandName
         };
     }
@@ -303,7 +351,12 @@ export class CLI {
 
     async getHelp(): Promise<HelpInfo> {
         return await HelpInfo.build({
-            dirs: this.roots
+            contexts: this.roots.map(root => {
+                return {
+                    label: root.label,
+                    dir: root.path
+                };
+            })
         });
     }
 

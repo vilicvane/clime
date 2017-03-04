@@ -1,16 +1,18 @@
 import * as Path from 'path';
 
 import {
-    Printable
-} from '../object';
-
-import {
-    ParamDefinition,
-    ParamsDefinition,
+    HelpBuildingContext,
+    HelpInfo,
     OptionDefinition,
     Options,
-    HelpInfo
+    ParamDefinition,
+    ParamsDefinition
 } from './';
+
+
+import {
+    Printable
+} from '../object';
 
 /**
  * Options for command.
@@ -99,7 +101,7 @@ export abstract class Command {
     /** @internal */
     static path: string;
     /** @internal */
-    static searchDirs: string[];
+    static helpBuildingContexts: HelpBuildingContext[];
     /** @internal */
     static sequence: string[];
     /** @internal */

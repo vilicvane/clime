@@ -1,12 +1,12 @@
 import 'source-map-support/register';
 
 import {
-    command,
-    option,
-    param,
     Command,
     Options,
-    ExpectedError
+    ExpectedError,
+    command,
+    option,
+    param
 } from '../../../';
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;

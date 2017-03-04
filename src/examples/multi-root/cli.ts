@@ -4,8 +4,11 @@ import * as Path from 'path';
 import { CLI, Shim } from '../../';
 
 let cli = new CLI('clime', [
-  Path.join(__dirname, 'commands'),
-  Path.join(__dirname, 'extra')
+    Path.join(__dirname, 'commands'),
+    {
+        label: 'Extended subcommands',
+        path: 'extra'
+    }
 ]);
 
 let shim = new Shim(cli);

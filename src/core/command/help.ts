@@ -15,24 +15,27 @@ import {
 import {
     CLI,
     CommandModule,
-    SubcommandDefinition
+    SubcommandDefinition,
+    SubcommandSearchContext
 } from '../cli';
 
 import {
     TableRow,
     buildTableOutput,
+    deduplicate,
     existsDir,
     findPaths,
     indent,
     safeStat
 } from '../../util';
 
-export interface HelpInfoBuildClassOptions {
-    TargetCommand: typeof Command;
+export interface HelpBuildingContext {
+    label: string;
+    dir: string;
 }
 
 export interface HelpInfoBuildPathOptions {
-    dirs: string[];
+    contexts: HelpBuildingContext[];
     description?: string;
 }
 
@@ -61,12 +64,12 @@ export class HelpInfo implements Printable {
 
         if (typeof options === 'object') {
             info.buildDescription(options.description);
-            await info.buildTextForSubCommands(options.dirs);
+            await info.buildTextForSubCommands(options.contexts);
         } else {
             info.buildDescription(options.description);
             info.buildTextsForParamsAndOptions(options);
 
-            await info.buildTextForSubCommands(options.searchDirs);
+            await info.buildTextForSubCommands(options.helpBuildingContexts);
         }
 
         return info;
@@ -192,12 +195,21 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
         }
     }
 
-    async buildTextForSubCommands(dirs: string[]): Promise<void> {
-        let helpItemsGroups: SubcommandHelpItem[][] = [];
+    async buildTextForSubCommands(contexts: HelpBuildingContext[]): Promise<void> {
+        let labels: string[] = [];
+        let labelToHelpItemsMap = new Map<string, SubcommandHelpItem[]>();
         let helpItemMap = new Map<string, SubcommandHelpItem>();
 
-        for (let [groupIndex, dir] of dirs.entries()) {
-            let helpItems: SubcommandHelpItem[] = helpItemsGroups[groupIndex] = [];
+        for (let [groupIndex, { label, dir }] of contexts.entries()) {
+            let helpItems: SubcommandHelpItem[];
+
+            if (labelToHelpItemsMap.has(label)) {
+                helpItems = labelToHelpItemsMap.get(label)!;
+            } else {
+                helpItems = [];
+                labelToHelpItemsMap.set(label, helpItems);
+                labels.push(label);
+            }
 
             let definitions = await CLI.getSubcommandDefinitions(dir);
 
@@ -205,9 +217,8 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                 let { name, brief } = definition;
                 let aliases = definition.aliases || definition.alias && [definition.alias] || [];
 
-                let existingItem = helpItemMap.get(name);
-
                 let item: SubcommandHelpItem;
+                let existingItem = helpItemMap.get(name);
 
                 if (existingItem) {
                     existingItem.overridden = true;
@@ -256,10 +267,10 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                     stats = await safeStat(path);
                 }
 
-                let item = helpItemMap.get(name);
+                let existingItem = helpItemMap.get(name);
 
                 // `brief` already set in `subcommands` field
-                if (item && item.group === groupIndex && item.brief) {
+                if (existingItem && existingItem.group === groupIndex && existingItem.brief) {
                     continue;
                 }
 
@@ -271,12 +282,26 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                     brief = CommandClass && (CommandClass.brief || CommandClass.description);
                 }
 
-                if (item) {
-                    item.brief = brief;
+                if (existingItem && existingItem.group === groupIndex) {
+                    existingItem.brief = brief;
                 } else {
-                    item = {
+                    let aliases: string[];
+
+                    if (existingItem) {
+                        existingItem.overridden = true;
+
+                        if (!brief) {
+                            brief = existingItem.brief;
+                        }
+
+                        aliases = existingItem.aliases;
+                    } else {
+                        aliases = [];
+                    }
+
+                    let item = {
                         name,
-                        aliases: [],
+                        aliases,
                         brief,
                         group: groupIndex
                     };
@@ -287,21 +312,23 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
             }
         }
 
-        let rows = helpItemsGroups
-            .reduce((helpItems, items) => helpItems.concat(items), [])
-            .filter(item => !item.overridden)
-            .map(({ name, aliases, brief }) => {
-                let subcommandNamesStr = Chalk.bold(name);
-                if (aliases.length) {
-                    subcommandNamesStr += ` [${Chalk.dim(aliases.join(','))}]`;
-                }
-                return [subcommandNamesStr, brief];
-            });
+        for (let label of labels) {
+            let rows = labelToHelpItemsMap
+                .get(label)!
+                .filter(item => !item.overridden)
+                .map(({ name, aliases, brief }) => {
+                    let subcommandNamesStr = Chalk.bold(name);
+                    if (aliases.length) {
+                        subcommandNamesStr += ` [${Chalk.dim(aliases.join(','))}]`;
+                    }
+                    return [subcommandNamesStr, brief];
+                });
 
-        if (rows.length) {
-            this.texts.push(`\
-  ${Chalk.green('SUBCOMMANDS')}\n
+            if (rows.length) {
+                this.texts.push(`\
+  ${Chalk.green(label.toUpperCase())}\n
 ${buildTableOutput(rows, { indent: 4, spaces: ' - ' })}`);
+            }
         }
     }
 
