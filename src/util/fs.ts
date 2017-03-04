@@ -7,6 +7,16 @@ export async function safeStat(path: string): Promise<FS.Stats | void> {
     return await v.call(FS.stat, path).catch(v.bear);
 }
 
+export async function existsFile(path: string): Promise<boolean> {
+    let stats = await safeStat(path);
+    return !!stats && stats.isFile();
+}
+
+export async function existsDir(path: string): Promise<boolean> {
+    let stats = await safeStat(path);
+    return !!stats && stats.isDirectory();
+}
+
 export function joinPaths(roots: string[], relPath: string): string[] {
     return roots.map(root => Path.join(root, relPath));
 }

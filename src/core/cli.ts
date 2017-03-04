@@ -1,6 +1,8 @@
 import * as FS from 'fs';
 import * as Path from 'path';
 
+import * as v from 'villa';
+
 import {
     Command,
     CommandClass,
@@ -22,6 +24,8 @@ import {
 } from './error';
 
 import {
+    existsDir,
+    existsFile,
     findPaths,
     joinPaths,
     safeStat
@@ -33,10 +37,10 @@ const HELP_OPTION_REGEX = /^(?:-[h?]|--help)$/;
 export interface CommandModule {
     brief?: string;
     description?: string;
-    subcommands?: SubcommandDescriptor[];
+    subcommands?: SubcommandDefinition[];
 }
 
-export interface SubcommandDescriptor {
+export interface SubcommandDefinition {
     name: string;
     filename?: string;
     alias?: string;
@@ -44,9 +48,10 @@ export interface SubcommandDescriptor {
     brief?: string;
 }
 
-export interface SubcommandsDefinition {
-    moduleDir: string;
-    subcommands: SubcommandDescriptor[];
+interface PreProcessSearchContext {
+    name: string;
+    path: string | undefined;
+    searchDir: string | undefined;
 }
 
 interface PreProcessResult {
@@ -151,96 +156,116 @@ export class CLI {
         }
     }
 
+    private async preProcessSearchDir(searchDir: string, possibleCommandName: string, aliasMap: Map<string, string>): Promise<PreProcessSearchContext> {
+        let definitions = await CLI.getSubcommandDefinitions(searchDir);
+        let definitionMap = new Map<string, SubcommandDefinition>();
+
+        for (let definition of definitions) {
+            definitionMap.set(definition.name, definition);
+
+            let aliases = definition.aliases || definition.alias && [definition.alias];
+
+            if (!aliases) {
+                continue;
+            }
+
+            for (let alias of aliases) {
+                if (!aliasMap.has(alias)) {
+                    aliasMap.set(alias, definition.name);
+                }
+
+                let targetName = aliasMap.get(alias);
+                if (targetName !== definition.name) {
+                    throw new Error(`Alias "${alias}" already exists and points to "${targetName}" instead of "${definition.name}"`);
+                }
+            }
+        }
+
+        possibleCommandName = definitionMap.has(possibleCommandName) ?
+            possibleCommandName : aliasMap.get(possibleCommandName) || possibleCommandName;
+
+        let targetPath: string | undefined;
+
+        let targetDefinition = definitionMap.get(possibleCommandName);
+        searchDir = Path.join(searchDir, possibleCommandName);
+
+        if (targetDefinition && targetDefinition.filename) {
+            targetPath = Path.resolve(searchDir, targetDefinition.filename);
+        } else {
+            let possiblePaths = [
+                `${searchDir}.js`,
+                Path.join(searchDir, 'default.js')
+            ];
+
+            for (let possiblePath of possiblePaths) {
+                if (await existsFile(possiblePath)) {
+                    targetPath = possiblePath;
+                    break;
+                }
+            }
+        }
+
+        return {
+            name: possibleCommandName,
+            path: targetPath,
+            searchDir: existsDir(searchDir) ? searchDir : undefined
+        };
+    }
+
     /**
      * Mapping the command line arguments to a specific command file.
      */
     private async preProcessArguments(argv: string[]): Promise<PreProcessResult> {
         let sequence = [this.name];
-        let searchDirs: string[] | undefined = this.roots;
-        let targetSearchDirs = searchDirs;
+        let targetSearchDirs = this.roots;
 
         let entryPaths = await findPaths('file', this.roots, 'default.js');
-        let targetPath = entryPaths && entryPaths[0];
+        let targetPath = entryPaths && entryPaths[entryPaths.length - 1];
         let possibleUnknownCommandName: string | undefined;
         let aliases: string[] | undefined;
 
         let argsIndex = 0;
 
-        outer:
-        for (let i = argsIndex; i < argv.length; i++) {
-            if (!searchDirs) {
-                // If none of `searchDirs` exists, stop searching.
-                break;
-            }
+        let contexts = await v.map(this.roots, async (root): Promise<PreProcessSearchContext> => {
+            let targetPath = Path.join(root, 'default.js');
 
+            return {
+                name: this.name,
+                path: await existsFile(targetPath) ? targetPath : undefined,
+                searchDir: root
+            };
+        });
+
+        for (let i = argsIndex; i < argv.length && contexts.length; i++) {
             let possibleCommandName = argv[i];
 
             if (!COMMAND_NAME_REGEX.test(possibleCommandName)) {
                 break;
             }
 
-            let definition = await CLI.getSubcommandsDefinition(searchDirs);
-            let subcommandDescriptor: SubcommandDescriptor | undefined;
+            let aliasMap = new Map<string, string>();
 
-            if (definition) {
-                let metadata = new Map<string, SubcommandDescriptor>();
+            let nextContexts = await v.map(contexts, async context => {
+                return await this.preProcessSearchDir(context.searchDir!, possibleCommandName, aliasMap);
+            });
 
-                for (let subcommand of definition.subcommands) {
-                    metadata.set(subcommand.name, subcommand);
+            let targetContexts = nextContexts.filter(context => !!context.path);
 
-                    let aliases = subcommand.aliases || subcommand.alias && [subcommand.alias];
-
-                    if (!aliases) {
-                        continue;
-                    }
-
-                    for (let alias of aliases) {
-                        metadata.set(alias, subcommand);
-                    }
-                }
-
-                subcommandDescriptor = metadata.get(possibleCommandName);
-
-                if (subcommandDescriptor) {
-                    // If `possibleCommandName` is an alias.
-                    possibleCommandName = subcommandDescriptor.name;
-                }
+            if (!targetContexts.length) {
+                possibleUnknownCommandName = possibleCommandName;
+                break;
             }
 
-            let searchBases = joinPaths(searchDirs, possibleCommandName);
+            let targetContext = targetContexts[targetContexts.length - 1];
 
-            searchDirs = await findPaths('dir', searchDirs, possibleCommandName);
+            targetPath = targetContext.path;
+            possibleCommandName = targetContext.name;
 
-            if (subcommandDescriptor && subcommandDescriptor.filename) {
-                targetPath = Path.resolve(definition!.moduleDir, subcommandDescriptor.filename);
-                targetSearchDirs = searchDirs || [];
-                argsIndex = i + 1;
-                sequence.push(subcommandDescriptor.name);
-                continue outer;
-            }
+            argsIndex = i + 1;
+            sequence.push(possibleCommandName);
 
-            let possiblePaths = [
-                ...searchBases.map(path => `${path}.js`),
-                ...joinPaths(searchBases, 'default.js'),
-                ...searchBases
-            ];
-
-            for (let possiblePath of possiblePaths) {
-                let stats = await safeStat(possiblePath);
-                if (stats && stats.isFile()) {
-                    targetPath = possiblePath;
-                    targetSearchDirs = searchDirs || [];
-                    argsIndex = i + 1;
-                    sequence.push(possibleCommandName);
-                    continue outer;
-                }
-            }
-
-            possibleUnknownCommandName = possibleCommandName;
-
-            if (searchDirs) {
-                targetSearchDirs = searchDirs;
-            }
+            contexts = nextContexts.filter(context => !!context.searchDir);
+            targetSearchDirs = contexts.map(context => context.searchDir!);
         }
 
         return {
@@ -286,24 +311,14 @@ export class CLI {
      * @internal
      * Get subcommands definition written as `export subcommands = [...]`.
      */
-    static async getSubcommandsDefinition(dirs: string[]): Promise<SubcommandsDefinition | undefined> {
-        let paths = await findPaths('file', dirs, 'default.js');
+    static async getSubcommandDefinitions(dir: string): Promise<SubcommandDefinition[]> {
+        let path = Path.join(dir, 'default.js');
 
-        if (!paths) {
-            return undefined;
+        if (!await existsFile(path)) {
+            return [];
         }
 
-        let path = paths[0];
-        let subcommands = (require(path) as CommandModule).subcommands;
-
-        if (!subcommands || !subcommands.length) {
-            return undefined;
-        }
-
-        return {
-            moduleDir: Path.dirname(path),
-            subcommands: subcommands,
-        };
+        return (require(path) as CommandModule).subcommands || [];
     }
 }
 

@@ -15,15 +15,16 @@ import {
 import {
     CLI,
     CommandModule,
-    SubcommandDescriptor
+    SubcommandDefinition
 } from '../cli';
 
 import {
     TableRow,
     buildTableOutput,
+    existsDir,
+    findPaths,
     indent,
-    safeStat,
-    findPaths
+    safeStat
 } from '../../util';
 
 export interface HelpInfoBuildClassOptions {
@@ -36,6 +37,14 @@ export interface HelpInfoBuildPathOptions {
 }
 
 export type HelpInfoBuildOptions = typeof Command | HelpInfoBuildPathOptions;
+
+export interface SubcommandHelpItem {
+    name: string;
+    aliases: string[];
+    brief: string | undefined;
+    group: number;
+    overridden?: boolean;
+}
 
 export class HelpInfo implements Printable {
     private texts: string[] = [];
@@ -184,41 +193,48 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
     }
 
     async buildTextForSubCommands(dirs: string[]): Promise<void> {
-        let rows: TableRow[] = [];
-        let rowMap = new Map<string, TableRow>();
+        let helpItemsGroups: SubcommandHelpItem[][] = [];
+        let helpItemMap = new Map<string, SubcommandHelpItem>();
 
-        let definition = await CLI.getSubcommandsDefinition(dirs);
+        for (let [groupIndex, dir] of dirs.entries()) {
+            let helpItems: SubcommandHelpItem[] = helpItemsGroups[groupIndex] = [];
 
-        if (definition) {
-            for (let subcommand of definition.subcommands) {
-                if (rowMap.has(subcommand.name)) {
-                    throw new Error('Duplicate subcommand definitions');
+            let definitions = await CLI.getSubcommandDefinitions(dir);
+
+            for (let definition of definitions) {
+                let { name, brief } = definition;
+                let aliases = definition.aliases || definition.alias && [definition.alias] || [];
+
+                let existingItem = helpItemMap.get(name);
+
+                let item: SubcommandHelpItem;
+
+                if (existingItem) {
+                    existingItem.overridden = true;
+
+                    item = {
+                        name,
+                        brief: brief || existingItem.brief,
+                        aliases: existingItem.aliases.concat(aliases),
+                        group: groupIndex
+                    };
+                } else {
+                    item = {
+                        name,
+                        brief: brief,
+                        aliases,
+                        group: groupIndex
+                    };
                 }
 
-                let aliases = subcommand.aliases || subcommand.alias && [subcommand.alias];
-                let subcommandNamesStr = Chalk.bold(subcommand.name);
-
-                if (aliases) {
-                    subcommandNamesStr += ` [${Chalk.dim(aliases.join(','))}]`;
-                }
-
-                let row = [
-                    subcommandNamesStr,
-                    subcommand.brief
-                ];
-
-                rows.push(row);
-                rowMap.set(subcommand.name, row);
+                helpItems.push(item);
+                helpItemMap.set(name, item);
             }
-        }
 
-        let foundDirs = await findPaths('dir', dirs);
+            if (!await existsDir(dir)) {
+                continue;
+            }
 
-        if (!foundDirs) {
-            return;
-        }
-
-        for (let dir of foundDirs) {
             let names = await v.call<string[]>(FS.readdir, dir);
 
             for (let name of names) {
@@ -240,33 +256,47 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
                     stats = await safeStat(path);
                 }
 
-                let row = rowMap.get(name);
+                let item = helpItemMap.get(name);
 
-                if (row && row[1]) {
+                // `brief` already set in `subcommands` field
+                if (item && item.group === groupIndex && item.brief) {
                     continue;
                 }
 
-                let description: string | undefined;
+                let brief: string | undefined;
 
                 if (stats) {
                     let module = require(path);
                     let CommandClass = (module.default || module) as CommandModule;
-                    description = CommandClass && (CommandClass.brief || CommandClass.description);
+                    brief = CommandClass && (CommandClass.brief || CommandClass.description);
                 }
 
-                if (row) {
-                    row[1] = description;
+                if (item) {
+                    item.brief = brief;
                 } else {
-                    row = [
-                        Chalk.bold(name),
-                        description
-                    ];
+                    item = {
+                        name,
+                        aliases: [],
+                        brief,
+                        group: groupIndex
+                    };
 
-                    rows.push(row);
-                    rowMap.set(name, row);
+                    helpItems.push(item);
+                    helpItemMap.set(name, item);
                 }
             }
         }
+
+        let rows = helpItemsGroups
+            .reduce((helpItems, items) => helpItems.concat(items), [])
+            .filter(item => !item.overridden)
+            .map(({ name, aliases, brief }) => {
+                let subcommandNamesStr = Chalk.bold(name);
+                if (aliases.length) {
+                    subcommandNamesStr += ` [${Chalk.dim(aliases.join(','))}]`;
+                }
+                return [subcommandNamesStr, brief];
+            });
 
         if (rows.length) {
             this.texts.push(`\

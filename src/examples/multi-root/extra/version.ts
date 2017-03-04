@@ -5,8 +5,8 @@ import {
 } from '../../../';
 
 @command({
-    brief: 'Print version.',
-    description: 'Print version of this tool.'
+    brief: 'Print version',
+    description: 'Print version of this tool'
 })
 export default class extends Command {
     @metadata

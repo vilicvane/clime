@@ -22,20 +22,20 @@ export class GreetingOptions extends Options {
     @option({
         flag: 'l',
         default: 'en',
-        description: 'Language of greeting message.'
+        description: 'Language of greeting message'
     })
     lang: string;
 }
 
 @command({
-    description: 'This is a command that prints greeting message.'
+    description: 'This is a command that prints greeting message'
 })
 export default class extends Command {
     execute(
         @param({
             name: 'yourName',
             required: true,
-            description: 'Your loud name.'
+            description: 'Your loud name'
         })
         name: string,
 
