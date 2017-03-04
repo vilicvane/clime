@@ -1,16 +1,18 @@
 import * as Path from 'path';
 
 import {
-    Printable
-} from '../object';
-
-import {
-    ParamDefinition,
-    ParamsDefinition,
+    HelpBuildingContext,
+    HelpInfo,
     OptionDefinition,
     Options,
-    HelpInfo
+    ParamDefinition,
+    ParamsDefinition
 } from './';
+
+
+import {
+    Printable
+} from '../object';
 
 /**
  * Options for command.
@@ -91,15 +93,15 @@ export abstract class Command {
      * Get the help object of current command.
      */
     static async getHelp(): Promise<HelpInfo> {
-        return await HelpInfo.build({
-            TargetCommand: this
-        });
+        return await HelpInfo.build(this);
     }
 
     /** @internal */
     static decorated = false;
     /** @internal */
     static path: string;
+    /** @internal */
+    static helpBuildingContexts: HelpBuildingContext[];
     /** @internal */
     static sequence: string[];
     /** @internal */

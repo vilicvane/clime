@@ -2,17 +2,16 @@ import {
     command,
     param,
     Command
-} from '../../../';
+} from '../../../../';
 
 @command({
-    brief: 'Install a package.'
-
+    description: 'Install a package'
 })
 export default class extends Command {
     execute(
         @param({
             required: true,
-            description: 'Name of package to install.'
+            description: 'Name of package to install'
         })
         name: string
     ) {

@@ -2,20 +2,19 @@ import {
     command,
     param,
     Command
-} from '../../../';
+} from '../../../../';
 
 @command({
-    brief: '[extend] View package information.'
-
+    description: 'Uninstall a package'
 })
 export default class extends Command {
     execute(
         @param({
             required: true,
-            description: 'Name of package to view.'
+            description: 'Name of package to uninstall'
         })
         name: string
     ) {
-        return `Guess what, try extend-command \`npm view ${name}\` (EXTEND) .`;
+        return `Guess what, try command \`npm uninstall ${name}\`.`;
     }
 }
