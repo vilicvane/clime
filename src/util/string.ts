@@ -62,7 +62,7 @@ export function buildTableOutput(rows: TableRow[], {
         .join('\n') + '\n';
 }
 
-export function indent(text: string, indent: string | number = 2): string {
+export function indent(text: string, indent: number | string): string {
     let indentStr = typeof indent === 'string' ?
         indent.replace(/\r/g, '') :
         Array(indent + 1).join(' ');

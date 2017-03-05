@@ -79,14 +79,15 @@ export class HelpInfo implements Printable {
 
     private buildDescription(description: string | undefined): void {
         if (description) {
-            this.texts.push(`${indent(description)}\n`);
+            this.texts.push(`${indent(description, 2)}\n`);
         }
     }
 
     private buildSubcommandsUsage(sequence: string[]) {
         if (sequence && sequence.length) {
-            this.texts.push(`${indent(Chalk.green('USAGE'))}\n`);
-            this.texts.push(`${indent(Chalk.bold(sequence.join(' ')), 4)} <subcommand>\n`);
+            this.texts.push(`\
+  ${Chalk.green('USAGE')}\n
+    ${Chalk.bold(sequence.join(' '))} <subcommand>\n`);
         }
     }
 
@@ -157,18 +158,14 @@ export class HelpInfo implements Printable {
             usageLine += ' [...options]';
         }
 
-        let usageContent = `\
+        this.texts.push(`\
   ${Chalk.green('USAGE')}\n
-    ${usageLine}\n`;
-
-        this.texts.push(usageContent);
+    ${usageLine}\n`);
 
         if (parameterDescriptionRows.length) {
-            let paramsContent = `\
+            this.texts.push(`\
   ${Chalk.green('PARAMETERS')}\n
-${buildTableOutput(parameterDescriptionRows, { indent: 4, spaces: ' - '})}`;
-
-            this.texts.push(paramsContent);
+${buildTableOutput(parameterDescriptionRows, { indent: 4, spaces: ' - '})}`);
         }
 
         if (optionDefinitions.length) {
@@ -199,8 +196,7 @@ ${buildTableOutput(parameterDescriptionRows, { indent: 4, spaces: ' - '})}`;
 
             this.texts.push(`\
   ${Chalk.green('OPTIONS')}\n
-${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
-            );
+${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`);
         }
     }
 
