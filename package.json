@@ -7,9 +7,11 @@
   "scripts": {
     "tsc": "tsc",
     "tslint": "tslint",
-    "build": "tsc",
+    "build": "rimraf bld && tsc",
     "lint": "tslint src/**/*.ts -c tslint.json",
-    "test": "npm run lint && mocha"
+    "pretest": "npm run lint && npm run build",
+    "test": "mocha",
+    "prepublish": "npm test"
   },
   "repository": {
     "type": "git",
@@ -44,6 +46,7 @@
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "mocha": "^3.0.2",
+    "rimraf": "^2.6.1",
     "source-map-support": "^0.4.0",
     "tslint": "^4.5.1",
     "typescript": "~2.2.1"
