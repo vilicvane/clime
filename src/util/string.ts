@@ -3,7 +3,7 @@ import * as Chalk from 'chalk';
 export type TableRow = (string | undefined)[];
 
 export function buildTableOutput(rows: TableRow[], {
-    spaces = 4 as string | number,
+    separators = '  ' as string | string[],
     indent = 0 as string | number
 } = {}): string {
     let maxTextLengths: number[] = [];
@@ -49,10 +49,10 @@ export function buildTableOutput(rows: TableRow[], {
                 line += new Array(maxLength - textLength + 1).join(' ');
 
                 if (i < row.length - 1) {
-                    if (typeof spaces === 'string') {
-                        line += spaces;
+                    if (typeof separators === 'string') {
+                        line += separators;
                     } else {
-                        line += new Array(spaces + 1).join(' ');
+                        line += separators[i];
                     }
                 }
             }

@@ -165,7 +165,7 @@ export class HelpInfo implements Printable {
         if (parameterDescriptionRows.length) {
             this.texts.push(`\
   ${Chalk.green('PARAMETERS')}\n
-${buildTableOutput(parameterDescriptionRows, { indent: 4, spaces: ' - '})}`);
+${buildTableOutput(parameterDescriptionRows, { indent: 4, separators: ' - '})}`);
         }
 
         if (optionDefinitions.length) {
@@ -196,7 +196,7 @@ ${buildTableOutput(parameterDescriptionRows, { indent: 4, spaces: ' - '})}`);
 
             this.texts.push(`\
   ${Chalk.green('OPTIONS')}\n
-${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`);
+${buildTableOutput(optionRows, { indent: 4, separators: ' - ' })}`);
         }
     }
 
@@ -318,21 +318,41 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`);
         }
 
         for (let label of labels) {
+            let hasAliases = false;
             let rows = labelToHelpItemsMap
                 .get(label)!
-                .filter(item => !item.overridden)
-                .map(({ name, aliases, brief }) => {
-                    let subcommandNamesStr = Chalk.bold(name);
-                    if (aliases.length) {
-                        subcommandNamesStr += ` [${Chalk.dim(aliases.join(','))}]`;
+                .filter(item => {
+                    if (item.overridden) {
+                        return false;
                     }
-                    return [subcommandNamesStr, brief];
+
+                    if (!hasAliases && item.aliases.length) {
+                        hasAliases = true;
+                    }
+
+                    return true;
+                })
+                .map(({ name, aliases, brief }) => {
+                    if (hasAliases) {
+                        return [
+                            Chalk.bold(name),
+                            aliases.length ? `[${Chalk.dim(aliases.join(','))}]` : '',
+                            brief
+                        ];
+                    } else {
+                        return [
+                            Chalk.bold(name),
+                            brief
+                        ];
+                    }
                 });
+
+            let separators = hasAliases ? [' ', ' - '] : ' - ';
 
             if (rows.length) {
                 this.texts.push(`\
   ${Chalk.green(label.toUpperCase())}\n
-${buildTableOutput(rows, { indent: 4, spaces: ' - ' })}`);
+${buildTableOutput(rows, { indent: 4, separators })}`);
             }
         }
     }
