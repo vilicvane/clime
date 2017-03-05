@@ -35,6 +35,7 @@ export interface HelpBuildingContext {
 }
 
 export interface HelpInfoBuildPathOptions {
+    sequence: string[];
     contexts: HelpBuildingContext[];
     description?: string;
 }
@@ -64,6 +65,7 @@ export class HelpInfo implements Printable {
 
         if (typeof options === 'object') {
             info.buildDescription(options.description);
+            info.buildSubcommandsUsage(options.sequence);
             await info.buildTextForSubCommands(options.contexts);
         } else {
             info.buildDescription(options.description);
@@ -78,6 +80,13 @@ export class HelpInfo implements Printable {
     private buildDescription(description: string | undefined): void {
         if (description) {
             this.texts.push(`${indent(description)}\n`);
+        }
+    }
+
+    private buildSubcommandsUsage(sequence: string[]) {
+        if (sequence && sequence.length) {
+            this.texts.push(`${indent(Chalk.green('USAGE'))}\n`);
+            this.texts.push(`${indent(Chalk.bold(sequence.join(' ')), 4)} <subcommand>\n`);
         }
     }
 
