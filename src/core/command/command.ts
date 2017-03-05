@@ -167,7 +167,7 @@ export function command(options: CommandOptions = {}) {
       throw new Error('Expecting variadic parameters to be adjacent to other parameters');
     }
 
-    // Prepare option defintions.
+    // Prepare option definitions.
     let types = Reflect.getMetadata('design:paramtypes', target.prototype, 'execute') as Clime.Constructor<any>[];
 
     if (!types) {

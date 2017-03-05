@@ -7,5 +7,5 @@ import * as Validation from './validation';
 
 export {
   Validation,
-  Reflection
+  Reflection,
 };

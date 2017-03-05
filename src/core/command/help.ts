@@ -344,6 +344,7 @@ ${buildTableOutput(optionRows, { indent: 4, separators: ' - ' })}`);
     if (typeof options === 'object') {
       info.buildDescription(options.description);
       info.buildSubcommandsUsage(options.sequence);
+
       await info.buildTextForSubCommands(options.contexts);
     } else {
       info.buildDescription(options.description);

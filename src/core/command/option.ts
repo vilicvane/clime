@@ -13,7 +13,7 @@ export interface OptionOptions<T> {
    * property.
    */
   name?: string;
-  /** A single charactor as the shorthand of the option. */
+  /** A single character as the shorthand of the option. */
   flag?: string;
   /** The placeholder shown on usage as `--option <placeholder>`. */
   placeholder?: string;

@@ -1,9 +1,9 @@
-export class CommaSeperatedStrings extends Array<string> {
+export class CommaSeparatedStrings extends Array<string> {
   private constructor(...args: string[]) {
     super(...args);
   }
 
-  static cast(line: string): CommaSeperatedStrings {
+  static cast(line: string): CommaSeparatedStrings {
     let values = line
       .split(',')
       .map(str => str.trim())

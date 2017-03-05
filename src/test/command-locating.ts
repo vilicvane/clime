@@ -56,7 +56,7 @@ describe('Command Locating', () => {
         .should.eventually.equal(label);
     });
 
-    it('Should locate `commands/hello.js` with emptry extra args', () => {
+    it('Should locate `commands/hello.js` with empty extra args', () => {
       return cli
         .execute(['hello'])
         .should.eventually.equal(`${label}/hello`);
@@ -74,7 +74,7 @@ describe('Command Locating', () => {
         .should.eventually.equal(`${label}/hello`);
     });
 
-    it('Should locate `commands/world.js` with emptry extra args', () => {
+    it('Should locate `commands/world.js` with empty extra args', () => {
       return cli
         .execute(['world'])
         .should.eventually.equal(`${label}/world`);
@@ -97,13 +97,13 @@ describe('Command Locating', () => {
         });
     });
 
-    it('Should locate `commands/foo/biu.js` with emptry extra args', () => {
+    it('Should locate `commands/foo/biu.js` with empty extra args', () => {
       return cli
         .execute(['foo', 'biu'])
         .should.eventually.equal(`${label}/foo/biu`);
     });
 
-    it('Should locate `commands/foo/pia.js` with emptry extra args', () => {
+    it('Should locate `commands/foo/pia.js` with empty extra args', () => {
       return cli
         .execute(['foo', 'pia'])
         .should.eventually.equal(`${label}/foo/pia`);

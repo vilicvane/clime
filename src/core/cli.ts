@@ -125,7 +125,7 @@ export class CLI {
         // This is a command module with an actual command.
 
         if (!TargetCommand.decorated) {
-          throw new TypeError(`Command defined in module "${path}" does not seem to be intialized, \
+          throw new TypeError(`Command defined in module "${path}" does not seem to be initialized, \
 make sure to decorate it with \`@command()\``);
         }
 
@@ -246,17 +246,7 @@ instead of "${definition.name}"`);
     if (targetDefinition && targetDefinition.filename) {
       targetPath = Path.resolve(searchBase, targetDefinition.filename);
     } else {
-      let possiblePaths = [
-        `${searchBase}.js`,
-        Path.join(searchBase, 'default.js'),
-      ];
-
-      for (let possiblePath of possiblePaths) {
-        if (await existsFile(possiblePath)) {
-          targetPath = possiblePath;
-          break;
-        }
-      }
+      targetPath = await CLI.findPathBySearchBase(searchBase) || targetPath;
     }
 
     return {
@@ -367,14 +357,29 @@ instead of "${definition.name}"`);
    * @internal
    * Get subcommands definition written as `export subcommands = [...]`.
    */
-  static async getSubcommandDefinitions(dir: string): Promise<SubcommandDefinition[]> {
-    let path = Path.join(dir, 'default.js');
+  static async getSubcommandDefinitions(searchBase: string): Promise<SubcommandDefinition[]> {
+    let path = await this.findPathBySearchBase(searchBase);
 
-    if (!await existsFile(path)) {
+    if (!path) {
       return [];
     }
 
     return (require(path) as CommandModule).subcommands || [];
+  }
+
+  private static async findPathBySearchBase(searchBase: string): Promise<string | undefined> {
+      let possiblePaths = [
+        `${searchBase}.js`,
+        Path.join(searchBase, 'default.js'),
+      ];
+
+      for (let possiblePath of possiblePaths) {
+        if (await existsFile(possiblePath)) {
+          return possiblePath;
+        }
+      }
+
+      return undefined;
   }
 }
 
@@ -556,7 +561,7 @@ class ArgsParser {
       !commandExtraArgs.length
     ) {
       throw new UsageError(
-        `Expecting at least one element for letiadic parameters \`${paramsDefinition.name}\``,
+        `Expecting at least one element for variadic parameters \`${paramsDefinition.name}\``,
         this.helpProvider,
       );
     }

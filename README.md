@@ -249,6 +249,47 @@ export const description = 'Some detailed description';
 export const brief = 'brief description';
 ```
 
+#### Configuring subcommand definitions using `subcommands` field
+
+Clime has to load every subcommand modules under a specific command to know their briefs.
+To avoid this, you may export a `subcommands` array with subcommand definitions like:
+
+```ts
+import { SubcommandDefinition } from 'clime';
+
+export const subcommands: SubcommandDefinition[] = [
+  {
+    name: 'foo',
+    brief: 'A subcommand named foo',
+  },
+  {
+    name: 'bar',
+    brief: 'A subcommand named bar',
+  },
+];
+```
+
+Further more, those definition entries also allow you to add aliases or filename for a subcommand:
+
+```ts
+import { SubcommandDefinition } from 'clime';
+
+export const subcommands: SubcommandDefinition[] = [
+  {
+    name: 'foo',
+    filename: 'foo-yo.js',
+    alias: 'f',
+    brief: 'A subcommand named foo',
+  },
+  {
+    name: 'bar',
+    aliases: ['b', 'bb'],
+    filename: 'bar-ha.js',
+    brief: 'A subcommand named bar',
+  },
+];
+```
+
 ## Testable
 
 As the core of Clime is not coupled with stream-based command line, commands written with Clime can be easily tested.
@@ -265,7 +306,7 @@ import {
 
 export class TestContext extends Context {
   promptForQuery(): Promise<string> {
-    // Using library like Inquier.js interact with user.
+    // Using library like Inquirer.js to interact with user.
     return Promise.resolve('result');
   }
 }
