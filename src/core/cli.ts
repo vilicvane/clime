@@ -172,6 +172,7 @@ export class CLI {
         }
 
         let helpInfo = await HelpInfo.build({
+            sequence,
             contexts: searchContexts.map(context => {
                 return {
                     label: context.label,
@@ -351,6 +352,7 @@ export class CLI {
 
     async getHelp(): Promise<HelpInfo> {
         return await HelpInfo.build({
+            sequence: [this.name],
             contexts: this.roots.map(root => {
                 return {
                     label: root.label,
@@ -370,7 +372,6 @@ export class CLI {
         if (!await existsFile(path)) {
             return [];
         }
-
         return (require(path) as CommandModule).subcommands || [];
     }
 }
