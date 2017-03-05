@@ -9,6 +9,9 @@ The command-line interface framework for TypeScript.
 
 ```shell
 npm install clime --save
+
+# To install v0.5:
+npm install clime@next --save
 ```
 
 ## Usage
