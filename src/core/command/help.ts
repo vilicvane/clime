@@ -1,367 +1,361 @@
-import * as Path from 'path';
 import * as FS from 'fs';
+import * as Path from 'path';
 
 import * as Chalk from 'chalk';
 import * as v from 'villa';
 
-import {
-    Command
-} from './';
+import { Command } from './';
+
+import { Printable } from '../object';
 
 import {
-    Printable
-} from '../object';
-
-import {
-    CLI,
-    CommandModule,
-    SubcommandDefinition,
-    SubcommandSearchContext
+  CLI,
+  CommandModule,
+  SubcommandDefinition,
+  SubcommandSearchContext,
 } from '../cli';
 
 import {
-    TableRow,
-    buildTableOutput,
-    deduplicate,
-    existsDir,
-    findPaths,
-    indent,
-    safeStat
+  TableRow,
+  buildTableOutput,
+  deduplicate,
+  existsDir,
+  findPaths,
+  indent,
+  safeStat,
 } from '../../util';
 
 export interface HelpBuildingContext {
-    label: string;
-    dir: string;
+  label: string;
+  dir: string;
 }
 
 export interface HelpInfoBuildPathOptions {
-    sequence: string[];
-    contexts: HelpBuildingContext[];
-    description?: string;
+  sequence: string[];
+  contexts: HelpBuildingContext[];
+  description?: string;
 }
 
 export type HelpInfoBuildOptions = typeof Command | HelpInfoBuildPathOptions;
 
 export interface SubcommandHelpItem {
-    name: string;
-    aliases: string[];
-    brief: string | undefined;
-    group: number;
-    overridden?: boolean;
+  name: string;
+  aliases: string[];
+  brief: string | undefined;
+  group: number;
+  overridden?: boolean;
 }
 
 export class HelpInfo implements Printable {
-    private texts: string[] = [];
+  private texts: string[] = [];
 
-    constructor() { }
+  get text(): string {
+    return this.texts.join('\n');
+  }
 
-    get text(): string {
-        return this.texts.join('\n');
-    }
+  async buildTextForSubCommands(contexts: HelpBuildingContext[]): Promise<void> {
+    let labels: string[] = [];
+    let labelToHelpItemsMap = new Map<string, SubcommandHelpItem[]>();
+    let helpItemMap = new Map<string, SubcommandHelpItem>();
 
-    /** @internal */
-    static async build(options: HelpInfoBuildOptions): Promise<HelpInfo> {
-        let info = new HelpInfo();
+    for (let [groupIndex, { label, dir }] of contexts.entries()) {
+      let helpItems: SubcommandHelpItem[];
 
-        if (typeof options === 'object') {
-            info.buildDescription(options.description);
-            info.buildSubcommandsUsage(options.sequence);
-            await info.buildTextForSubCommands(options.contexts);
+      if (labelToHelpItemsMap.has(label)) {
+        helpItems = labelToHelpItemsMap.get(label)!;
+      } else {
+        helpItems = [];
+        labelToHelpItemsMap.set(label, helpItems);
+        labels.push(label);
+      }
+
+      let definitions = await CLI.getSubcommandDefinitions(dir);
+
+      for (let definition of definitions) {
+        let { name, brief } = definition;
+        let aliases = definition.aliases || definition.alias && [definition.alias] || [];
+
+        let item: SubcommandHelpItem;
+        let existingItem = helpItemMap.get(name);
+
+        if (existingItem) {
+          existingItem.overridden = true;
+
+          item = {
+            name,
+            brief: brief || existingItem.brief,
+            aliases: existingItem.aliases.concat(aliases),
+            group: groupIndex,
+          };
         } else {
-            info.buildDescription(options.description);
-            info.buildTextsForParamsAndOptions(options);
-
-            await info.buildTextForSubCommands(options.helpBuildingContexts);
+          item = {
+            name,
+            brief,
+            aliases,
+            group: groupIndex,
+          };
         }
 
-        return info;
-    }
+        helpItems.push(item);
+        helpItemMap.set(name, item);
+      }
 
-    private buildDescription(description: string | undefined): void {
-        if (description) {
-            this.texts.push(`${indent(description, 2)}\n`);
+      if (!await existsDir(dir)) {
+        continue;
+      }
+
+      let names = await v.call<string[]>(FS.readdir, dir);
+
+      for (let name of names) {
+        let path = Path.join(dir, name);
+        let stats = await safeStat(path);
+
+        if (!stats) {
+          continue;
         }
-    }
 
-    private buildSubcommandsUsage(sequence: string[]) {
-        if (sequence && sequence.length) {
-            this.texts.push(`\
-  ${Chalk.green('USAGE')}\n
-    ${Chalk.bold(sequence.join(' '))} <subcommand>\n`);
-        }
-    }
+        if (stats.isFile()) {
+          if (name === 'default.js' || Path.extname(path) !== '.js') {
+            continue;
+          }
 
-    private buildTextsForParamsAndOptions(TargetCommand: typeof Command): void {
-        let paramDefinitions = TargetCommand.paramDefinitions;
-        let paramsDefinition = TargetCommand.paramsDefinition;
-
-        let parameterDescriptionRows: string[][] = [];
-        let parameterUsageTexts: string[] = [];
-
-        if (paramDefinitions) {
-            parameterUsageTexts = paramDefinitions.map(definition => {
-                let {
-                    name,
-                    required,
-                    description,
-                    default: defaultValue
-                } = definition;
-
-                if (description) {
-                    parameterDescriptionRows.push([
-                        Chalk.bold(name),
-                        description
-                    ]);
-                }
-
-                return required ?
-                    `<${name}>` :
-                    `[${name}${defaultValue !== undefined ? '=' + defaultValue : ''}]`;
-            });
+          name = Path.basename(name, '.js');
         } else {
-            parameterUsageTexts = [];
+          path = Path.join(path, 'default.js');
+          stats = await safeStat(path);
         }
 
-        if (paramsDefinition) {
-            let {
-                name,
-                required,
-                description
-            } = paramsDefinition;
+        let existingItem = helpItemMap.get(name);
 
-            if (description) {
-                parameterDescriptionRows.push([
-                    Chalk.bold(name),
-                    description
-                ]);
+        // `brief` already set in `subcommands` field
+        if (existingItem && existingItem.group === groupIndex && existingItem.brief) {
+          continue;
+        }
+
+        let brief: string | undefined;
+
+        if (stats) {
+          let module = require(path);
+          let CommandClass = (module.default || module) as CommandModule;
+          brief = CommandClass && (CommandClass.brief || CommandClass.description);
+        }
+
+        if (existingItem && existingItem.group === groupIndex) {
+          existingItem.brief = brief;
+        } else {
+          let aliases: string[];
+
+          if (existingItem) {
+            existingItem.overridden = true;
+
+            if (!brief) {
+              brief = existingItem.brief;
             }
 
-            parameterUsageTexts.push(
-                required ?
-                    `<...${name}>` :
-                    `[...${name}]`
-            );
+            aliases = existingItem.aliases;
+          } else {
+            aliases = [];
+          }
+
+          let item = {
+            name,
+            aliases,
+            brief,
+            group: groupIndex,
+          };
+
+          helpItems.push(item);
+          helpItemMap.set(name, item);
         }
+      }
+    }
 
-        let optionDefinitions = TargetCommand.optionDefinitions || [];
-        let requiredOptionUsageItems = optionDefinitions
-            .filter(definition => definition.required)
-            .map(({ name, placeholder }) => `--${name} <${placeholder || name}>`);
+    for (let label of labels) {
+      let hasAliases = false;
+      let rows = labelToHelpItemsMap
+        .get(label)!
+        .filter(item => {
+          if (item.overridden) {
+            return false;
+          }
 
-        let usageLine = [
-            Chalk.bold(TargetCommand.sequence.join(' ')),
-            ...parameterUsageTexts,
-            ...requiredOptionUsageItems
-        ].join(' ');
+          if (!hasAliases && item.aliases.length) {
+            hasAliases = true;
+          }
 
-        if (optionDefinitions.length > requiredOptionUsageItems.length) {
-            usageLine += ' [...options]';
-        }
+          return true;
+        })
+        .map(({ name, aliases, brief }) => {
+          if (hasAliases) {
+            return [
+              Chalk.bold(name),
+              aliases.length ? `[${Chalk.dim(aliases.join(','))}]` : '',
+              brief,
+            ];
+          } else {
+            return [
+              Chalk.bold(name),
+              brief,
+            ];
+          }
+        });
 
+      let separators = hasAliases ? [' ', ' - '] : ' - ';
+
+      if (rows.length) {
         this.texts.push(`\
+  ${Chalk.green(label.toUpperCase())}\n
+${buildTableOutput(rows, { indent: 4, separators })}`);
+      }
+    }
+  }
+
+  print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream): void {
+    stderr.write(`\n${this.text}\n`);
+  }
+
+  private buildDescription(description: string | undefined): void {
+    if (description) {
+      this.texts.push(`${indent(description, 2)}\n`);
+    }
+  }
+
+  private buildSubcommandsUsage(sequence: string[]) {
+    if (sequence && sequence.length) {
+      this.texts.push(`\
+  ${Chalk.green('USAGE')}\n
+    ${Chalk.bold(sequence.join(' '))} <subcommand>\n`);
+    }
+  }
+
+  private buildTextsForParamsAndOptions(TargetCommand: typeof Command): void {
+    let paramDefinitions = TargetCommand.paramDefinitions;
+    let paramsDefinition = TargetCommand.paramsDefinition;
+
+    let parameterDescriptionRows: string[][] = [];
+    let parameterUsageTexts: string[] = [];
+
+    if (paramDefinitions) {
+      parameterUsageTexts = paramDefinitions.map(definition => {
+        let {
+          name,
+          required,
+          description,
+          default: defaultValue,
+        } = definition;
+
+        if (description) {
+          parameterDescriptionRows.push([
+            Chalk.bold(name),
+            description,
+          ]);
+        }
+
+        return required ?
+          `<${name}>` :
+          `[${name}${defaultValue !== undefined ? '=' + defaultValue : ''}]`;
+      });
+    } else {
+      parameterUsageTexts = [];
+    }
+
+    if (paramsDefinition) {
+      let {
+        name,
+        required,
+        description,
+      } = paramsDefinition;
+
+      if (description) {
+        parameterDescriptionRows.push([
+          Chalk.bold(name),
+          description,
+        ]);
+      }
+
+      parameterUsageTexts.push(
+        required ?
+          `<...${name}>` :
+          `[...${name}]`,
+      );
+    }
+
+    let optionDefinitions = TargetCommand.optionDefinitions || [];
+    let requiredOptionUsageItems = optionDefinitions
+      .filter(definition => definition.required)
+      .map(({ name, placeholder }) => `--${name} <${placeholder || name}>`);
+
+    let usageLine = [
+      Chalk.bold(TargetCommand.sequence.join(' ')),
+      ...parameterUsageTexts,
+      ...requiredOptionUsageItems,
+    ].join(' ');
+
+    if (optionDefinitions.length > requiredOptionUsageItems.length) {
+      usageLine += ' [...options]';
+    }
+
+    this.texts.push(`\
   ${Chalk.green('USAGE')}\n
     ${usageLine}\n`);
 
-        if (parameterDescriptionRows.length) {
-            this.texts.push(`\
+    if (parameterDescriptionRows.length) {
+      this.texts.push(`\
   ${Chalk.green('PARAMETERS')}\n
 ${buildTableOutput(parameterDescriptionRows, { indent: 4, separators: ' - '})}`);
-        }
+    }
 
-        if (optionDefinitions.length) {
-            let optionRows = optionDefinitions
-                .map(definition => {
-                    let {
-                        name,
-                        key,
-                        flag,
-                        placeholder,
-                        toggle: isToggle,
-                        description
-                    } = definition;
+    if (optionDefinitions.length) {
+      let optionRows = optionDefinitions
+        .map(definition => {
+          let {
+            name,
+            key,
+            flag,
+            placeholder,
+            toggle: isToggle,
+            description,
+          } = definition;
 
-                    let triggerStr = flag ? `-${flag}, ` : '';
+          let triggerStr = flag ? `-${flag}, ` : '';
 
-                    triggerStr += `--${name}`;
+          triggerStr += `--${name}`;
 
-                    if (!isToggle) {
-                        triggerStr += ` <${placeholder || key}>`;
-                    }
+          if (!isToggle) {
+            triggerStr += ` <${placeholder || key}>`;
+          }
 
-                    return [
-                        Chalk.bold(triggerStr),
-                        description
-                    ];
-                });
+          return [
+            Chalk.bold(triggerStr),
+            description,
+          ];
+        });
 
-            this.texts.push(`\
+      this.texts.push(`\
   ${Chalk.green('OPTIONS')}\n
 ${buildTableOutput(optionRows, { indent: 4, separators: ' - ' })}`);
-        }
+    }
+  }
+
+  /** @internal */
+  static async build(options: HelpInfoBuildOptions): Promise<HelpInfo> {
+    let info = new HelpInfo();
+
+    if (typeof options === 'object') {
+      info.buildDescription(options.description);
+      info.buildSubcommandsUsage(options.sequence);
+      await info.buildTextForSubCommands(options.contexts);
+    } else {
+      info.buildDescription(options.description);
+      info.buildTextsForParamsAndOptions(options);
+
+      await info.buildTextForSubCommands(options.helpBuildingContexts);
     }
 
-    async buildTextForSubCommands(contexts: HelpBuildingContext[]): Promise<void> {
-        let labels: string[] = [];
-        let labelToHelpItemsMap = new Map<string, SubcommandHelpItem[]>();
-        let helpItemMap = new Map<string, SubcommandHelpItem>();
-
-        for (let [groupIndex, { label, dir }] of contexts.entries()) {
-            let helpItems: SubcommandHelpItem[];
-
-            if (labelToHelpItemsMap.has(label)) {
-                helpItems = labelToHelpItemsMap.get(label)!;
-            } else {
-                helpItems = [];
-                labelToHelpItemsMap.set(label, helpItems);
-                labels.push(label);
-            }
-
-            let definitions = await CLI.getSubcommandDefinitions(dir);
-
-            for (let definition of definitions) {
-                let { name, brief } = definition;
-                let aliases = definition.aliases || definition.alias && [definition.alias] || [];
-
-                let item: SubcommandHelpItem;
-                let existingItem = helpItemMap.get(name);
-
-                if (existingItem) {
-                    existingItem.overridden = true;
-
-                    item = {
-                        name,
-                        brief: brief || existingItem.brief,
-                        aliases: existingItem.aliases.concat(aliases),
-                        group: groupIndex
-                    };
-                } else {
-                    item = {
-                        name,
-                        brief: brief,
-                        aliases,
-                        group: groupIndex
-                    };
-                }
-
-                helpItems.push(item);
-                helpItemMap.set(name, item);
-            }
-
-            if (!await existsDir(dir)) {
-                continue;
-            }
-
-            let names = await v.call<string[]>(FS.readdir, dir);
-
-            for (let name of names) {
-                let path = Path.join(dir, name);
-                let stats = await safeStat(path);
-
-                if (!stats) {
-                    continue;
-                }
-
-                if (stats.isFile()) {
-                    if (name === 'default.js' || Path.extname(path) !== '.js') {
-                        continue;
-                    }
-
-                    name = Path.basename(name, '.js');
-                } else {
-                    path = Path.join(path, 'default.js');
-                    stats = await safeStat(path);
-                }
-
-                let existingItem = helpItemMap.get(name);
-
-                // `brief` already set in `subcommands` field
-                if (existingItem && existingItem.group === groupIndex && existingItem.brief) {
-                    continue;
-                }
-
-                let brief: string | undefined;
-
-                if (stats) {
-                    let module = require(path);
-                    let CommandClass = (module.default || module) as CommandModule;
-                    brief = CommandClass && (CommandClass.brief || CommandClass.description);
-                }
-
-                if (existingItem && existingItem.group === groupIndex) {
-                    existingItem.brief = brief;
-                } else {
-                    let aliases: string[];
-
-                    if (existingItem) {
-                        existingItem.overridden = true;
-
-                        if (!brief) {
-                            brief = existingItem.brief;
-                        }
-
-                        aliases = existingItem.aliases;
-                    } else {
-                        aliases = [];
-                    }
-
-                    let item = {
-                        name,
-                        aliases,
-                        brief,
-                        group: groupIndex
-                    };
-
-                    helpItems.push(item);
-                    helpItemMap.set(name, item);
-                }
-            }
-        }
-
-        for (let label of labels) {
-            let hasAliases = false;
-            let rows = labelToHelpItemsMap
-                .get(label)!
-                .filter(item => {
-                    if (item.overridden) {
-                        return false;
-                    }
-
-                    if (!hasAliases && item.aliases.length) {
-                        hasAliases = true;
-                    }
-
-                    return true;
-                })
-                .map(({ name, aliases, brief }) => {
-                    if (hasAliases) {
-                        return [
-                            Chalk.bold(name),
-                            aliases.length ? `[${Chalk.dim(aliases.join(','))}]` : '',
-                            brief
-                        ];
-                    } else {
-                        return [
-                            Chalk.bold(name),
-                            brief
-                        ];
-                    }
-                });
-
-            let separators = hasAliases ? [' ', ' - '] : ' - ';
-
-            if (rows.length) {
-                this.texts.push(`\
-  ${Chalk.green(label.toUpperCase())}\n
-${buildTableOutput(rows, { indent: 4, separators })}`);
-            }
-        }
-    }
-
-    print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream): void {
-        stderr.write(`\n${this.text}\n`);
-    }
+    return info;
+  }
 }
 
 function isHelpInfoBuildPathOptions(options: HelpInfoBuildOptions): options is HelpInfoBuildPathOptions {
-    return 'dirs' in options;
+  return 'dirs' in options;
 }

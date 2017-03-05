@@ -1,16 +1,16 @@
 import {
-    command,
-    metadata,
-    Command
+  Command,
+  command,
+  metadata,
 } from '../../../';
 
 @command({
-    brief: 'Print version',
-    description: 'Print version of this tool'
+  brief: 'Print version',
+  description: 'Print version of this tool',
 })
 export default class extends Command {
-    @metadata
-    execute() {
-        return '0.0.0';
-    }
+  @metadata
+  execute() {
+    return '0.0.0';
+  }
 }

@@ -7,5 +7,5 @@ export function deduplicate<T>(values: T[]): T[] {
       set.add(value);
       return true;
     }
-  })
+  });
 }

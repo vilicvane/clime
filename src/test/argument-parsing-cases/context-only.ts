@@ -1,16 +1,16 @@
 import * as assert from 'assert';
 
 import {
-    command,
-    metadata,
-    Command,
-    Context
+  Command,
+  Context,
+  command,
+  metadata,
 } from '../../';
 
 @command()
 export default class TestCommand extends Command {
-    @metadata
-    execute(context: Context) {
-        return arguments;
-    }
+  @metadata
+  execute(context: Context) {
+    return arguments;
+  }
 }

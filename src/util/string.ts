@@ -3,69 +3,69 @@ import * as Chalk from 'chalk';
 export type TableRow = (string | undefined)[];
 
 export function buildTableOutput(rows: TableRow[], {
-    separators = '  ' as string | string[],
-    indent = 0 as string | number
+  separators = '  ' as string | string[],
+  indent = 0 as string | number,
 } = {}): string {
-    let maxTextLengths: number[] = [];
+  let maxTextLengths: number[] = [];
 
-    for (let row of rows) {
-        let lastNoneEmptyIndex = 0;
+  for (let row of rows) {
+    let lastNoneEmptyIndex = 0;
 
-        for (let i = 0; i < row.length; i++) {
-            let text = row[i] || '';
-            let textLength = Chalk.stripColor(text).length;
+    for (let i = 0; i < row.length; i++) {
+      let text = row[i] || '';
+      let textLength = Chalk.stripColor(text).length;
 
-            if (!textLength) {
-                continue;
-            }
+      if (!textLength) {
+        continue;
+      }
 
-            lastNoneEmptyIndex = i;
+      lastNoneEmptyIndex = i;
 
-            if (maxTextLengths.length > i) {
-                maxTextLengths[i] = Math.max(maxTextLengths[i], textLength);
-            } else {
-                maxTextLengths[i] = textLength;
-            }
-        }
-
-        row.splice(lastNoneEmptyIndex + 1);
+      if (maxTextLengths.length > i) {
+        maxTextLengths[i] = Math.max(maxTextLengths[i], textLength);
+      } else {
+        maxTextLengths[i] = textLength;
+      }
     }
 
-    let indentStr = typeof indent === 'string' ?
-        indent :
-        new Array(indent + 1).join(' ');
+    row.splice(lastNoneEmptyIndex + 1);
+  }
 
-    return rows
-        .map(row => {
-            let line = indentStr;
+  let indentStr = typeof indent === 'string' ?
+    indent :
+    new Array(indent + 1).join(' ');
 
-            for (let i = 0; i < row.length; i++) {
-                let text = row[i] || '';
-                let textLength = Chalk.stripColor(text).length;
+  return rows
+    .map(row => {
+      let line = indentStr;
 
-                let maxLength = maxTextLengths[i];
+      for (let i = 0; i < row.length; i++) {
+        let text = row[i] || '';
+        let textLength = Chalk.stripColor(text).length;
 
-                line += text;
-                line += new Array(maxLength - textLength + 1).join(' ');
+        let maxLength = maxTextLengths[i];
 
-                if (i < row.length - 1) {
-                    if (typeof separators === 'string') {
-                        line += separators;
-                    } else {
-                        line += separators[i];
-                    }
-                }
-            }
+        line += text;
+        line += new Array(maxLength - textLength + 1).join(' ');
 
-            return line;
-        })
-        .join('\n') + '\n';
+        if (i < row.length - 1) {
+          if (typeof separators === 'string') {
+            line += separators;
+          } else {
+            line += separators[i];
+          }
+        }
+      }
+
+      return line;
+    })
+    .join('\n') + '\n';
 }
 
 export function indent(text: string, indent: number | string): string {
-    let indentStr = typeof indent === 'string' ?
-        indent.replace(/\r/g, '') :
-        Array(indent + 1).join(' ');
+  let indentStr = typeof indent === 'string' ?
+    indent.replace(/\r/g, '') :
+    Array(indent + 1).join(' ');
 
-    return text.replace(/^/mg, indentStr);
+  return text.replace(/^/mg, indentStr);
 }

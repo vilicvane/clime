@@ -36,24 +36,24 @@ shim.execute(process.argv);
 
 ```ts
 import {
-    command,
-    param,
-    Command
+  command,
+  param,
+  Command
 } from 'clime';
 
 @command({
-    description: 'This is a command for printing a greeting message.'
+  description: 'This is a command for printing a greeting message.'
 })
 export default class extends Command {
-    execute(
-        @param({
-            description: 'Your loud name',
-            required: true
-        })
-        name: string
-    ) {
-        return `Hello, ${name}!`;
-    }
+  execute(
+    @param({
+      description: 'Your loud name',
+      required: true
+    })
+    name: string
+  ) {
+    return `Hello, ${name}!`;
+  }
 }
 ```
 
@@ -71,51 +71,51 @@ To make this work, you'll need to set both of `experimentalDecorators` and `emit
 
 ```ts
 import {
-    command,
-    option,
-    param,
-    params,
-    Command,
-    Options
+  command,
+  option,
+  param,
+  params,
+  Command,
+  Options
 } from 'clime';
 
 export class SomeOptions extends Options {
-    @option({
-        flag: 't',
-        description: 'timeout that does nothing'
-    })
-    timeout: number;
+  @option({
+    flag: 't',
+    description: 'timeout that does nothing'
+  })
+  timeout: number;
 
-    // You can also create methods and properties.
-    get timeoutInSeconds(): number {
-        return this.timeout / 1000;
-    }
+  // You can also create methods and properties.
+  get timeoutInSeconds(): number {
+    return this.timeout / 1000;
+  }
 }
 
 @command()
 export default class extends Command {
-    execute(
-        @param({
-            required: true,
-            description: 'required parameter foo'
-        })
-        foo: string,
+  execute(
+    @param({
+      required: true,
+      description: 'required parameter foo'
+    })
+    foo: string,
 
-        @param({
-            description: 'optional parameter bar'
-        })
-        bar: number,
+    @param({
+      description: 'optional parameter bar'
+    })
+    bar: number,
 
-        @params({
-            type: String,
-            description: 'extra parameters'
-        })
-        args: string[],
+    @params({
+      type: String,
+      description: 'extra parameters'
+    })
+    args: string[],
 
-        options: SomeOptions
-    ) {
-        return 'Hello, Clime!';
-    }
+    options: SomeOptions
+  ) {
+    return 'Hello, Clime!';
+  }
 }
 ```
 
@@ -147,13 +147,13 @@ For example:
 import { StringCastable } from 'clime';
 
 class File implements StringCastable {
-    constructor(
-        public path: string
-    ) { }
+  constructor(
+    public path: string
+  ) { }
 
-    static cast(path: string, context: Context): File {
-        return new File(Path.resolve(context.cwd, path));
-    }
+  static cast(path: string, context: Context): File {
+    return new File(Path.resolve(context.cwd, path));
+  }
 }
 ```
 
@@ -175,10 +175,10 @@ Thus a `@metadata` decorator that does nothing at run time is provided for prese
 ```ts
 @command()
 export default class extends Command {
-    @metadata
-    execute(options: SomeOptions) {
-        return 'Hello, Clime!';
-    }
+  @metadata
+  execute(options: SomeOptions) {
+    return 'Hello, Clime!';
+  }
 }
 ```
 
@@ -192,10 +192,10 @@ You can have `context` passed in by adding the last parameter of `execute` metho
 ```ts
 @command()
 export default class extends Command {
-    @metadata
-    execute(context: Context) {
-        return 'Hello, Clime!';
-    }
+  @metadata
+  execute(context: Context) {
+    return 'Hello, Clime!';
+  }
 }
 ```
 
@@ -256,25 +256,25 @@ For example:
 
 ```ts
 import {
-    command,
-    metadata,
-    Command,
-    Context,
+  command,
+  metadata,
+  Command,
+  Context,
 } from 'clime';
 
 export class TestContext extends Context {
-    promptForQuery(): Promise<string> {
-        // Using library like Inquier.js interact with user.
-        return Promise.resolve('result');
-    }
+  promptForQuery(): Promise<string> {
+    // Using library like Inquier.js interact with user.
+    return Promise.resolve('result');
+  }
 }
 
 @command()
 export default class TestCommand extends Command {
-    @metadata
-    execute(context: TestContext) {
-        return context.promptForQuery();
-    }
+  @metadata
+  execute(context: TestContext) {
+    return context.promptForQuery();
+  }
 }
 ```
 
@@ -286,17 +286,17 @@ If this command is meant to stop somewhere and exit the process, we can define a
 import { Printable } from 'clime';
 
 export class ExitSignal implements Printable {
-    constructor(
-        public code: number
-    ) { }
+  constructor(
+    public code: number
+  ) { }
 
-    print(): void {
-        process.exit(this.code);
-    }
+  print(): void {
+    process.exit(this.code);
+  }
 }
 
 export function exit(code = 0): void {
-    throw new ExitSignal(code);
+  throw new ExitSignal(code);
 }
 ```
 

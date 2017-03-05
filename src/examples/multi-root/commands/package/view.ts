@@ -1,20 +1,20 @@
 import {
-    command,
-    param,
-    Command
+  Command,
+  command,
+  param,
 } from '../../../../';
 
 @command({
-    description: 'View package information'
+  description: 'View package information',
 })
 export default class extends Command {
-    execute(
-        @param({
-            required: true,
-            description: 'Name of package to view'
-        })
-        name: string
-    ) {
-        return `Guess what, try command \`npm view ${name}\`.`;
-    }
+  execute(
+    @param({
+      required: true,
+      description: 'Name of package to view',
+    })
+    name: string,
+  ) {
+    return `Guess what, try command \`npm view ${name}\`.`;
+  }
 }
