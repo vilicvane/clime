@@ -1,9 +1,14 @@
+import 'source-map-support/register';
+
 import * as Path from 'path';
 import { CLI, Shim } from '../../';
 
-let cli = new CLI('greet', [
-    Path.join(__dirname, './commands'),
-    { dir: Path.join(__dirname, './extend-commands'), title: "EXTEND-COMMANDS" }
+let cli = new CLI('clime', [
+    Path.join(__dirname, 'commands'),
+    {
+        label: 'Extended subcommands',
+        path: 'extra'
+    }
 ]);
 
 let shim = new Shim(cli);

@@ -5,16 +5,16 @@ import {
 } from '../../../../';
 
 @command({
-    description: 'Install a package'
+    description: 'View package information (extra)'
 })
 export default class extends Command {
     execute(
         @param({
             required: true,
-            description: 'Name of package to install'
+            description: 'Name of package to view'
         })
         name: string
     ) {
-        return `Guess what, try command \`npm install ${name}\`.`;
+        return `Guess what (extra), try command \`npm view ${name}\`.`;
     }
 }

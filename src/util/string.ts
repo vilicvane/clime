@@ -1,6 +1,10 @@
 import * as Chalk from 'chalk';
 
-export type TableRow = (string | undefined)[];
+export class TableCaption {
+    constructor(public text: string) {}
+}
+
+export type TableRow = TableCaption | (string | undefined)[];
 
 export function buildTableOutput(rows: TableRow[], {
     spaces = 4 as string | number,
@@ -10,6 +14,9 @@ export function buildTableOutput(rows: TableRow[], {
 
     for (let row of rows) {
         let lastNoneEmptyIndex = 0;
+        if (row instanceof TableCaption) {
+            continue;
+        }
 
         for (let i = 0; i < row.length; i++) {
             let text = row[i] || '';
@@ -37,6 +44,11 @@ export function buildTableOutput(rows: TableRow[], {
 
     return rows
         .map(row => {
+            
+            if (row instanceof TableCaption) {
+                return row.text + '\n';
+            }
+
             let line = indentStr;
 
             for (let i = 0; i < row.length; i++) {

@@ -1,16 +1,18 @@
 import * as Path from 'path';
 
 import {
-    Printable
-} from '../object';
-
-import {
-    ParamDefinition,
-    ParamsDefinition,
+    HelpBuildingContext,
+    HelpInfo,
     OptionDefinition,
     Options,
-    HelpInfo
+    ParamDefinition,
+    ParamsDefinition
 } from './';
+
+
+import {
+    Printable
+} from '../object';
 
 /**
  * Options for command.
@@ -51,6 +53,7 @@ export class Context {
 }
 
 /**
+ * @deprecated
  * Validator interface for parameters or options.
  */
 export interface Validator<T> {
@@ -65,7 +68,17 @@ export interface Validator<T> {
     validate(value: T, name: string): void;
 }
 
-export type GeneralValidator<T> = Validator<T> | RegExp;
+/**
+ * A function that validates a value.
+ * It should throw an error (usually an instance of `ExpectedError`) if the
+ * validation fails.
+ * @param value - Value to be validated.
+ * @param name - Name of the parameter or option, used for generating error
+ * message.
+ */
+export type ValidatorFunction<T> = (value: T, name: string) => void;
+
+export type GeneralValidator<T> = ValidatorFunction<T> | Validator<T> | RegExp;
 
 /**
  * The abstract `Command` class to be extended.
@@ -80,15 +93,15 @@ export abstract class Command {
      * Get the help object of current command.
      */
     static async getHelp(): Promise<HelpInfo> {
-        return await HelpInfo.build({
-            TargetCommand: this
-        });
+        return await HelpInfo.build(this);
     }
 
     /** @internal */
     static decorated = false;
     /** @internal */
     static path: string;
+    /** @internal */
+    static helpBuildingContexts: HelpBuildingContext[];
     /** @internal */
     static sequence: string[];
     /** @internal */

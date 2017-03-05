@@ -15,27 +15,41 @@ import {
 import {
     CLI,
     CommandModule,
-    SubcommandDescriptor
+    SubcommandDefinition,
+    SubcommandSearchContext
 } from '../cli';
 
 import {
     TableRow,
+    TableCaption,
     buildTableOutput,
+    deduplicate,
+    existsDir,
+    findPaths,
     indent,
     safeStat
 } from '../../util';
 
-export interface HelpInfoBuildClassOptions {
-    TargetCommand: typeof Command;
-    subcommandHelpInfo?: HelpInfo;
+export interface HelpBuildingContext {
+    label: string;
+    dir: string;
 }
 
 export interface HelpInfoBuildPathOptions {
-    dir: string | string[];
+    sequence: string[];
+    contexts: HelpBuildingContext[];
     description?: string;
 }
 
-export type HelpInfoBuildOptions = HelpInfoBuildClassOptions | HelpInfoBuildPathOptions;
+export type HelpInfoBuildOptions = typeof Command | HelpInfoBuildPathOptions;
+
+export interface SubcommandHelpItem {
+    name: string;
+    aliases: string[];
+    brief: string | undefined;
+    group: number;
+    overridden?: boolean;
+}
 
 export class HelpInfo implements Printable {
     private texts: string[] = [];
@@ -50,38 +64,34 @@ export class HelpInfo implements Printable {
     static async build(options: HelpInfoBuildOptions): Promise<HelpInfo> {
         let info = new HelpInfo();
 
-        if (isHelpInfoBuildPathOptions(options)) {
+        if (typeof options === 'object') {
             info.buildDescription(options.description);
-            await info.buildTextForSubCommands(options.dir);
+            info.buildSubcommandsUsage(options.sequence);
+            await info.buildTextForSubCommands(options.contexts);
         } else {
-            let TargetCommand = options.TargetCommand;
+            info.buildDescription(options.description);
+            info.buildTextsForParamsAndOptions(options);
 
-            info.buildDescription(TargetCommand.description);
-            info.buildTextsForParamsAndOptions(TargetCommand);
-
-            let dir = Path.dirname(TargetCommand.path);
-
-            if (Path.basename(TargetCommand.path) !== 'default.js') {
-                dir = Path.join(dir, Path.basename(TargetCommand.path, '.js'));
-            }
-
-            if (options.subcommandHelpInfo) {
-                info.texts.push(options.subcommandHelpInfo.text);
-            } else {
-                await info.buildTextForSubCommands(dir);
-            }
+            await info.buildTextForSubCommands(options.helpBuildingContexts);
         }
 
         return info;
     }
 
-    private buildDescription(description: string | undefined): void {
+    buildDescription(description: string | undefined): void {
         if (description) {
             this.texts.push(`${indent(description)}\n`);
         }
     }
 
-    private buildTextsForParamsAndOptions(TargetCommand: typeof Command): void {
+    buildSubcommandsUsage(sequence: string[]) {
+        if (sequence && sequence.length) {
+            this.texts.push(`${indent(Chalk.green('USAGE'))}\n`);
+            this.texts.push(`${indent(Chalk.bold(sequence.join(' ')), 4)} <subcommand>\n`);
+        }
+    }
+
+    buildTextsForParamsAndOptions(TargetCommand: typeof Command): void {
         let paramDefinitions = TargetCommand.paramDefinitions;
         let paramsDefinition = TargetCommand.paramsDefinition;
 
@@ -195,37 +205,140 @@ ${buildTableOutput(optionRows, { indent: 4, spaces: ' - ' })}`
         }
     }
 
-    async buildTextForSubCommands(dir: string | string[]): Promise<void> {
-        let subcommandRowIndexMap = new Map<string, number>();
-        let rows: TableRow[] = [];
-        let subcommands = await CLI.getSubcommandDescriptors(dir, true);
+    async buildTextForSubCommands(contexts: HelpBuildingContext[]): Promise<void> {
+        let labels: string[] = [];
+        let labelToHelpItemsMap = new Map<string, SubcommandHelpItem[]>();
+        let helpItemMap = new Map<string, SubcommandHelpItem>();
 
-        if (subcommands) {
-            subcommands.forEach(subcommand => {
-                let aliases = subcommand.aliases || subcommand.alias && [subcommand.alias];
-                let subcommandNamesStr = Chalk.bold(subcommand.name);
+        for (let [groupIndex, { label, dir }] of contexts.entries()) {
+            let helpItems: SubcommandHelpItem[];
 
-                if (aliases) {
-                    subcommandNamesStr += ` [${Chalk.dim(aliases.join(','))}]`;
+            if (labelToHelpItemsMap.has(label)) {
+                helpItems = labelToHelpItemsMap.get(label)!;
+            } else {
+                helpItems = [];
+                labelToHelpItemsMap.set(label, helpItems);
+                labels.push(label);
+            }
+
+            let definitions = await CLI.getSubcommandDefinitions(dir);
+
+            for (let definition of definitions) {
+                let { name, brief } = definition;
+                let aliases = definition.aliases || definition.alias && [definition.alias] || [];
+
+                let item: SubcommandHelpItem;
+                let existingItem = helpItemMap.get(name);
+
+                if (existingItem) {
+                    existingItem.overridden = true;
+
+                    item = {
+                        name,
+                        brief: brief || existingItem.brief,
+                        aliases: existingItem.aliases.concat(aliases),
+                        group: groupIndex
+                    };
+                } else {
+                    item = {
+                        name,
+                        brief: brief,
+                        aliases,
+                        group: groupIndex
+                    };
                 }
-                
-                // 删除列表中 重复项目
-                if (subcommandRowIndexMap.has(subcommand.name)) {
-                    rows.splice(subcommandRowIndexMap.get(subcommand.name), 1);
+
+                helpItems.push(item);
+                helpItemMap.set(name, item);
+            }
+
+            if (!await existsDir(dir)) {
+                continue;
+            }
+
+            let names = await v.call<string[]>(FS.readdir, dir);
+
+            for (let name of names) {
+                let path = Path.join(dir, name);
+                let stats = await safeStat(path);
+
+                if (!stats) {
+                    continue;
                 }
-                
-                subcommandRowIndexMap.set(subcommand.name, rows.length);
-                rows.push([
-                    subcommandNamesStr,
-                    subcommand.brief
-                ]);
-            });
+
+                if (stats.isFile()) {
+                    if (name === 'default.js' || Path.extname(path) !== '.js') {
+                        continue;
+                    }
+
+                    name = Path.basename(name, '.js');
+                } else {
+                    path = Path.join(path, 'default.js');
+                    stats = await safeStat(path);
+                }
+
+                let existingItem = helpItemMap.get(name);
+
+                // `brief` already set in `subcommands` field
+                if (existingItem && existingItem.group === groupIndex && existingItem.brief) {
+                    continue;
+                }
+
+                let brief: string | undefined;
+
+                if (stats) {
+                    let module = require(path);
+                    let CommandClass = (module.default || module) as CommandModule;
+                    brief = CommandClass && (CommandClass.brief || CommandClass.description);
+                }
+
+                if (existingItem && existingItem.group === groupIndex) {
+                    existingItem.brief = brief;
+                } else {
+                    let aliases: string[];
+
+                    if (existingItem) {
+                        existingItem.overridden = true;
+
+                        if (!brief) {
+                            brief = existingItem.brief;
+                        }
+
+                        aliases = existingItem.aliases;
+                    } else {
+                        aliases = [];
+                    }
+
+                    let item = {
+                        name,
+                        aliases,
+                        brief,
+                        group: groupIndex
+                    };
+
+                    helpItems.push(item);
+                    helpItemMap.set(name, item);
+                }
+            }
         }
 
-        if (rows.length) {
-            this.texts.push(`\
-  ${Chalk.green('SUBCOMMANDS')}\n
+        for (let label of labels) {
+            let rows = labelToHelpItemsMap
+                .get(label)!
+                .filter(item => !item.overridden)
+                .map(({ name, aliases, brief }) => {
+                    let subcommandNamesStr = Chalk.bold(name);
+                    if (aliases.length) {
+                        subcommandNamesStr += ` [${Chalk.dim(aliases.join(','))}]`;
+                    }
+                    return [subcommandNamesStr, brief];
+                });
+
+            if (rows.length) {
+                this.texts.push(`\
+  ${Chalk.green(label.toUpperCase())}\n
 ${buildTableOutput(rows, { indent: 4, spaces: ' - ' })}`);
+            }
         }
     }
 
@@ -235,5 +348,5 @@ ${buildTableOutput(rows, { indent: 4, spaces: ' - ' })}`);
 }
 
 function isHelpInfoBuildPathOptions(options: HelpInfoBuildOptions): options is HelpInfoBuildPathOptions {
-    return 'dir' in options;
+    return 'dirs' in options;
 }

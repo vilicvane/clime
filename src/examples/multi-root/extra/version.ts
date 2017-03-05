@@ -5,12 +5,12 @@ import {
 } from '../../../';
 
 @command({
-    brief: 'listing installed packages.'
-
+    brief: 'Print version',
+    description: 'Print version of this tool'
 })
 export default class extends Command {
     @metadata
     execute() {
-        return `Guess what, [clime, villa, thenfail, ...].`;
+        return '0.0.0';
     }
 }
