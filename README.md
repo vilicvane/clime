@@ -36,21 +36,21 @@ shim.execute(process.argv);
 
 ```ts
 import {
+  Command,
   command,
   param,
-  Command
 } from 'clime';
 
 @command({
-  description: 'This is a command for printing a greeting message.'
+  description: 'This is a command for printing a greeting message',
 })
 export default class extends Command {
   execute(
     @param({
       description: 'Your loud name',
-      required: true
+      required: true,
     })
-    name: string
+    name: string,
   ) {
     return `Hello, ${name}!`;
   }
@@ -59,10 +59,11 @@ export default class extends Command {
 
 ## Features
 
-- ☑ Type and schema based parameters/options casting.
-- ☑ Object and promise based architecture.
-- ☑ File path based multi-level subcommands.
-- ☑ Automatic usage generating.
+- ☑ Type and schema based parameters/options casting
+- ☑ Object and promise based architecture
+- ☑ File path based multi-level subcommands
+- ☑ Automatic usage generating
+- ☑ Multiple command roots support <sup>New in v0.5</sup>
 
 ### Parameter types and options schema
 
@@ -71,18 +72,18 @@ To make this work, you'll need to set both of `experimentalDecorators` and `emit
 
 ```ts
 import {
+  Command,
+  Options,
   command,
   option,
   param,
   params,
-  Command,
-  Options
 } from 'clime';
 
 export class SomeOptions extends Options {
   @option({
     flag: 't',
-    description: 'timeout that does nothing'
+    description: 'timeout that does nothing',
   })
   timeout: number;
 
@@ -97,22 +98,22 @@ export default class extends Command {
   execute(
     @param({
       required: true,
-      description: 'required parameter foo'
+      description: 'required parameter foo',
     })
     foo: string,
 
     @param({
-      description: 'optional parameter bar'
+      description: 'optional parameter bar',
     })
     bar: number,
 
     @params({
       type: String,
-      description: 'extra parameters'
+      description: 'extra parameters',
     })
     args: string[],
 
-    options: SomeOptions
+    options: SomeOptions,
   ) {
     return 'Hello, Clime!';
   }
@@ -148,7 +149,7 @@ import { StringCastable } from 'clime';
 
 class File implements StringCastable {
   constructor(
-    public path: string
+    public path: string,
   ) { }
 
   static cast(path: string, context: Context): File {
@@ -256,10 +257,10 @@ For example:
 
 ```ts
 import {
-  command,
-  metadata,
   Command,
   Context,
+  command,
+  metadata,
 } from 'clime';
 
 export class TestContext extends Context {
@@ -287,7 +288,7 @@ import { Printable } from 'clime';
 
 export class ExitSignal implements Printable {
   constructor(
-    public code: number
+    public code: number,
   ) { }
 
   print(): void {
