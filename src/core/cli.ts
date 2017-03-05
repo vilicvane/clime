@@ -372,6 +372,7 @@ export class CLI {
         if (!await existsFile(path)) {
             return [];
         }
+
         return (require(path) as CommandModule).subcommands || [];
     }
 }
