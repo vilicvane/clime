@@ -206,7 +206,7 @@ export default class extends Command {
 ### Subcommands
 
 Clime provides an easy way to create subcommands. The default entry of a clime command is `default.js` (`default.ts` before compilation).
-Any other `.js` files under the same folder are considered as sub-command files.
+Any other `.js` files under the same folder are considered as subcommand files.
 
 Clime allows multi-level subcommands via folders, for three-level commands like:
 
@@ -248,7 +248,7 @@ Just export `description` and `brief` directly from the entry module to do so:
 ```ts
 export const description = 'Some detailed description';
 
-// Used when listing as subcommands, optional.
+// Used when listing as subcommands.
 export const brief = 'brief description';
 ```
 
