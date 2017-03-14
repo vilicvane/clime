@@ -15,11 +15,9 @@ export function buildTableOutput(rows: TableRow[], {
       let text = row[i] || '';
       let textLength = Chalk.stripColor(text).length;
 
-      if (!textLength) {
-        continue;
+      if (textLength) {
+        lastNoneEmptyIndex = i;
       }
-
-      lastNoneEmptyIndex = i;
 
       if (maxTextLengths.length > i) {
         maxTextLengths[i] = Math.max(maxTextLengths[i], textLength);
