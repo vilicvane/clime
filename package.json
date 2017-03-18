@@ -7,9 +7,9 @@
   "scripts": {
     "tsc": "tsc",
     "tslint": "tslint",
-    "build": "rimraf bld && tsc",
     "lint": "tslint src/**/*.ts -c tslint.json",
-    "pretest": "npm run lint && npm run build",
+    "build": "npm run lint && rimraf bld && tsc",
+    "pretest": "npm run build",
     "test": "mocha",
     "prepublish": "npm test"
   },
