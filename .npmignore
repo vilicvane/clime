@@ -6,5 +6,6 @@
 /bld/test/
 
 /tsconfig.json
+/tslint.json
 
 .*
