@@ -79,7 +79,7 @@ export class Directory {
         throw new ExpectedError(`Directory "${this.source}" does not exist`);
       }
 
-      if (!stats.isFile()) {
+      if (!stats.isDirectory()) {
         throw new ExpectedError(`Object "${this.source}" is expected to be a directory`);
       }
     } else if (stats) {
