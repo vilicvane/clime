@@ -1,5 +1,5 @@
 import * as FS from 'fs';
-import * as PathModule from 'path';
+import * as Path from 'path';
 
 import * as v from 'villa';
 
@@ -16,15 +16,15 @@ export class File {
     public readonly source: string,
     public readonly cwd: string,
   ) {
-    this.baseName = PathModule.basename(source);
-    this.fullName = PathModule.resolve(cwd, source);
+    this.baseName = Path.basename(source);
+    this.fullName = Path.resolve(cwd, source);
   }
 
   require<T>(): T {
     try {
       return require(this.fullName);
     } catch (error) {
-      throw new ExpectedError(`Error parsing requiring file "${this.source}"`);
+      throw new ExpectedError(`Error requiring file "${this.source}"`);
     }
   }
 
@@ -39,11 +39,7 @@ export class File {
   }
 
   async assert(exists = true): Promise<void> {
-    let stats: FS.Stats | undefined;
-
-    try {
-      stats = await v.call<FS.Stats>(FS.stat, this.fullName);
-    } catch (error) { }
+    let stats = await v.call(FS.stat, this.fullName).catch(v.bear);
 
     if (exists) {
       if (!stats) {
@@ -51,14 +47,47 @@ export class File {
       }
 
       if (!stats.isFile()) {
-        throw new ExpectedError(`Path "${this.source}" is expected to be a file`);
+        throw new ExpectedError(`Object "${this.source}" is expected to be a file`);
       }
     } else if (stats) {
-      throw new ExpectedError(`Path "${this.source}" already exists`);
+      throw new ExpectedError(`Object "${this.source}" already exists`);
     }
   }
 
   static cast(name: string, context: Context): File {
+    return new this(name, context.cwd);
+  }
+}
+
+export class Directory {
+  readonly baseName: string;
+  readonly fullName: string;
+
+  private constructor(
+    public readonly source: string,
+    public readonly cwd: string,
+  ) {
+    this.baseName = Path.basename(source);
+    this.fullName = Path.resolve(cwd, source);
+  }
+
+  async assert(exists = true): Promise<void> {
+    let stats = await v.call(FS.stat, this.fullName).catch(v.bear);
+
+    if (exists) {
+      if (!stats) {
+        throw new ExpectedError(`Directory "${this.source}" does not exist`);
+      }
+
+      if (!stats.isFile()) {
+        throw new ExpectedError(`Object "${this.source}" is expected to be a directory`);
+      }
+    } else if (stats) {
+      throw new ExpectedError(`Object "${this.source}" already exists`);
+    }
+  }
+
+  static cast(name: string, context: Context): Directory {
     return new this(name, context.cwd);
   }
 }
