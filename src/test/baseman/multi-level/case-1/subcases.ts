@@ -59,4 +59,28 @@ export default [
     args: ['bar', 'biu'],
   },
   // TODO: bar pia-pia
+  {
+    name: 'help-long-bar-pia-pia',
+    args: ['bar', 'pia-pia', '--help'],
+  },
+  {
+    name: 'no-argument-bar-pia-pia',
+    args: ['bar', 'pia-pia'],
+  },
+  {
+    name: 'valid-argument-bar-pia-pia-1',
+    args: ['bar', 'pia-pia', '--switch'],
+  },
+  {
+    name: 'valid-argument-bar-pia-pia-2',
+    args: ['bar', 'pia-pia', '-s'],
+  },
+  {
+    name: 'valid-argument-bar-pia-pia-3',
+    args: ['bar', 'pia-pia', '--name', 'hello'],
+  },
+  {
+    name: 'valid-argument-bar-pia-pia-4',
+    args: ['bar', 'pia-pia', '-sn', 'hello'],
+  },
 ];

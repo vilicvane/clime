@@ -1,0 +1,12 @@
+
+  Pia pia description
+
+  USAGE
+
+    single-level bar pia-pia [...options]
+
+  OPTIONS
+
+    -n, --name <name> - Useless name  
+    -s, --switch      - Useless switch
+
