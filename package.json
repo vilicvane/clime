@@ -43,7 +43,7 @@
     "@types/glob": "^5.0.30",
     "@types/mocha": "^2.2.39",
     "@types/node": "^7.0.5",
-    "baseman": "0.1.0-dev.1",
+    "baseman": "dev",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "glob": "^7.1.1",
