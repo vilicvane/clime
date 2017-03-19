@@ -1,0 +1,12 @@
+ERR Unknown option `foo`.
+
+  Foo bar
+
+  USAGE
+
+    single-level <name> [value=123]
+
+  PARAMETERS
+
+    name - Some name
+
