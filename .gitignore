@@ -1,4 +1,6 @@
 /node_modules/
 /bld/
 
+/test/baseman/output/
+
 npm-debug.log
