@@ -4,14 +4,6 @@ export default [
     args: ['--help'],
   },
   {
-    name: 'help-long-foo',
-    args: ['foo', '--help'],
-  },
-  {
-    name: 'help-long-bar',
-    args: ['bar', '--help'],
-  },
-  {
     name: 'help-long-unknown',
     args: ['unknown', '--help'],
   },
@@ -19,24 +11,52 @@ export default [
     name: 'no-argument',
     args: [],
   },
-  // {
-  //   name: 'valid-argument-1',
-  //   args: ['guess what'],
-  // },
-  // {
-  //   name: 'valid-argument-2',
-  //   args: ['yoha', '456'],
-  // },
-  // {
-  //   name: 'invalid-argument-1',
-  //   args: ['yoha', 'def'],
-  // },
-  // {
-  //   name: 'unknown-option-1',
-  //   args: ['--foo'],
-  // },
-  // {
-  //   name: 'unknown-option-2',
-  //   args: ['-f'],
-  // },
+  {
+    name: 'valid-argument-1',
+    args: ['guess what'],
+  },
+  {
+    name: 'unknown-option-1',
+    args: ['-x', 'abc'],
+  },
+  // foo
+  {
+    name: 'help-long-foo',
+    args: ['foo', '--help'],
+  },
+  {
+    name: 'no-argument-foo',
+    args: ['foo'],
+  },
+  {
+    name: 'valid-argument-foo-1',
+    args: ['foo', 'abc'],
+  },
+  {
+    name: 'invalid-argument-foo-1',
+    args: ['foo', 'def', 'ghi'],
+  },
+  {
+    name: 'unknown-option-foo-1',
+    args: ['foo', '-x', 'def'],
+  },
+  // bar
+  {
+    name: 'help-long-bar',
+    args: ['bar', '--help'],
+  },
+  {
+    name: 'no-argument-bar',
+    args: ['bar'],
+  },
+  // bar biu
+  {
+    name: 'help-long-bar-biu',
+    args: ['bar', 'biu', '--help'],
+  },
+  {
+    name: 'no-argument-bar-biu',
+    args: ['bar', 'biu'],
+  },
+  // TODO: bar pia-pia
 ];

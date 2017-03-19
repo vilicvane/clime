@@ -1,0 +1,17 @@
+ERR Unknown option flag "x".
+
+  Foo bar
+
+  USAGE
+
+    single-level [name]
+
+  PARAMETERS
+
+    name - Some name
+
+  SUBCOMMANDS
+
+    bar - Bar description
+    foo - Foo brief      
+
