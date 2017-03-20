@@ -1,0 +1,16 @@
+
+  Foo bar
+
+  USAGE
+
+    multi-level-3 [name]
+
+  PARAMETERS
+
+    name - Some name
+
+  SUBCOMMANDS
+
+    bar - Bar description
+    foo - Foo brief      
+

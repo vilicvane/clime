@@ -1,0 +1,16 @@
+
+  Bar description
+
+  USAGE
+
+    multi-level-3 bar [name]
+
+  PARAMETERS
+
+    name - Some name
+
+  SUBCOMMANDS
+
+    biu     - Biu
+    pia-pia - Pia
+

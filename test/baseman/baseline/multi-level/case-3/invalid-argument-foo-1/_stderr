@@ -1,0 +1,12 @@
+ERR Expecting 1 parameter(s) at most but got 2 instead.
+
+  Foo description
+
+  USAGE
+
+    multi-level-3 foo [name]
+
+  PARAMETERS
+
+    name - Some name
+
