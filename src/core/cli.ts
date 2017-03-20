@@ -117,7 +117,9 @@ export class CLI {
 
     let description: string | undefined;
 
-    if (path) {
+    let stats = path ? await v.call(FS.stat, path) : undefined;
+
+    if (path && stats!.isFile()) {
       let module = require(path);
       let TargetCommand = (module.default || module) as CommandClass;
 
@@ -358,7 +360,7 @@ instead of "${definition.name}"`);
    * Get subcommands definition written as `export subcommands = [...]`.
    */
   static async getSubcommandDefinitions(searchBase: string): Promise<SubcommandDefinition[]> {
-    let path = await this.findPathBySearchBase(searchBase);
+    let path = await this.findPathBySearchBase(searchBase, true);
 
     if (!path) {
       return [];
@@ -367,7 +369,7 @@ instead of "${definition.name}"`);
     return (require(path) as CommandModule).subcommands || [];
   }
 
-  private static async findPathBySearchBase(searchBase: string): Promise<string | undefined> {
+  private static async findPathBySearchBase(searchBase: string, fileOnly = false): Promise<string | undefined> {
       let possiblePaths = [
         `${searchBase}.js`,
         Path.join(searchBase, 'default.js'),
@@ -377,6 +379,10 @@ instead of "${definition.name}"`);
         if (await existsFile(possiblePath)) {
           return possiblePath;
         }
+      }
+
+      if (!fileOnly && await existsDir(searchBase)) {
+        return searchBase;
       }
 
       return undefined;
