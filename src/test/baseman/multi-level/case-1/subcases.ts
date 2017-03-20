@@ -58,7 +58,7 @@ export default [
     name: 'no-argument-bar-biu',
     args: ['bar', 'biu'],
   },
-  // TODO: bar pia-pia
+  // bar pia-pia
   {
     name: 'help-long-bar-pia-pia',
     args: ['bar', 'pia-pia', '--help'],

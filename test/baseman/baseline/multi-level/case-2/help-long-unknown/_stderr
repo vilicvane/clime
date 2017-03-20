@@ -1,0 +1,11 @@
+ERR Unknown subcommand "unknown".
+
+  USAGE
+
+    multi-level-2 <subcommand>
+
+  SUBCOMMANDS
+
+    bar
+    foo - Foo brief
+

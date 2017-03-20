@@ -4,7 +4,7 @@ ERR Unknown option flag "f".
 
   USAGE
 
-    single-level <name> [value=123]
+    single-level-1 <name> [value=123]
 
   PARAMETERS
 
