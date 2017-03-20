@@ -1,6 +1,7 @@
 import {
   Command,
   Context,
+  SubcommandDefinition,
   command,
   param,
 } from '../../../../../';
@@ -20,3 +21,10 @@ export default class extends Command {
     }, undefined, 2);
   }
 }
+
+export const subcommands: SubcommandDefinition[] = [
+  {
+    name: 'foo',
+    brief: 'Overridden foo brief',
+  },
+];

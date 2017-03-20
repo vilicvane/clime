@@ -15,8 +15,15 @@ interface SubcaseDefinition {
   args: string[];
 }
 
+export class ClimeCLITestCase extends CLITestCase {
+  get description(): string {
+    let argsStr = this.args.slice(1).map(arg => JSON.stringify(arg)).join(' ');
+    return `args ${argsStr}`;
+  }
+}
+
 export class ClimeCLITest extends CLITest {
-  async generate(): Promise<CLITestCase[]> {
+  async generate(): Promise<ClimeCLITestCase[]> {
     let caseNames = await v.call(glob, '*/case-*/', {
       cwd: __dirname,
     });
@@ -26,7 +33,7 @@ export class ClimeCLITest extends CLITest {
       let subcases = require(Path.join(caseDir, 'subcases')).default as SubcaseDefinition[];
 
       return subcases.map(subcase => {
-        return new CLITestCase(
+        return new ClimeCLITestCase(
           `${caseName}${subcase.name}`,
           [Path.join(caseDir, 'cli.js')].concat(subcase.args),
         );

@@ -11,6 +11,6 @@
 
   SUBCOMMANDS
 
-    bar - Bar description
-    foo - Foo brief      
+    foo - Overridden foo brief
+    bar - Bar description     
 
