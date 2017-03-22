@@ -272,7 +272,7 @@ export const subcommands: SubcommandDefinition[] = [
 ];
 ```
 
-Further more, those definition entries also allow you to add aliases or filename for a subcommand:
+Further more, those definition entries also allow you to add aliases for a subcommand:
 
 ```ts
 import { SubcommandDefinition } from 'clime';
@@ -280,14 +280,12 @@ import { SubcommandDefinition } from 'clime';
 export const subcommands: SubcommandDefinition[] = [
   {
     name: 'foo',
-    filename: 'foo-yo.js',
     alias: 'f',
     brief: 'A subcommand named foo',
   },
   {
     name: 'bar',
     aliases: ['b', 'bb'],
-    filename: 'bar-ha.js',
     brief: 'A subcommand named bar',
   },
 ];

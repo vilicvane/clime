@@ -1,0 +1,12 @@
+ERR Unknown option flag "x".
+
+  Foo description
+
+  USAGE
+
+    multi-level-4 foo [name]
+
+  PARAMETERS
+
+    name - Some name
+

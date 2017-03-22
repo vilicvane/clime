@@ -47,7 +47,6 @@ export interface CommandModule {
 
 export interface SubcommandDefinition {
   name: string;
-  filename?: string;
   alias?: string;
   aliases?: string[];
   brief?: string;
@@ -240,20 +239,11 @@ instead of "${definition.name}"`);
     possibleCommandName = definitionMap.has(possibleCommandName) ?
       possibleCommandName : aliasMap.get(possibleCommandName) || possibleCommandName;
 
-    let targetPath: string | undefined;
-
-    let targetDefinition = definitionMap.get(possibleCommandName);
     searchBase = Path.join(searchBase, possibleCommandName);
-
-    if (targetDefinition && targetDefinition.filename) {
-      targetPath = Path.resolve(searchBase, targetDefinition.filename);
-    } else {
-      targetPath = await CLI.findPathBySearchBase(searchBase) || targetPath;
-    }
 
     return {
       name: possibleCommandName,
-      path: targetPath,
+      path: await CLI.findPathBySearchBase(searchBase),
       searchBase: existsDir(searchBase) ? searchBase : undefined,
     };
   }
