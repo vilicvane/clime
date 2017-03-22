@@ -7,7 +7,6 @@ import { Resolvable } from 'villa';
 import {
   CLITest,
   CLITestCase,
-  Test,
 } from 'baseman';
 
 interface SubcaseDefinition {
