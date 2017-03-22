@@ -1,0 +1,17 @@
+ERR Unknown option flag "x".
+
+  Foo bar
+
+  USAGE
+
+    multi-root-1 [name]
+
+  PARAMETERS
+
+    name - Some name
+
+  SUBCOMMANDS
+
+    bar - Bar description
+    foo - Foo brief      
+
