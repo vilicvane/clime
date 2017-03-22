@@ -10,7 +10,7 @@ ERR Unknown option flag "x".
 
     name - Some name
 
-  SUBCOMMANDS
+  INTERESTING COMMANDS
 
     bar - Bar description
     foo - Foo brief      
