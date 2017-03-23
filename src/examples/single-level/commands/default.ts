@@ -7,7 +7,7 @@ import {
   command,
   option,
   param,
-} from '../../../';
+} from '../../..';
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 

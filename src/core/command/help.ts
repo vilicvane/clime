@@ -4,7 +4,7 @@ import * as Path from 'path';
 import * as Chalk from 'chalk';
 import * as v from 'villa';
 
-import { Command } from './';
+import { Command } from '.';
 
 import { Printable } from '../object';
 

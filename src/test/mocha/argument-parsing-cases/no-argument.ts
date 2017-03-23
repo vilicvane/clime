@@ -4,7 +4,7 @@ import {
   Command,
   command,
   metadata,
-} from '../../../';
+} from '../../..';
 
 @command()
 export default class TestCommand extends Command {

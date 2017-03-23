@@ -4,7 +4,7 @@ import {
   SubcommandDefinition,
   command,
   param,
-} from '../../../../../';
+} from '../../../../..';
 
 export const subcommands: SubcommandDefinition[] = [
   {

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import * as Path from 'path';
-import { CLI, Shim } from '../../../../';
+import { CLI, Shim } from '../../../..';
 
 let cli = new CLI('multi-level-1', {
   label: 'Interesting Commands',

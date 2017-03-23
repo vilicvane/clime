@@ -7,7 +7,7 @@ import {
   Options,
   ParamDefinition,
   ParamsDefinition,
-} from './';
+} from '.';
 
 import { Printable } from '../object';
 

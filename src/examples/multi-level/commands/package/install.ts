@@ -2,7 +2,7 @@ import {
   Command,
   command,
   param,
-} from '../../../../';
+} from '../../../..';
 
 @command({
   description: 'Install a package',

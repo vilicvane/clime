@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import hyphenate from 'hyphenate';
 
-import { GeneralValidator } from './';
+import { GeneralValidator } from '.';
 
 /**
  * Options for command options.

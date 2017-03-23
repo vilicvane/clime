@@ -2,7 +2,7 @@ import {
   Command,
   command,
   metadata,
-} from '../../../../../../';
+} from '../../../../../..';
 
 @command({
   brief: 'Biu',

@@ -4,7 +4,7 @@ import {
   command,
   param,
   params,
-} from '../../../../../';
+} from '../../../../..';
 
 @command({
   description: 'Foo bar',

@@ -3,7 +3,7 @@ import {
   Context,
   command,
   param,
-} from '../../../../../';
+} from '../../../../..';
 
 @command({
   description: 'Foo bar',

@@ -1,6 +1,6 @@
 import * as Path from 'path';
 
-import { CLI } from '../../../';
+import { CLI } from '../../..';
 
 export type CLICreator = (label?: string) => CLI;
 

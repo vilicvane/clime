@@ -3,7 +3,7 @@ import * as Path from 'path';
 import {
   CLI,
   HelpInfo,
-} from '../../';
+} from '../..';
 
 import { getCLICreator } from './helpers';
 

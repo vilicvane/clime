@@ -5,7 +5,7 @@ import {
   command,
   metadata,
   option,
-} from '../../../../../';
+} from '../../../../..';
 
 export class SomeOptions extends Options {
   @option()

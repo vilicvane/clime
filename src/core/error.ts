@@ -1,7 +1,7 @@
 import * as Chalk from 'chalk';
 import ExtendableError from 'extendable-error';
 
-import { Printable } from './';
+import { Printable } from '.';
 
 export class ExpectedError extends ExtendableError implements Printable {
   constructor(

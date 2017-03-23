@@ -6,7 +6,7 @@ import {
   command,
   option,
   params,
-} from '../../../../';
+} from '../../../..';
 
 export class TestOptions extends Options {
   @option()

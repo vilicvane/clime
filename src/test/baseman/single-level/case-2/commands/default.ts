@@ -4,7 +4,7 @@ import {
   Object as ClimeObject,
   command,
   param,
-} from '../../../../../';
+} from '../../../../..';
 
 @command({
   description: 'Foo bar',

@@ -4,7 +4,7 @@ import {
   command,
   metadata,
   option,
-} from '../../../../../../';
+} from '../../../../../..';
 
 export class PiaPiaOptions extends Options {
   @option({

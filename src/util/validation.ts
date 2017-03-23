@@ -1,7 +1,7 @@
 import {
   ExpectedError,
   Validator,
-} from '../core/';
+} from '../core';
 
 export class RangeValidator implements Validator<number> {
   constructor(
