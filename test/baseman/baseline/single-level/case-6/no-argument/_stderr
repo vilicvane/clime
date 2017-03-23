@@ -1,0 +1,12 @@
+ERR Missing required option(s) `foo`.
+
+  Foo bar
+
+  USAGE
+
+    single-level-6 --foo <yo>
+
+  OPTIONS
+
+    -h, --foo <yo> - guess what
+

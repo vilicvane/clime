@@ -1,0 +1,12 @@
+ERR Expecting value for option `help`.
+
+  Foo bar
+
+  USAGE
+
+    single-level-5 [...options]
+
+  OPTIONS
+
+    --help <help>
+

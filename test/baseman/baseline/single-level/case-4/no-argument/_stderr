@@ -1,0 +1,13 @@
+ERR Expecting parameter(s) `name`.
+
+  Foo bar
+
+  USAGE
+
+    single-level-4 <name> <...values>
+
+  PARAMETERS
+
+    name   - Some name  
+    values - Some values
+

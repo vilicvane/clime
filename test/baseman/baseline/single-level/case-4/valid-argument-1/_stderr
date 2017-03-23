@@ -1,0 +1,13 @@
+ERR Expecting at least one element for variadic parameters `values`.
+
+  Foo bar
+
+  USAGE
+
+    single-level-4 <name> <...values>
+
+  PARAMETERS
+
+    name   - Some name  
+    values - Some values
+
