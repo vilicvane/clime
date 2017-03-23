@@ -1,0 +1,20 @@
+
+  Foo bar
+
+  USAGE
+
+    multi-root-2 [name]
+
+  PARAMETERS
+
+    name - Some name
+
+  SUBCOMMANDS
+
+    bar - Bar description
+
+  EXTRA SUBCOMMANDS
+
+    foo - Extra extra foo brief
+    pia - Extra extra pia brief
+
