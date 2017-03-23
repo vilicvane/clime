@@ -146,6 +146,11 @@ export class HelpInfo implements Printable {
           let aliases: string[];
 
           if (existingItem) {
+            if (!stats) {
+              // Directory without an entry should not override existing one.
+              continue;
+            }
+
             existingItem.overridden = true;
 
             if (!brief) {
