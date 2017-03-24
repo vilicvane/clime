@@ -4,7 +4,7 @@ import * as Path from 'path';
 import * as Chalk from 'chalk';
 import * as v from 'villa';
 
-import { Command } from '.';
+import { Command, CommandClass } from '.';
 
 import { Printable } from '../object';
 
@@ -132,12 +132,13 @@ export class HelpInfo implements Printable {
           continue;
         }
 
+        let commandConstructor: CommandClass | undefined;
         let brief: string | undefined;
 
         if (stats) {
-          let module = require(path);
-          let CommandClass = (module.default || module) as CommandModule;
-          brief = CommandClass && (CommandClass.brief || CommandClass.description);
+          let module = require(path) as CommandModule;
+          commandConstructor = module.default;
+          brief = commandConstructor && (commandConstructor.brief || commandConstructor.description);
         }
 
         if (existingItem && existingItem.group === groupIndex) {
@@ -146,7 +147,7 @@ export class HelpInfo implements Printable {
           let aliases: string[];
 
           if (existingItem) {
-            if (!stats) {
+            if (!commandConstructor) {
               // Directory without an entry should not override existing one.
               continue;
             }

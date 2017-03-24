@@ -40,6 +40,7 @@ export interface CommandRoot {
 export type GeneralCommandRoot = string | CommandRoot;
 
 export interface CommandModule {
+  default?: CommandClass;
   brief?: string;
   description?: string;
   subcommands?: SubcommandDefinition[];
@@ -119,10 +120,10 @@ export class CLI {
     let stats = path ? await v.call(FS.stat, path) : undefined;
 
     if (path && stats!.isFile()) {
-      let module = require(path);
-      let TargetCommand = (module.default || module) as CommandClass;
+      let module = require(path) as CommandModule;
+      let TargetCommand = module.default;
 
-      if (TargetCommand.prototype instanceof Command) {
+      if (TargetCommand && TargetCommand.prototype instanceof Command) {
         // This is a command module with an actual command.
 
         if (!TargetCommand.decorated) {
@@ -163,9 +164,8 @@ make sure to decorate it with \`@command()\``);
           context,
         );
       } else if (Path.basename(path) === 'default.js') {
-        // This is a command module with only description and
-        // subcommands information.
-        description = TargetCommand.description;
+        // This is a command module with only description and subcommands information.
+        description = module.description;
       } else {
         throw new TypeError(`Module "${path}" is expected to be a command`);
       }
