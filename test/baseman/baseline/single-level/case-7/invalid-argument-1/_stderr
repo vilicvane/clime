@@ -1,0 +1,13 @@
+ERR Expecting value for option `foo`.
+
+  Foo bar
+
+  USAGE
+
+    single-level-7 --foo <yo> [...options]
+
+  OPTIONS
+
+    -h, --foo <yo> - guess what foo
+    --bar <bar>    - guess what bar
+
