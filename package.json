@@ -11,7 +11,8 @@
     "lint": "tslint src/**/*.ts -c tslint.json",
     "build": "npm run lint && rimraf bld && tsc",
     "pretest": "npm run build",
-    "test": "mocha && baseman run bld/test/baseman"
+    "test": "mocha && baseman run bld/test/baseman",
+    "prepublish": "npm test"
   },
   "repository": {
     "type": "git",
@@ -44,7 +45,7 @@
     "@types/glob": "^5.0.30",
     "@types/mocha": "^2.2.39",
     "@types/node": "^7.0.5",
-    "baseman": "dev",
+    "baseman": "^0.1.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "glob": "^7.1.1",
