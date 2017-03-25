@@ -1,0 +1,13 @@
+{
+  "reporter": [
+    "lcov",
+    "text-summary"
+  ],
+  "include": [
+    "bld/**/*.js"
+  ],
+  "exclude": [
+    "bld/test/**/*.js",
+    "bld/lang.js"
+  ]
+}

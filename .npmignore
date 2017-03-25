@@ -4,6 +4,7 @@
 
 /bld/examples/
 /bld/test/
+/coverage/
 
 /tsconfig.json
 /tslint.json

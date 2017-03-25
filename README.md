@@ -1,9 +1,10 @@
 [![NPM Package](https://badge.fury.io/js/clime.svg)](https://www.npmjs.com/package/clime)
 [![Build Status](https://travis-ci.org/vilic/clime.svg?branch=master)](https://travis-ci.org/vilic/clime)
+[![Coverage Status](https://coveralls.io/repos/github/vilic/clime/badge.svg?branch=master)](https://coveralls.io/github/vilic/clime?branch=master)
 
 # Clime
 
-The command-line interface framework for TypeScript.
+The command-line interface framework for TypeScript, tested with [baseman](https://github.com/vilic/baseman).
 
 ## Install
 

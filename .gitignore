@@ -1,7 +1,9 @@
+/.nyc_output/
 /.vscode/launch.json
 
 /node_modules/
 /bld/
+/coverage/
 
 /test/baseman/output/
 

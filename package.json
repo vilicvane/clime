@@ -7,12 +7,16 @@
   "scripts": {
     "tsc": "tsc",
     "baseman": "baseman",
+    "nyc": "nyc",
+    "coveralls": "coveralls",
     "tslint": "tslint",
     "lint": "tslint src/**/*.ts -c tslint.json",
     "build": "npm run lint && rimraf bld && tsc",
+    "bare-test": "mocha && baseman run bld/test/baseman",
     "pretest": "npm run build",
-    "test": "mocha && baseman run bld/test/baseman",
-    "prepublish": "npm test"
+    "test": "nyc npm run bare-test",
+    "prepublish": "npm test",
+    "report-coverage": "cat coverage/lcov.info | coveralls"
   },
   "repository": {
     "type": "git",
@@ -50,6 +54,7 @@
     "chai-as-promised": "^6.0.0",
     "glob": "^7.1.1",
     "mocha": "^3.0.2",
+    "nyc": "^10.1.2",
     "rimraf": "^2.6.1",
     "source-map-support": "^0.4.0",
     "tslint": "^4.5.1",
