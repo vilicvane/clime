@@ -27,7 +27,7 @@ import {
   findPaths,
   joinPaths,
   safeStat,
-} from '../util';
+} from '../internal-util';
 
 const COMMAND_NAME_REGEX = /^[\w\d]+(?:-[\w\d]+)*$/;
 const HELP_OPTION_REGEX = /^(?:-[h?]|--help)$/;

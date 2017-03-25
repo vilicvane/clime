@@ -18,12 +18,11 @@ import {
 import {
   TableRow,
   buildTableOutput,
-  deduplicate,
   existsDir,
   findPaths,
   indent,
   safeStat,
-} from '../../util';
+} from '../../internal-util';
 
 export interface HelpBuildingContext {
   label: string;

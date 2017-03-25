@@ -5,6 +5,11 @@ import './lang';
 export * from './core';
 export * from './shim';
 
-import * as ClimeObject from './object';
+import * as CastableObject from './castable-object';
+import * as Validation from './validation';
 
-export { ClimeObject as Object };
+export {
+  CastableObject,
+  CastableObject as Object,
+  Validation,
+};

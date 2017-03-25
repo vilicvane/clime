@@ -50,7 +50,6 @@ export class Context {
 }
 
 /**
- * @deprecated
  * Validator interface for parameters or options.
  */
 export interface Validator<T> {

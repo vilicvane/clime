@@ -7,7 +7,7 @@ import {
   GeneralValidator,
 } from './command';
 
-import { Reflection } from '../../util';
+import { Reflection } from '../../internal-util';
 
 /**
  * Options for variadic command parameters.
