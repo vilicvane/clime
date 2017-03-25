@@ -262,17 +262,21 @@ instead of "${definition.name}"`);
     let targetPath: string | undefined;
 
     let contexts: SubcommandSearchContext[] = await v.map(this.roots, async root => {
-      let candidatePath: string | undefined = Path.join(root.path, 'default.js');
-      candidatePath = await existsFile(candidatePath) ? candidatePath : undefined;
+      let path: string | undefined = Path.join(root.path, 'default.js');
+      path = await existsFile(path) ? path : undefined;
 
-      if (candidatePath) {
-        targetPath = candidatePath;
+      if (path) {
+        let module = require(path) as CommandModule;
+
+        if (module.default || !targetPath) {
+          targetPath = path;
+        }
       }
 
       return {
         label: root.label,
         name: this.name,
-        path: candidatePath,
+        path,
         searchBase: root.path,
       };
     });
@@ -301,7 +305,14 @@ instead of "${definition.name}"`);
         break;
       }
 
-      let targetContext = targetContexts[targetContexts.length - 1];
+      let targetContext = targetContexts[0];
+
+      for (let context of targetContexts.slice(1)) {
+        let module = require(context.path!) as CommandModule;
+        if (module.default) {
+          targetContext = context;
+        }
+      }
 
       targetPath = targetContext.path;
       possibleCommandName = targetContext.name;
