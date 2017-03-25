@@ -202,18 +202,6 @@ make sure to decorate it with \`@command()\``);
     }
   }
 
-  async getHelp(): Promise<HelpInfo> {
-    return await HelpInfo.build({
-      sequence: [this.name],
-      contexts: this.roots.map(root => {
-        return {
-          label: root.label,
-          dir: root.path,
-        };
-      }),
-    });
-  }
-
   private async preProcessSearchBase(searchBase: string, possibleCommandName: string, aliasMap: Map<string, string>):
     Promise<SubcommandSearchBaseResult> {
     let definitions = await CLI.getSubcommandDefinitions(searchBase);
