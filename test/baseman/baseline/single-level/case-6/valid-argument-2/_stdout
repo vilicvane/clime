@@ -1,3 +1,4 @@
 {
-  "foo": "yoha"
+  "foo": "yoha",
+  "bar": 456
 }

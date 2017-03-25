@@ -4,9 +4,10 @@ ERR Unknown option flag "f".
 
   USAGE
 
-    single-level-6 --foo <yo>
+    single-level-6 --foo <yo> [...options]
 
   OPTIONS
 
     -h, --foo <yo> - guess what
+    --bar <bar>   
 

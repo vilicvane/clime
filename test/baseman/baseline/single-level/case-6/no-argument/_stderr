@@ -4,9 +4,10 @@ ERR Missing required option(s) `foo`.
 
   USAGE
 
-    single-level-6 --foo <yo>
+    single-level-6 --foo <yo> [...options]
 
   OPTIONS
 
     -h, --foo <yo> - guess what
+    --bar <bar>   
 

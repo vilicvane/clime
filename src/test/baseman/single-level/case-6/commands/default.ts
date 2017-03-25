@@ -15,6 +15,11 @@ export class SomeOptions extends Options {
     required: true,
   })
   foo: string;
+
+  @option({
+    default: '456',
+  })
+  bar: number;
 }
 
 @command({
