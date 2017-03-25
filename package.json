@@ -6,6 +6,7 @@
   "typings": "bld/index.d.ts",
   "scripts": {
     "tsc": "tsc",
+    "baseman": "baseman",
     "tslint": "tslint",
     "lint": "tslint src/**/*.ts -c tslint.json",
     "build": "npm run lint && rimraf bld && tsc",
