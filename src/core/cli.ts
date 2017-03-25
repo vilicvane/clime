@@ -217,15 +217,18 @@ make sure to decorate it with \`@command()\``);
       }
 
       for (let alias of aliases) {
-        if (!aliasMap.has(alias)) {
-          aliasMap.set(alias, definition.name);
+        if (aliasMap.has(alias)) {
+          let targetName = aliasMap.get(alias);
+
+          if (targetName !== definition.name) {
+            throw new Error(`Alias "${alias}" already exists and points to "${targetName}" \
+instead of "${definition.name}"`);
+          }
+
+          continue;
         }
 
-        let targetName = aliasMap.get(alias);
-        if (targetName !== definition.name) {
-          throw new Error(`Alias "${alias}" already exists and points to "${targetName}" \
-instead of "${definition.name}"`);
-        }
+        aliasMap.set(alias, definition.name);
       }
     }
 
