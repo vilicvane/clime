@@ -1,0 +1,13 @@
+ERR Expecting a value instead of an option or toggle "--bar" for option `foo`.
+
+  Foo bar
+
+  USAGE
+
+    single-level-6 --foo <yo> [...options]
+
+  OPTIONS
+
+    -h, --foo <yo> - guess what
+    --bar <bar>   
+

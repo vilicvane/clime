@@ -28,6 +28,10 @@ export default [
     args: ['--foo'],
   },
   {
+    name: 'invalid-argument-2',
+    args: ['--foo', '--bar'],
+  },
+  {
     name: 'unknown-option-2',
     args: ['-f'],
   },
