@@ -83,4 +83,8 @@ export default [
     name: 'valid-argument-bar-pia-pia-4',
     args: ['bar', 'pia-pia', '-sn', 'hello'],
   },
+  {
+    name: 'invalid-argument-bar-pia-pia-1',
+    args: ['bar', 'pia-pia', '-ns', 'hello'],
+  },
 ];

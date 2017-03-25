@@ -1,0 +1,13 @@
+ERR Only the last flag in a sequence can refer to an option instead of a toggle.
+
+  Pia pia description
+
+  USAGE
+
+    multi-level-1 bar pia-pia [...options]
+
+  OPTIONS
+
+    -n, --name <name> - Useless name  
+    -s, --switch      - Useless switch
+
