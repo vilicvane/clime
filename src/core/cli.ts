@@ -53,9 +53,15 @@ export interface SubcommandDefinition {
   brief?: string;
 }
 
+export interface CommandEntry {
+  path: string;
+  module: CommandModule | undefined;
+}
+
 export interface SubcommandSearchBaseResult {
   name: string;
   path: string | undefined;
+  module: CommandModule | undefined;
   searchBase: string | undefined;
 }
 
@@ -71,6 +77,7 @@ interface PreProcessResult {
   sequence: string[];
   args: string[];
   path: string | undefined;
+  module: CommandModule | undefined;
   searchContexts: SubcommandSearchContext[];
   possibleUnknownCommandName: string | undefined;
 }
@@ -111,6 +118,7 @@ export class CLI {
       sequence,
       args,
       path,
+      module,
       searchContexts,
       possibleUnknownCommandName,
     } = await this.preProcessArguments(argv);
@@ -119,8 +127,7 @@ export class CLI {
 
     let stats = path ? await v.call(FS.stat, path) : undefined;
 
-    if (path && stats!.isFile()) {
-      let module = require(path) as CommandModule;
+    if (module) {
       let TargetCommand = module.default;
 
       if (TargetCommand && TargetCommand.prototype instanceof Command) {
@@ -131,7 +138,7 @@ export class CLI {
 make sure to decorate it with \`@command()\``);
         }
 
-        TargetCommand.path = path;
+        TargetCommand.path = path!;
         TargetCommand.helpBuildingContexts = searchContexts.map(context => {
           return {
             label: context.label,
@@ -163,11 +170,9 @@ make sure to decorate it with \`@command()\``);
           commandOptions,
           context,
         );
-      } else if (Path.basename(path) === 'default.js') {
-        // This is a command module with only description and subcommands information.
-        description = module.description;
       } else {
-        throw new TypeError(`Module "${path}" is expected to be a command`);
+        // This is a command module with only description and subcommand definitions.
+        description = module.description;
       }
     }
 
@@ -241,10 +246,12 @@ instead of "${definition.name}"`);
 
     searchBase = Path.join(searchBase, possibleCommandName);
 
+    let entry = await CLI.findEntryBySearchBase(searchBase);
+
     return {
       name: possibleCommandName,
-      path: await CLI.findPathBySearchBase(searchBase),
       searchBase: existsDir(searchBase) ? searchBase : undefined,
+      ...entry,
     };
   }
 
@@ -260,24 +267,29 @@ instead of "${definition.name}"`);
     let argsIndex = 0;
 
     let targetPath: string | undefined;
+    let targetModule: CommandModule | undefined;
 
     let contexts: SubcommandSearchContext[] = await v.map(this.roots, async root => {
       let path: string | undefined = Path.join(root.path, 'default.js');
       path = await existsFile(path) ? path : undefined;
 
+      let module: CommandModule | undefined;
+
       if (path) {
-        let module = require(path) as CommandModule;
+        module = require(path) as CommandModule;
 
         if (module.default || !targetPath) {
           targetPath = path;
+          targetModule = module;
         }
       }
 
       return {
         label: root.label,
         name: this.name,
-        path,
         searchBase: root.path,
+        path,
+        module,
       };
     });
 
@@ -308,13 +320,15 @@ instead of "${definition.name}"`);
       let targetContext = targetContexts[0];
 
       for (let context of targetContexts.slice(1)) {
-        let module = require(context.path!) as CommandModule;
-        if (module.default) {
+        let module = context.module;
+        if (module && module.default) {
           targetContext = context;
         }
       }
 
       targetPath = targetContext.path;
+      targetModule = targetContext.module;
+
       possibleCommandName = targetContext.name;
 
       argsIndex = i + 1;
@@ -327,6 +341,7 @@ instead of "${definition.name}"`);
       sequence,
       args: argv.slice(argsIndex),
       path: targetPath,
+      module: targetModule,
       searchContexts: contexts,
       possibleUnknownCommandName,
     };
@@ -361,16 +376,16 @@ instead of "${definition.name}"`);
    * Get subcommands definition written as `export subcommands = [...]`.
    */
   static async getSubcommandDefinitions(searchBase: string): Promise<SubcommandDefinition[]> {
-    let path = await this.findPathBySearchBase(searchBase, true);
+    let entry = await this.findEntryBySearchBase(searchBase);
 
-    if (!path) {
+    if (!entry || !entry.module) {
       return [];
     }
 
-    return (require(path) as CommandModule).subcommands || [];
+    return entry.module.subcommands || [];
   }
 
-  private static async findPathBySearchBase(searchBase: string, fileOnly = false): Promise<string | undefined> {
+  private static async findEntryBySearchBase(searchBase: string): Promise<CommandEntry | undefined> {
       let possiblePaths = [
         `${searchBase}.js`,
         Path.join(searchBase, 'default.js'),
@@ -378,12 +393,18 @@ instead of "${definition.name}"`);
 
       for (let possiblePath of possiblePaths) {
         if (await existsFile(possiblePath)) {
-          return possiblePath;
+          return {
+            path: possiblePath,
+            module: require(possiblePath) as CommandModule,
+          };
         }
       }
 
-      if (!fileOnly && await existsDir(searchBase)) {
-        return searchBase;
+      if (await existsDir(searchBase)) {
+        return {
+          path: searchBase,
+          module: undefined,
+        };
       }
 
       return undefined;
