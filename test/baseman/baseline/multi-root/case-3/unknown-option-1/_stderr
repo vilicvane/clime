@@ -1,0 +1,21 @@
+ERR Unknown option flag "x".
+
+  Foo bar
+
+  USAGE
+
+    multi-root-3 [name]
+
+  PARAMETERS
+
+    name - Some name
+
+  SUBCOMMANDS
+
+    bar - Overridden bar brief
+
+  EXTRA SUBCOMMANDS
+
+    foo [f,ff] - Extra overridden foo brief
+    pia        - Extra extra pia brief     
+

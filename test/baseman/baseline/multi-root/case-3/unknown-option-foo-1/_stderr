@@ -1,0 +1,12 @@
+ERR Unknown option flag "x".
+
+  Extra extra foo description
+
+  USAGE
+
+    multi-root-3 foo [name]
+
+  PARAMETERS
+
+    name - Some name
+

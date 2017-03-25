@@ -3,7 +3,7 @@
 
   USAGE
 
-    multi-root-2 bar [name]
+    multi-root-3 bar [name]
 
   PARAMETERS
 
@@ -15,5 +15,5 @@
 
   EXTRA SUBCOMMANDS
 
-    biu - Extra biu
+    biu - Extra overridden biu brief
 

@@ -1,0 +1,12 @@
+
+  Pia pia description
+
+  USAGE
+
+    multi-root-3 bar pia-pia [...options]
+
+  OPTIONS
+
+    -n, --name <name> - Useless name  
+    -s, --switch      - Useless switch
+
