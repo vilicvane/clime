@@ -1,0 +1,30 @@
+export default [
+  {
+    name: 'help-long',
+    args: ['--help'],
+  },
+  {
+    name: 'no-argument',
+    args: [],
+  },
+  {
+    name: 'valid-argument-1',
+    args: ['--foo', '123'],
+  },
+  {
+    name: 'valid-argument-2',
+    args: ['--bar', '15'],
+  },
+  {
+    name: 'invalid-argument-1',
+    args: ['--foo', '1.23'],
+  },
+  {
+    name: 'invalid-argument-2',
+    args: ['--bar', '12.3'],
+  },
+  {
+    name: 'invalid-argument-3',
+    args: ['--bar', '21'],
+  },
+];

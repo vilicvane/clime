@@ -1,0 +1,12 @@
+
+  Foo bar
+
+  USAGE
+
+    single-level-validation [...options]
+
+  OPTIONS
+
+    --foo <foo> - Foo description
+    --bar <bar> - Bar description
+
