@@ -68,9 +68,6 @@ export function params<T>({
 
     let paramDefinitions = constructor.paramDefinitions || [];
 
-    type = type ||
-      Reflect.getMetadata('design:paramtypes', target, 'execute')[index] as Clime.Constructor<T>;
-
     paramName = paramName ||
       hyphenate(Reflection.getFunctionParameterName(target.execute, index), { lowerCase: true });
 
