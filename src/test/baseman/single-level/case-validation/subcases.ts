@@ -16,6 +16,14 @@ export default [
     args: ['--bar', '15'],
   },
   {
+    name: 'valid-argument-3',
+    args: ['yoha'],
+  },
+  {
+    name: 'valid-argument-4',
+    args: ['yoha', '123'],
+  },
+  {
     name: 'invalid-argument-1',
     args: ['--foo', '1.23'],
   },
@@ -26,5 +34,13 @@ export default [
   {
     name: 'invalid-argument-3',
     args: ['--bar', '21'],
+  },
+  {
+    name: 'invalid-argument-4',
+    args: ['xxx'],
+  },
+  {
+    name: 'invalid-argument-5',
+    args: ['yoha', '456'],
   },
 ];

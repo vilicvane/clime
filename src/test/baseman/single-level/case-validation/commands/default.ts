@@ -1,10 +1,12 @@
 import {
   Command,
+  ExpectedError,
   Options,
   Validation,
   command,
   metadata,
   option,
+  param,
 } from '../../../../..';
 
 export class FooOptions extends Options {
@@ -28,8 +30,29 @@ export class FooOptions extends Options {
   description: 'Foo bar',
 })
 export default class extends Command {
-  @metadata
-  execute(options: FooOptions) {
-    return JSON.stringify(options, undefined, 2);
+  execute(
+    @param({
+      validator: /yoha/,
+    })
+    foo: string,
+
+    @param({
+      validators: [
+        (value: number, name) => {
+          if (value !== 123) {
+            throw new ExpectedError(`Value of ${name} is not valid`);
+          }
+        },
+      ],
+    })
+    bar: number,
+
+    options: FooOptions,
+  ) {
+    let data = Object.assign({
+      args: [foo, bar],
+    }, options);
+
+    return JSON.stringify(data, undefined, 2);
   }
 }
