@@ -24,8 +24,6 @@ import { ExpectedError } from './error';
 import {
   existsDir,
   existsFile,
-  findPaths,
-  joinPaths,
   safeStat,
 } from '../internal-util';
 

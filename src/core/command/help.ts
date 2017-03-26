@@ -19,7 +19,6 @@ import {
   TableRow,
   buildTableOutput,
   existsDir,
-  findPaths,
   indent,
   safeStat,
 } from '../../internal-util';
