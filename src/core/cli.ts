@@ -705,13 +705,13 @@ see \`StringCastable\` interface for more information`);
 
       for (let validator of validators) {
         if (validator instanceof RegExp) {
-          if (!validator.test(value)) {
+          if (!validator.test(arg)) {
             throw new ExpectedError(`Invalid value for "${name}"`);
           }
         } else if (typeof validator === 'function') {
-          validator(arg, name);
+          validator(value, name);
         } else {
-          validator.validate(arg, name);
+          validator.validate(value, name);
         }
       }
 
