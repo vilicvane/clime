@@ -4,9 +4,9 @@ import {
   Options,
   Validation,
   command,
-  metadata,
   option,
   param,
+  params,
 } from '../../../../..';
 
 export class FooOptions extends Options {
@@ -47,10 +47,16 @@ export default class extends Command {
     })
     bar: number,
 
+    @params({
+      type: Number,
+      validator: Validation.integer,
+    })
+    args: number[],
+
     options: FooOptions,
   ) {
     let data = Object.assign({
-      args: [foo, bar],
+      args: [foo, bar, ...args],
     }, options);
 
     return JSON.stringify(data, undefined, 2);

@@ -24,6 +24,10 @@ export default [
     args: ['yoha', '123'],
   },
   {
+    name: 'valid-argument-5',
+    args: ['yoha', '123', '1', '2'],
+  },
+  {
     name: 'invalid-argument-1',
     args: ['--foo', '1.23'],
   },
@@ -42,5 +46,9 @@ export default [
   {
     name: 'invalid-argument-5',
     args: ['yoha', '456'],
+  },
+  {
+    name: 'invalid-argument-6',
+    args: ['yoha', '123', '1.1'],
   },
 ];
