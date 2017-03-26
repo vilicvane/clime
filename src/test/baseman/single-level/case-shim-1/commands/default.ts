@@ -11,9 +11,21 @@ export default class extends Command {
   execute(
     @param()
     error: boolean,
+
+    @param({
+      default: true,
+    })
+    stack: boolean,
   ) {
     if (error) {
-      throw new Error('Instance of Error');
+      let error = new Error('Instance of Error');
+
+      if (stack) {
+        throw error;
+      } else {
+        delete error.stack;
+        throw error;
+      }
     } else {
       throw 'Some meaningless string';
     }
