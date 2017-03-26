@@ -15,7 +15,6 @@
     "bare-test": "mocha && baseman run bld/test/baseman",
     "pretest": "npm run build",
     "test": "nyc npm run bare-test",
-    "prepublish": "npm test",
     "report-coverage": "cat coverage/lcov.info | coveralls"
   },
   "repository": {
