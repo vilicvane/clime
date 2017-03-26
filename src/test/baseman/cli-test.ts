@@ -7,6 +7,7 @@ import { Resolvable } from 'villa';
 import {
   CLITest,
   CLITestCase,
+  Util,
 } from 'baseman';
 
 interface SubcaseDefinition {
@@ -18,6 +19,23 @@ export class ClimeCLITestCase extends CLITestCase {
   get description(): string {
     let argsStr = this.args.slice(1).map(arg => JSON.stringify(arg)).join(' ');
     return `args ${argsStr}`;
+  }
+
+  extractOutput(stdout: Buffer, stderr: Buffer): [string, string] {
+    let out = stdout.toString();
+    let err = stderr.toString();
+
+    let blurPathOptions: Util.BlurPathOptions = {
+      extensions: ['.js'],
+      existingOnly: true,
+    };
+
+    out = Util.blurPath(out, blurPathOptions);
+
+    err = Util.blurErrorStack(err);
+    err = Util.blurPath(err, blurPathOptions);
+
+    return [out, err];
   }
 }
 

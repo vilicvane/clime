@@ -1,0 +1,2 @@
+TypeError: Command defined in module "[path]" does not seem to be initialized, make sure to decorate it with `@command()`
+    [stack]
