@@ -46,6 +46,10 @@ export class ClimeCLITest extends CLITest {
     });
 
     return caseNames.map(caseName => {
+      if (!/-\d+\/$/.test(caseName)) {
+        throw new Error(`Expecting numeric suffix for case name "${caseName}"`);
+      }
+
       let caseDir = Path.join(__dirname, caseName);
       let subcases = require(Path.join(caseDir, 'subcases')).default as SubcaseDefinition[];
 
