@@ -1,0 +1,2 @@
+Error: No parameter type information found, please add `@metadata` decorator to method `execute` if no other decorator applied
+    [stack]
