@@ -356,7 +356,3 @@ ${buildTableOutput(optionRows, { indent: 4, separators: ' - ' })}`);
     return info;
   }
 }
-
-function isHelpInfoBuildPathOptions(options: HelpInfoBuildOptions): options is HelpInfoBuildPathOptions {
-  return 'dirs' in options;
-}
