@@ -108,11 +108,7 @@ export class HelpInfo implements Printable {
         let path = Path.join(dir, name);
         let stats = await safeStat(path);
 
-        if (!stats) {
-          continue;
-        }
-
-        if (stats.isFile()) {
+        if (stats!.isFile()) {
           if (name === 'default.js' || Path.extname(path) !== '.js') {
             continue;
           }

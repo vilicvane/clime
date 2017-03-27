@@ -3,7 +3,7 @@ import * as Path from 'path';
 
 import * as v from 'villa';
 
-export async function safeStat(path: string): Promise<FS.Stats | void> {
+export async function safeStat(path: string): Promise<FS.Stats | undefined> {
   return await v.call(FS.stat, path).catch(v.bear);
 }
 
