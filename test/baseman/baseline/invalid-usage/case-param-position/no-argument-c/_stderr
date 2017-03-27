@@ -1,0 +1,2 @@
+Error: Parameter cannot be optional if variadic parameters are required
+    [stack]
