@@ -9,6 +9,7 @@
   "exclude": [
     "bld/test/**/*.js",
     "bld/examples/**/*.js",
+    "bld/internal-util/**/*.js",
     "bld/lang.js"
   ]
 }
