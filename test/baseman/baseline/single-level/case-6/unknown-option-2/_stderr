@@ -4,7 +4,7 @@ ERR Unknown option flag "f".
 
   USAGE
 
-    single-level-6 --foo <yo> [...options]
+    single-level --foo <yo> [...options]
 
   OPTIONS
 

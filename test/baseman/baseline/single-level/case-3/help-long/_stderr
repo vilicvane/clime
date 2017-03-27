@@ -3,7 +3,7 @@
 
   USAGE
 
-    single-level-3 <name> [...values]
+    single-level <name> [...values]
 
   PARAMETERS
 

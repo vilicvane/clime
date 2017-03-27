@@ -3,7 +3,7 @@
 import * as Path from 'path';
 import { CLI, Shim } from '../../../..';
 
-let cli = new CLI('multi-level-1', {
+let cli = new CLI('multi-level', {
   label: 'Interesting Commands',
   path: Path.join(__dirname, 'commands'),
 });

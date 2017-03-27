@@ -4,7 +4,7 @@ ERR Only the last flag in a sequence can refer to an option instead of a toggle.
 
   USAGE
 
-    multi-level-1 bar pia-pia [...options]
+    multi-level bar pia-pia [...options]
 
   OPTIONS
 

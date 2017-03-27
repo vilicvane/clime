@@ -3,7 +3,7 @@
 
   USAGE
 
-    single-level-6 --foo <yo> [...options]
+    single-level --foo <yo> [...options]
 
   OPTIONS
 

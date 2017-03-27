@@ -4,7 +4,7 @@ ERR Unknown option flag "x".
 
   USAGE
 
-    multi-level-2 foo [name]
+    multi-level foo [name]
 
   PARAMETERS
 

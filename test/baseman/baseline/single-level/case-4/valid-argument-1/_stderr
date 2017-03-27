@@ -4,7 +4,7 @@ ERR Expecting at least one element for variadic parameters `values`.
 
   USAGE
 
-    single-level-4 <name> <...values>
+    single-level <name> <...values>
 
   PARAMETERS
 

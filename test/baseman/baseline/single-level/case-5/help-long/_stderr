@@ -4,7 +4,7 @@ ERR Expecting value for option `help`.
 
   USAGE
 
-    single-level-5 [...options]
+    single-level [...options]
 
   OPTIONS
 

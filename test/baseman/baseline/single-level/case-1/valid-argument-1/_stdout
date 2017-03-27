@@ -2,6 +2,6 @@
   "name": "guess what",
   "value": 123,
   "commands": [
-    "single-level-1"
+    "single-level"
   ]
 }

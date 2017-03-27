@@ -4,7 +4,7 @@ ERR Expecting a value instead of an option or toggle "--bar" for option `foo`.
 
   USAGE
 
-    single-level-6 --foo <yo> [...options]
+    single-level --foo <yo> [...options]
 
   OPTIONS
 

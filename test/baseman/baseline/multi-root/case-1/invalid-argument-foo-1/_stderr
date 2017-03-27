@@ -4,7 +4,7 @@ ERR Expecting 1 parameter(s) at most but got 2 instead.
 
   USAGE
 
-    multi-root-1 foo [name]
+    multi-root foo [name]
 
   PARAMETERS
 

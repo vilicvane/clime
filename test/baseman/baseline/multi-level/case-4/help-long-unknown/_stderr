@@ -2,7 +2,7 @@ ERR Unknown subcommand "unknown".
 
   USAGE
 
-    multi-level-4 <subcommand>
+    multi-level <subcommand>
 
   SUBCOMMANDS
 

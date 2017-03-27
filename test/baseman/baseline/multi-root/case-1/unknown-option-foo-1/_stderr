@@ -4,7 +4,7 @@ ERR Unknown option flag "x".
 
   USAGE
 
-    multi-root-1 foo [name]
+    multi-root foo [name]
 
   PARAMETERS
 
