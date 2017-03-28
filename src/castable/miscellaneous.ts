@@ -12,3 +12,15 @@ export class CommaSeparatedStrings extends Array<string> {
     return new this(...values);
   }
 }
+
+export class CastableDate extends Date {
+  private constructor(str: string) {
+    super(str);
+  }
+
+  static cast(str: string): CastableDate {
+    return new this(str);
+  }
+}
+
+export { CastableDate as Date };
