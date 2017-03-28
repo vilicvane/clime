@@ -1,5 +1,3 @@
-import * as Path from 'path';
-
 import {
   HelpBuildingContext,
   HelpInfo,
@@ -8,8 +6,6 @@ import {
   ParamDefinition,
   ParamsDefinition,
 } from '.';
-
-import { Printable } from '../object';
 
 /**
  * Options for command.

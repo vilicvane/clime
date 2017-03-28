@@ -11,12 +11,9 @@ import { Printable } from '../object';
 import {
   CLI,
   CommandModule,
-  SubcommandDefinition,
-  SubcommandSearchContext,
 } from '../cli';
 
 import {
-  TableRow,
   buildTableOutput,
   existsDir,
   indent,

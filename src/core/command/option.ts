@@ -55,7 +55,7 @@ export interface OptionDefinition<T> {
  */
 export abstract class Options {
   // TODO: what is this for? type checking?
-  // tslint:disable-next-line:variable-name
+  // tslint:disable-next-line
   private _options_mark: void;
 
   /** @internal */

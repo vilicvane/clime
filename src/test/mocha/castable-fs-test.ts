@@ -5,7 +5,7 @@ import { Context } from '../..';
 import {
   Directory,
   File,
-} from '../../castable-object/fs';
+} from '../../castable/fs';
 
 const SAMPLE_FILES_DIR = Path.join(__dirname, '../../../test/sample-files');
 const TEXT_FILE_NAME = 'file.txt';

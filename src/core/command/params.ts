@@ -66,8 +66,6 @@ export function params<T>({
       throw new Error('Can only define one `params` parameter');
     }
 
-    let paramDefinitions = constructor.paramDefinitions || [];
-
     paramName = paramName ||
       hyphenate(Reflection.getFunctionParameterName(target.execute, index), { lowerCase: true });
 

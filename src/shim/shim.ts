@@ -5,7 +5,6 @@ import * as Chalk from 'chalk';
 import {
   CLI,
   ExpectedError,
-  Printable,
   isPrintable,
 } from '../core';
 

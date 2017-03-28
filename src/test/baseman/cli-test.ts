@@ -2,7 +2,6 @@ import * as Path from 'path';
 
 import * as glob from 'glob';
 import * as v  from 'villa';
-import { Resolvable } from 'villa';
 
 import {
   CLITest,

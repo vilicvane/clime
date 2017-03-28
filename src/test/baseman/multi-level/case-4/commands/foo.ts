@@ -1,6 +1,5 @@
 import {
   Command,
-  Context,
   command,
   param,
 } from '../../../../..';

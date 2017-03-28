@@ -1,6 +1,5 @@
 import {
   Command,
-  Context,
   SubcommandDefinition,
   command,
   param,

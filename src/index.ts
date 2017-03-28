@@ -5,11 +5,11 @@ import './lang';
 export * from './core';
 export * from './shim';
 
-import * as CastableObject from './castable-object';
+import * as Castable from './castable';
 import * as Validation from './validation';
 
 export {
-  CastableObject,
-  CastableObject as Object,
+  Castable,
+  Castable as Object,
   Validation,
 };

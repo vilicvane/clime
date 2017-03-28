@@ -1,6 +1,5 @@
 import {
   Command,
-  Context,
   Options,
   command,
   metadata,

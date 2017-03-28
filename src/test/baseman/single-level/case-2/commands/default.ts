@@ -1,7 +1,6 @@
 import {
+  Castable,
   Command,
-  Context,
-  Object as ClimeObject,
   command,
   param,
 } from '../../../../..';
@@ -15,7 +14,7 @@ export default class extends Command {
       description: 'Some names',
       default: 'yo,ha',
     })
-    names: ClimeObject.CommaSeparatedStrings,
+    names: Castable.CommaSeparatedStrings,
   ) {
     return JSON.stringify(names, undefined, 2);
   }

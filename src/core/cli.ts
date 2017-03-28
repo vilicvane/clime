@@ -1,4 +1,3 @@
-import * as FS from 'fs';
 import * as Path from 'path';
 
 import * as v from 'villa';
@@ -24,7 +23,6 @@ import { ExpectedError } from './error';
 import {
   existsDir,
   existsFile,
-  safeStat,
 } from '../internal-util';
 
 const COMMAND_NAME_REGEX = /^[\w\d]+(?:-[\w\d]+)*$/;
@@ -122,8 +120,6 @@ export class CLI {
     } = await this.preProcessArguments(argv);
 
     let description: string | undefined;
-
-    let stats = path ? await v.call(FS.stat, path) : undefined;
 
     if (module) {
       let TargetCommand = module.default;
@@ -251,7 +247,6 @@ instead of "${definition.name}"`);
     let sequence = [this.name];
 
     let possibleUnknownCommandName: string | undefined;
-    let aliases: string[] | undefined;
 
     let argsIndex = 0;
 
