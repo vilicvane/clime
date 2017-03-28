@@ -4,7 +4,7 @@
 
 # Clime
 
-The command-line interface framework for TypeScript, tested with [baseman](https://github.com/vilic/baseman).
+The command-line interface framework for TypeScript, fully tested with [baseman](https://github.com/vilic/baseman).
 
 ## Install
 
