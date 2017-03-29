@@ -2,7 +2,9 @@ import * as assert from 'assert';
 
 import hyphenate from 'hyphenate';
 
-import { GeneralValidator } from '.';
+import { CastableType } from '..';
+
+import { GeneralValidator } from './command';
 
 /**
  * Options for command options.
@@ -18,7 +20,7 @@ export interface OptionOptions<T> {
   /** The placeholder shown on usage as `--option <placeholder>`. */
   placeholder?: string;
   /** Parameter type, defaults to type of emitted "design:type" metadata. */
-  type?: Clime.Constructor<T>;
+  type?: CastableType<T>;
   /** Indicates whether this option is required, defaults to `false`. */
   required?: boolean;
   /**
@@ -43,7 +45,7 @@ export interface OptionDefinition<T> {
   flag: string | undefined;
   placeholder: string | undefined;
   toggle: boolean;
-  type: Clime.Constructor<T>;
+  type: CastableType<T>;
   required: boolean;
   validators: GeneralValidator<T>[];
   default: T | string | undefined;

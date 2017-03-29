@@ -14,8 +14,10 @@ import {
 } from './command';
 
 import {
+  CastableType,
   Printable,
-  isStringCastable,
+  buildCastingContext,
+  cast,
 } from './object';
 
 import { ExpectedError } from './error';
@@ -661,56 +663,15 @@ class ArgsParser {
     async function castArgument(
       arg: string,
       name: string,
-      type: Clime.Constructor<any>,
+      type: CastableType<any>,
       validators: GeneralValidator<any>[],
     ): Promise<any> {
-      let value: any;
+      let castingContext = buildCastingContext(context, {
+        name,
+        validators,
+      });
 
-      switch (type) {
-        case String:
-          value = arg;
-          break;
-        case Number:
-          value = Number(arg);
-
-          if (isNaN(value)) {
-            throw new ExpectedError(`Value "${arg}" cannot be casted to number`);
-          }
-
-          break;
-        case Boolean:
-          if (/^(?:f|false)$/i.test(arg)) {
-            value = false;
-          } else {
-            let n = Number(arg);
-            value = isNaN(n) ? true : Boolean(n);
-          }
-
-          break;
-        default:
-          if (isStringCastable(type)) {
-            value = await type.cast(arg, context);
-          } else {
-            throw new Error(`Type \`${(<any>type).name || type}\` cannot be casted from a string, \
-see \`StringCastable\` interface for more information`);
-          }
-
-          break;
-      }
-
-      for (let validator of validators) {
-        if (validator instanceof RegExp) {
-          if (!validator.test(arg)) {
-            throw new ExpectedError(`Invalid value for "${name}"`);
-          }
-        } else if (typeof validator === 'function') {
-          validator(value, name);
-        } else {
-          validator.validate(value, name);
-        }
-      }
-
-      return value;
+      return await cast(arg, type, castingContext);
     }
   }
 }

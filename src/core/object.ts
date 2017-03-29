@@ -1,8 +1,11 @@
 import { Resolvable } from 'villa';
 
-import { Context } from './command';
+import {
+  Context,
+  GeneralValidator,
+} from './command';
 
-export type PrintableOutputLevel = 'log' | 'info' | 'warn' | 'error';
+import { ExpectedError } from './error';
 
 export interface Printable {
   print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream): Promise<void> | void;
@@ -12,10 +15,90 @@ export function isPrintable(object: any): object is Printable {
   return !!object && typeof object.print === 'function';
 }
 
-export interface StringCastable<T> extends Clime.Constructor<T> {
-  cast(source: string, context: Context): Resolvable<T>;
+export interface StringCastable<T> {
+  cast(source: string, context: CastingContext<T>): Resolvable<T>;
 }
 
-export function isStringCastable<T>(constructor: Clime.Constructor<T>): constructor is StringCastable<T>  {
-  return !!(<any>constructor).cast && typeof (<any>constructor).cast === 'function';
+export function isStringCastable<T>(object: object): object is StringCastable<T>  {
+  return !!object && !!(<any>object).cast && typeof (<any>object).cast === 'function';
+}
+
+export type CastableType<T> = Clime.Constructor<T> | StringCastable<T>;
+
+export async function cast<T>(
+  source: string,
+  type: CastableType<T>,
+  context: CastingContext<T>,
+): Promise<T> {
+  let value: any;
+
+  let {
+    name,
+    validators,
+  } = context;
+
+  switch (type as CastableType<any>) {
+    case String:
+      value = source;
+      break;
+    case Number:
+      value = Number(source);
+
+      if (isNaN(value)) {
+        throw new ExpectedError(`Value "${source}" cannot be casted to number`);
+      }
+
+      break;
+    case Boolean:
+      if (/^(?:f|false)$/i.test(source)) {
+        value = false;
+      } else {
+        let n = Number(source);
+        value = isNaN(n) ? true : Boolean(n);
+      }
+
+      break;
+    default:
+      if (!isStringCastable(type)) {
+        throw new Error(`Type \`${(<any>type).name || type}\` cannot be casted from a string, \
+see \`StringCastable\` interface for more information`);
+      }
+
+      let castingContext = buildCastingContext(context, {
+        name,
+        validators,
+        upper: context,
+      });
+
+      value = await type.cast(source, castingContext);
+
+      break;
+  }
+
+  for (let validator of validators) {
+    if (validator instanceof RegExp) {
+      if (!validator.test(source)) {
+        throw new ExpectedError(`Invalid value for "${name}"`);
+      }
+    } else if (typeof validator === 'function') {
+      validator(value, name);
+    } else {
+      validator.validate(value, name);
+    }
+  }
+
+  return value;
+
+}
+
+export interface CastingContextExtension<T> {
+  name: string;
+  validators: GeneralValidator<T>[];
+  upper?: CastingContext<any>;
+}
+
+export interface CastingContext<T> extends CastingContextExtension<T>, Context { }
+
+export function buildCastingContext<T>(context: Context, extension: CastingContextExtension<T>): CastingContext<T> {
+  return Object.assign(Object.create(context), extension);
 }

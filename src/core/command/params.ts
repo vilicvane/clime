@@ -2,6 +2,8 @@ import * as assert from 'assert';
 
 import hyphenate from 'hyphenate';
 
+import { CastableType } from '..';
+
 import {
   Command,
   GeneralValidator,
@@ -19,7 +21,7 @@ export interface ParamsOptions<T> {
    */
   name?: string;
   /** Type of every element in variadic parameters. */
-  type: Clime.Constructor<T>;
+  type: CastableType<T>;
   /**
    * Indicates whether at least one element is required, defaults to `false`.
    */
@@ -39,7 +41,7 @@ export interface ParamsOptions<T> {
 export interface ParamsDefinition<T> {
   name: string;
   index: number;
-  type: Clime.Constructor<T>;
+  type: CastableType<T>;
   required: boolean;
   validators: GeneralValidator<T>[];
   description: string | undefined;

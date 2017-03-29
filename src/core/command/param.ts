@@ -7,6 +7,8 @@ import {
   GeneralValidator,
 } from './command';
 
+import { CastableType } from '..';
+
 import { Reflection } from '../../internal-util';
 
 /**
@@ -19,7 +21,7 @@ export interface ParamOptions<T> {
    */
   name?: string;
   /** Parameter type, defaults to type of emitted "design:type" metadata. */
-  type?: Clime.Constructor<T>;
+  type?: CastableType<T>;
   /** Indicates whether this parameter is required, defaults to `false`. */
   required?: boolean;
   /**
@@ -39,7 +41,7 @@ export interface ParamOptions<T> {
 export interface ParamDefinition<T> {
   name: string;
   index: number;
-  type: Clime.Constructor<T>;
+  type: CastableType<T>;
   description: string | undefined;
   required: boolean;
   validators: GeneralValidator<T>[];
@@ -75,7 +77,7 @@ export function param<T>({
     }
 
     type = type ||
-      Reflect.getMetadata('design:paramtypes', target, 'execute')[index] as Clime.Constructor<T>;
+      Reflect.getMetadata('design:paramtypes', target, 'execute')[index] as CastableType<T>;
 
     paramName = paramName ||
       hyphenate(Reflection.getFunctionParameterName(target.execute, index), { lowerCase: true });
