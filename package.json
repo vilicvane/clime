@@ -57,7 +57,7 @@
     "nyc": "^10.1.2",
     "rimraf": "^2.6.1",
     "source-map-support": "^0.4.0",
-    "tslint": "^4.5.1",
+    "tslint": "^5.0.0",
     "typescript": "~2.2.1",
     "vts": "^0.1.0"
   }
