@@ -9,10 +9,10 @@ export function parseFunctionParameterNames(fn: Function): string[] | undefined 
 export function getFunctionParameterName(fn: Function, index: number): string {
   let paramNames: string[] | undefined;
 
-  if ((<any>fn).__paramNames) {
-    paramNames = (<any>fn).__paramNames;
+  if ((fn as any).__paramNames) {
+    paramNames = (fn as any).__paramNames;
   } else {
-    paramNames = (<any>fn).__paramNames = parseFunctionParameterNames(fn);
+    paramNames = (fn as any).__paramNames = parseFunctionParameterNames(fn);
   }
 
   return paramNames && paramNames[index] || 'param' + index;

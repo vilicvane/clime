@@ -177,7 +177,7 @@ if no other decorator applied');
 
     if (optionsConstructorCandidate && optionsConstructorCandidate.prototype instanceof Options) {
       target.optionsConstructor = optionsConstructorCandidate;
-      target.optionDefinitions = (<any>optionsConstructorCandidate as typeof Options).definitions;
+      target.optionDefinitions = (optionsConstructorCandidate as any as typeof Options).definitions;
 
       contextConstructorCandidateIndex = optionsConstructorCandidateIndex + 1;
     } else {

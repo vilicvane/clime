@@ -32,7 +32,7 @@ export function array<T>(
 ): StringCastable<T[]> {
   return {
     async cast(str: string, context: CastingContext<T[]>): Promise<T[]> {
-      let parts = str.split(<any>separator);
+      let parts = str.split(separator as any);
 
       if (trim) {
         parts = parts.map(part => part.trim());

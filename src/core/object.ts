@@ -20,7 +20,7 @@ export interface StringCastable<T> {
 }
 
 export function isStringCastable<T>(object: object): object is StringCastable<T>  {
-  return !!object && !!(<any>object).cast && typeof (<any>object).cast === 'function';
+  return !!object && !!(object as any).cast && typeof (object as any).cast === 'function';
 }
 
 export type CastableType<T> = Clime.Constructor<T> | StringCastable<T>;
@@ -60,7 +60,7 @@ export async function cast<T>(
       break;
     default:
       if (!isStringCastable(type)) {
-        throw new Error(`Type \`${(<any>type).name || type}\` cannot be casted from a string, \
+        throw new Error(`Type \`${type.name || type}\` cannot be casted from a string, \
 see \`StringCastable\` interface for more information`);
       }
 

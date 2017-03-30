@@ -27,6 +27,7 @@ export default class extends Command {
         throw error;
       }
     } else {
+      // tslint:disable-next-line:no-string-throw
       throw 'Some meaningless string';
     }
   }
