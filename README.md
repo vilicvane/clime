@@ -1,6 +1,6 @@
 [![NPM Package](https://badge.fury.io/js/clime.svg)](https://www.npmjs.com/package/clime)
 [![Build Status](https://travis-ci.org/vilic/clime.svg?branch=master)](https://travis-ci.org/vilic/clime)
-[![Coverage Status](https://coveralls.io/repos/github/vilic/clime/badge.svg?branch=master)](https://coveralls.io/github/vilic/clime?branch=master)
+[![Coverage Status](https://s3.amazonaws.com/assets.coveralls.io/badges/coveralls_98.svg)](https://coveralls.io/github/vilic/clime?branch=master)
 
 # Clime
 
