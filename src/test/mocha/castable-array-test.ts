@@ -1,6 +1,7 @@
 import {
   CastingContext,
   Context,
+  Validation,
   buildCastingContext,
   cast,
 } from '../..';
@@ -76,12 +77,36 @@ describe('Castable array', () => {
       validators: [],
     });
 
-    let type = array(array(String), { separator: ';' });
+    let type = array(array(String, { trim: false, empty: true }), { separator: ';' });
 
-    await cast('yo, ha; biu, pia', type, castingContext)
+    await cast('yo,, ha ; biu, pia', type, castingContext)
       .should.eventually.deep.equal([
-        ['yo', 'ha'],
-        ['biu', 'pia'],
+        ['yo', '', ' ha'],
+        ['biu', ' pia'],
       ]);
+  });
+
+  it('should validate array values', async () => {
+    let castingContext = buildCastingContext(context, {
+      name: 'test',
+      validators: [],
+    });
+
+    let typeA = array(Number, {
+      validators: [Validation.integer, Validation.range(10, 20)],
+    });
+
+    await cast('1, 15', typeA, castingContext)
+      .should.be.rejectedWith('Value of "element of test" is not within the range of [10, 20)');
+
+    await cast('10, 15.5', typeA, castingContext)
+      .should.be.rejectedWith('Value of "element of test" is not an integer');
+
+    let typeB = array(Number, {
+      validator: /^1\d$/,
+    });
+
+    await cast('11, 22, 13', typeB, castingContext)
+      .should.be.rejectedWith('Invalid value for "element of test"');
   });
 });
