@@ -659,7 +659,6 @@ class ArgsParser {
       commandOptions![key] = await castArgument(arg, name, type, validators);
     }
 
-    // TODO: support casting provider object.
     async function castArgument(
       arg: string,
       name: string,
