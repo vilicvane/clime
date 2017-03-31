@@ -46,6 +46,16 @@ export class Context {
 }
 
 /**
+ * Validation context.
+ */
+export interface ValidationContext {
+  /** A descriptive name of the validation target. */
+  name: string;
+  /** The source string of the value before being casted. */
+  source: string;
+}
+
+/**
  * Validator interface for parameters or options.
  */
 export interface Validator<T> {
@@ -57,7 +67,7 @@ export interface Validator<T> {
    * @param name - Name of the parameter or option, used for generating error
    * message.
    */
-  validate(value: T, name: string): void;
+  validate(value: T, context: ValidationContext): void;
 }
 
 /**
@@ -68,7 +78,7 @@ export interface Validator<T> {
  * @param name - Name of the parameter or option, used for generating error
  * message.
  */
-export type ValidatorFunction<T> = (value: T, name: string) => void;
+export type ValidatorFunction<T> = (value: T, context: ValidationContext) => void;
 
 export type GeneralValidator<T> = ValidatorFunction<T> | Validator<T> | RegExp;
 

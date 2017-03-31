@@ -38,7 +38,7 @@ export default class extends Command {
 
     @param({
       validators: [
-        (value: number, name) => {
+        (value: number, { name }) => {
           if (value !== 123) {
             throw new ExpectedError(`Value of ${name} is not valid`);
           }

@@ -81,9 +81,9 @@ see \`StringCastable\` interface for more information`);
         throw new ExpectedError(`Invalid value for "${name}"`);
       }
     } else if (typeof validator === 'function') {
-      validator(value, name);
+      validator(value, { name, source });
     } else {
-      validator.validate(value, name);
+      validator.validate(value, { name, source });
     }
   }
 

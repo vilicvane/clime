@@ -165,7 +165,7 @@ class File implements StringCastable {
 #### Validators
 
 A `validator` or `validators` can be specified for parameters and options validation.
-A validator can either be an instance of interface `Validator<T>` or a regular expression.
+A validator can either be an instance of interface `Validator<T>`, a function of type `ValidatorFunction<T>` or a regular expression.
 
 #### Expected error
 

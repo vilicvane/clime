@@ -1,1 +1,1 @@
-ERR Value of "bar" is not an integer.
+ERR Value (12.3) of "bar" is not an integer.

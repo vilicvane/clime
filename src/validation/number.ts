@@ -1,5 +1,6 @@
 import {
   ExpectedError,
+  ValidationContext,
   Validator,
 } from '../core';
 
@@ -11,9 +12,9 @@ export class RangeValidator implements Validator<number> {
     public to: number,
   ) { }
 
-  validate(value: number, name: string): void {
+  validate(value: number, { name, source }: ValidationContext): void {
     if (value < this.from || value >= this.to) {
-      throw new ExpectedError(`Value of "${name}" is not within the range of [${this.from}, ${this.to})`);
+      throw new ExpectedError(`Value (${source}) of "${name}" is not within the range of [${this.from}, ${this.to})`);
     }
   }
 }
@@ -23,9 +24,9 @@ export function range(from: number, to: number): RangeValidator {
 }
 
 export class IntegerValidator implements Validator<number> {
-  validate(value: number, name: string): void {
+  validate(value: number, { name, source }: ValidationContext): void {
     if (value % 1 !== 0) {
-      throw new ExpectedError(`Value of "${name}" is not an integer`);
+      throw new ExpectedError(`Value (${source}) of "${name}" is not an integer`);
     }
   }
 }
