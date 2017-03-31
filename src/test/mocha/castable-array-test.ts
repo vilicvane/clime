@@ -97,10 +97,10 @@ describe('Castable array', () => {
     });
 
     await cast('1, 15', typeA, castingContext)
-      .should.be.rejectedWith('Value of "element of test" is not within the range of [10, 20)');
+      .should.be.rejectedWith('Value (1) of "element of test" is not within the range of [10, 20)');
 
     await cast('10, 15.5', typeA, castingContext)
-      .should.be.rejectedWith('Value of "element of test" is not an integer');
+      .should.be.rejectedWith('Value (15.5) of "element of test" is not an integer');
 
     let typeB = array(Number, {
       validator: /^1\d$/,
