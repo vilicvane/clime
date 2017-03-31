@@ -48,6 +48,10 @@ describe('Castable object `File`', () => {
     (await textFile.text()).should.equal('content\n');
   });
 
+  it('should read json', async () => {
+    (await jsonFile.json<object>()).should.deep.equal({ key: 'value' });
+  });
+
   it('should require', () => {
     jsonFile.require<object>().should.deep.equal({ key: 'value' });
   });

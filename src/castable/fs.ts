@@ -38,6 +38,11 @@ export class File {
     return v.call<string>(FS.readFile, this.fullName, encoding);
   }
 
+  async json<T>(encoding?: string): Promise<T> {
+    let json = await this.text(encoding);
+    return JSON.parse(json);
+  }
+
   async assert(exists = true): Promise<void> {
     let stats = await v.call(FS.stat, this.fullName).catch(v.bear);
 
