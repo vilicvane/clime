@@ -1,34 +1,18 @@
 import {
   ExpectedError,
-  ValidationContext,
-  Validator,
+  ValidatorFunction,
 } from '../core';
 
-export class RangeValidator implements Validator<number> {
-  constructor(
-    /** value >= from. */
-    public from: number,
-    /** value < to. */
-    public to: number,
-  ) { }
-
-  validate(value: number, { name, source }: ValidationContext): void {
-    if (value < this.from || value >= this.to) {
-      throw new ExpectedError(`Value (${source}) of "${name}" is not within the range of [${this.from}, ${this.to})`);
+export function range(from: number, to: number): ValidatorFunction<number> {
+  return (value, { name, source }) => {
+    if (value < from || value >= to) {
+      throw new ExpectedError(`Value (${source}) of "${name}" is not within the range of [${from}, ${to})`);
     }
+  };
+}
+
+export const integer: ValidatorFunction<number> = (value, { name, source }) => {
+  if (value % 1 !== 0) {
+    throw new ExpectedError(`Value (${source}) of "${name}" is not an integer`);
   }
-}
-
-export function range(from: number, to: number): RangeValidator {
-  return new RangeValidator(from, to);
-}
-
-export class IntegerValidator implements Validator<number> {
-  validate(value: number, { name, source }: ValidationContext): void {
-    if (value % 1 !== 0) {
-      throw new ExpectedError(`Value (${source}) of "${name}" is not an integer`);
-    }
-  }
-}
-
-export const integer = new IntegerValidator();
+};
