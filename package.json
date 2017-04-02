@@ -59,6 +59,6 @@
     "source-map-support": "^0.4.0",
     "tslint": "^5.0.1",
     "typescript": "^2.2.2",
-    "vts": "^5.0.0"
+    "vts": "^5.0.1"
   }
 }
