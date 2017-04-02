@@ -80,6 +80,7 @@ export function param<T>({
       Reflect.getMetadata('design:paramtypes', target, 'execute')[index] as CastableType<T>;
 
     paramName = paramName ||
+      // tslint:disable-next-line:no-unbound-method
       hyphenate(Reflection.getFunctionParameterName(target.execute, index), { lowerCase: true });
 
     if (!validators) {

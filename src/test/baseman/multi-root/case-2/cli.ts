@@ -16,4 +16,5 @@ let cli = new CLI('multi-root', [
 ]);
 
 let shim = new Shim(cli);
+// tslint:disable-next-line:no-floating-promises
 shim.execute(process.argv);

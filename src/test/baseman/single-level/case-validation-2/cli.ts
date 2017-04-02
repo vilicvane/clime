@@ -6,4 +6,5 @@ import { CLI, Shim } from '../../../..';
 let cli = new CLI('single-level-validation', Path.join(__dirname, 'commands'));
 
 let shim = new Shim(cli);
+// tslint:disable-next-line:no-floating-promises
 shim.execute(process.argv);

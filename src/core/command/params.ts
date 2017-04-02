@@ -69,6 +69,7 @@ export function params<T>({
     }
 
     paramName = paramName ||
+      // tslint:disable-next-line:no-unbound-method
       hyphenate(Reflection.getFunctionParameterName(target.execute, index), { lowerCase: true });
 
     if (!validators) {

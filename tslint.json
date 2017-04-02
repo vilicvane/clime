@@ -1,3 +1,6 @@
 {
-  "extends": "vts"
+  "extends": "vts",
+  "rules": {
+    "no-require-imports": false
+  }
 }

@@ -33,6 +33,7 @@ export function buildTableOutput(rows: TableRow[], {
     indent :
     new Array(indent + 1).join(' ');
 
+  // tslint:disable-next-line:prefer-template
   return rows
     .map(row => {
       let line = indentStr;

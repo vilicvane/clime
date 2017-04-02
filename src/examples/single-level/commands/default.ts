@@ -9,6 +9,7 @@ import {
   param,
 } from '../../..';
 
+// tslint:disable-next-line:no-unbound-method
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 const messageMap: {

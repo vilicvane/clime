@@ -15,5 +15,5 @@ export function getFunctionParameterName(fn: Function, index: number): string {
     paramNames = (fn as any).__paramNames = parseFunctionParameterNames(fn);
   }
 
-  return paramNames && paramNames[index] || 'param' + index;
+  return paramNames && paramNames[index] || `param${index}`;
 }

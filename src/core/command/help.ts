@@ -250,7 +250,7 @@ ${buildTableOutput(rows, { indent: 4, separators })}`);
 
         return required ?
           `<${name}>` :
-          `[${name}${defaultValue !== undefined ? '=' + defaultValue : ''}]`;
+          `[${name}${defaultValue !== undefined ? `=${defaultValue}` : ''}]`;
       });
     } else {
       parameterUsageTexts = [];

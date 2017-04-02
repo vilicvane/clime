@@ -9,4 +9,5 @@ let cli = new CLI('single-level', {
 });
 
 let shim = new Shim(cli);
+// tslint:disable-next-line:no-floating-promises
 shim.execute(process.argv);

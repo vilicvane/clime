@@ -15,7 +15,7 @@ export default [
     name: 'valid-argument-2',
     args: ['guess what, biu biu biu'],
   },
-  // foo
+  // `foo`
   {
     name: 'help-long-foo',
     args: ['foo', '--help'],
@@ -28,7 +28,7 @@ export default [
     name: 'valid-argument-foo-1',
     args: ['foo', 'abc'],
   },
-  // bar
+  // `bar`
   {
     name: 'help-long-bar',
     args: ['bar', '--help'],

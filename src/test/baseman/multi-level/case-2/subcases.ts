@@ -15,7 +15,7 @@ export default [
     name: 'unknown-option-1',
     args: ['-x', 'abc'],
   },
-  // foo
+  // `foo`
   {
     name: 'help-long-foo',
     args: ['foo', '--help'],
@@ -36,7 +36,7 @@ export default [
     name: 'unknown-option-foo-1',
     args: ['foo', '-x', 'def'],
   },
-  // bar
+  // `bar`
   {
     name: 'help-long-bar',
     args: ['bar', '--help'],
@@ -45,7 +45,7 @@ export default [
     name: 'no-argument-bar',
     args: ['bar'],
   },
-  // bar biu
+  // `bar biu`
   {
     name: 'help-long-bar-biu',
     args: ['bar', 'biu', '--help'],
@@ -54,7 +54,7 @@ export default [
     name: 'no-argument-bar-biu',
     args: ['bar', 'biu'],
   },
-  // bar pia-pia
+  // `bar pia-pia`
   {
     name: 'help-long-bar-pia-pia',
     args: ['bar', 'pia-pia', '--help'],
