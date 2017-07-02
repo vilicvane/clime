@@ -10,9 +10,6 @@ The command-line interface framework for TypeScript, fully tested with [baseman]
 
 ```shell
 npm install clime --save
-
-# To install v0.5:
-npm install clime@dev --save
 ```
 
 ## Usage
