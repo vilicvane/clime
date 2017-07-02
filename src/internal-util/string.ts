@@ -1,4 +1,4 @@
-import * as Chalk from 'chalk';
+import * as stripAnsi from 'strip-ansi';
 
 export type TableRow = (string | undefined)[];
 
@@ -13,7 +13,7 @@ export function buildTableOutput(rows: TableRow[], {
 
     for (let i = 0; i < row.length; i++) {
       let text = row[i] || '';
-      let textLength = Chalk.stripColor(text).length;
+      let textLength = stripAnsi(text).length;
 
       if (textLength) {
         lastNoneEmptyIndex = i;
@@ -40,7 +40,7 @@ export function buildTableOutput(rows: TableRow[], {
 
       for (let i = 0; i < row.length; i++) {
         let text = row[i] || '';
-        let textLength = Chalk.stripColor(text).length;
+        let textLength = stripAnsi(text).length;
 
         let maxLength = maxTextLengths[i];
 

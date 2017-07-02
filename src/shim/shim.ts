@@ -1,3 +1,5 @@
+// tslint:disable:no-console
+
 import * as Util from 'util';
 
 import * as Chalk from 'chalk';
@@ -38,7 +40,7 @@ export class Shim {
         await error.print(process.stdout, process.stderr);
 
         if (error instanceof ExpectedError) {
-          exitCode = (error as ExpectedError).code;
+          exitCode = error.code;
         }
       } else if (error instanceof Error) {
         console.error(Chalk.red(error.stack || error.message));

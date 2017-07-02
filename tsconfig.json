@@ -5,10 +5,8 @@
     "declaration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "strictNullChecks": true,
+    "strict": true,
     "noImplicitReturns": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
     "stripInternal": true,
@@ -16,7 +14,12 @@
     "skipDefaultLibCheck": true,
     "newLine": "LF",
     "rootDir": "src",
-    "outDir": "bld"
+    "outDir": "bld",
+    "plugins": [
+      {
+        "name": "tslint-language-service"
+      }
+    ]
   },
   "exclude": [
     "bld",

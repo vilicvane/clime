@@ -58,7 +58,7 @@ export interface CommandEntry {
 
 export interface SubcommandSearchBaseResult {
   name: string;
-  path: string | undefined;
+  path?: string | undefined;
   module: CommandModule | undefined;
   searchBase: string | undefined;
 }
@@ -238,7 +238,8 @@ instead of "${definition.name}"`);
     return {
       name: possibleCommandName,
       searchBase: existsDir(searchBase) ? searchBase : undefined,
-      ...entry,
+      path: entry && entry.path,
+      module: entry && entry.module,
     };
   }
 

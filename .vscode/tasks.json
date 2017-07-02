@@ -18,8 +18,8 @@
       "args": ["run", "lint", "--", "--force"],
       "showOutput": "silent",
 			"problemMatcher": {
-				"owner": "tslint",
-				"fileLocation": "relative",
+				"owner": "typescript",
+				"fileLocation": "absolute",
 				"pattern": {
 					"regexp": "^(?:([A-Z]+): )?(.*)\\[(\\d+),\\s(\\d+)\\]:\\s(.*)$",
           "severity": 1,
