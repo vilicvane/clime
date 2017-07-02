@@ -1,6 +1,6 @@
 {
   "name": "clime",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "The command-line interface framework for TypeScript.",
   "main": "bld/index.js",
   "typings": "bld/index.d.ts",
