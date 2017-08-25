@@ -8,7 +8,9 @@ The command-line interface framework for TypeScript, fully tested with [baseman]
 
 ## Install
 
-```shell
+```sh
+yarn add clime
+# or
 npm install clime --save
 ```
 

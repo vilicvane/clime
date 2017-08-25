@@ -11,10 +11,10 @@
     "coveralls": "coveralls",
     "tslint": "tslint",
     "lint": "tslint -c tslint.json -p tsconfig.json --type-check",
-    "build": "npm run lint && rimraf bld && tsc",
+    "build": "yarn lint && rimraf bld && tsc",
     "bare-test": "mocha && baseman run bld/test/baseman",
-    "pretest": "npm run build",
-    "test": "nyc npm run bare-test",
+    "pretest": "yarn build",
+    "test": "nyc yarn bare-test",
     "report-coverage": "cat coverage/lcov.info | coveralls"
   },
   "repository": {
@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/vilic/clime#readme",
   "dependencies": {
-    "chalk": "^2.0.1",
+    "chalk": "^2.1.0",
     "extendable-error": "^0.1.5",
     "hyphenate": "^0.2.1",
     "reflect-metadata": "^0.1.10",
@@ -43,24 +43,24 @@
     "villa": "^0.2.11"
   },
   "devDependencies": {
-    "@types/chai": "^4.0.1",
+    "@types/chai": "^4.0.4",
     "@types/chai-as-promised": "0.0.31",
     "@types/chalk": "^0.4.31",
-    "@types/glob": "^5.0.30",
-    "@types/mocha": "^2.2.41",
-    "@types/node": "^8.0.7",
+    "@types/glob": "^5.0.32",
+    "@types/mocha": "^2.2.42",
+    "@types/node": "^8.0.25",
     "baseman": "latest",
-    "chai": "^4.0.2",
-    "chai-as-promised": "^7.0.0",
+    "chai": "^4.1.1",
+    "chai-as-promised": "^7.1.1",
     "coveralls": "^2.13.1",
     "glob": "^7.1.2",
-    "mocha": "^3.4.2",
-    "nyc": "^11.0.3",
+    "mocha": "^3.5.0",
+    "nyc": "^11.1.0",
     "rimraf": "^2.6.1",
-    "source-map-support": "^0.4.15",
-    "tslint": "^5.4.3",
+    "source-map-support": "^0.4.16",
+    "tslint": "^5.6.0",
     "tslint-language-service": "^0.9.6",
-    "typescript": "^2.4.1",
-    "vts": "^5.4.7"
+    "typescript": "^2.4.2",
+    "vts": "^5.6.1"
   }
 }
