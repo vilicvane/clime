@@ -3,19 +3,19 @@
   "tasks": [
     {
       "taskName": "build-watch",
-      "command": "npm",
+      "command": "yarn",
       "isBuildCommand": true,
       "isShellCommand": true,
-      "args": ["run", "tsc", "--", "-w"],
+      "args": ["tsc", "--", "-w"],
       "showOutput": "silent",
       "isBackground": true,
       "problemMatcher": "$tsc-watch"
     },
     {
       "taskName": "lint",
-      "command": "npm",
+      "command": "yarn",
       "isShellCommand": true,
-      "args": ["run", "lint", "--", "--force"],
+      "args": ["lint", "--", "--force"],
       "showOutput": "silent",
 			"problemMatcher": {
 				"owner": "typescript",
