@@ -35,6 +35,7 @@ export async function cast<T>(
   let {
     name,
     validators,
+    default: usingDefault,
   } = context;
 
   switch (type as CastableType<any>) {
@@ -67,6 +68,7 @@ see \`StringCastable\` interface for more information`);
       let castingContext = buildCastingContext(context, {
         name,
         validators,
+        default: usingDefault,
         upper: context,
       });
 
@@ -94,6 +96,7 @@ see \`StringCastable\` interface for more information`);
 export interface CastingContextExtension<T> {
   name: string;
   validators: GeneralValidator<T>[];
+  default: boolean;
   upper?: CastingContext<any>;
 }
 

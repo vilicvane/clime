@@ -14,10 +14,10 @@ export class File {
 
   private constructor(
     public readonly source: string,
-    public readonly cwd: string,
+    public readonly context: Context,
   ) {
     this.baseName = Path.basename(source);
-    this.fullName = Path.resolve(cwd, source);
+    this.fullName = Path.resolve(context.cwd, source);
   }
 
   require<T>(): T {
@@ -60,7 +60,7 @@ export class File {
   }
 
   static cast(name: string, context: Context): File {
-    return new this(name, context.cwd);
+    return new this(name, context);
   }
 }
 
@@ -70,10 +70,10 @@ export class Directory {
 
   private constructor(
     public readonly source: string,
-    public readonly cwd: string,
+    public readonly context: Context,
   ) {
     this.baseName = Path.basename(source);
-    this.fullName = Path.resolve(cwd, source);
+    this.fullName = Path.resolve(context.cwd, source);
   }
 
   async assert(exists = true): Promise<void> {
@@ -93,6 +93,6 @@ export class Directory {
   }
 
   static cast(name: string, context: Context): Directory {
-    return new this(name, context.cwd);
+    return new this(name, context);
   }
 }

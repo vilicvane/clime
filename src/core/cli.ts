@@ -503,7 +503,7 @@ class ArgsParser {
           commandOptions[key] = false;
         } else {
           commandOptions[key] = typeof defaultValue === 'string' ?
-            await castArgument(defaultValue, name, type, validators) :
+            await castArgument(defaultValue, name, type, validators, true) :
             defaultValue;
         }
       }
@@ -528,10 +528,22 @@ class ArgsParser {
         }
       } else if (pendingParamDefinitions.length) {
         let definition = pendingParamDefinitions.shift() as ParamDefinition<any>;
-        let casted = await castArgument(arg, definition.name, definition.type, definition.validators);
+        let casted = await castArgument(
+          arg,
+          definition.name,
+          definition.type,
+          definition.validators,
+          false,
+        );
         commandArgs.push(casted);
       } else if (paramsDefinition) {
-        let casted = await castArgument(arg, paramsDefinition.name, paramsDefinition.type, paramsDefinition.validators);
+        let casted = await castArgument(
+          arg,
+          paramsDefinition.name,
+          paramsDefinition.type,
+          paramsDefinition.validators,
+          false,
+        );
         commandExtraArgs.push(casted);
       } else {
         throw new UsageError(
@@ -564,7 +576,7 @@ class ArgsParser {
       let defaultValue = definition.default;
 
       let value = typeof defaultValue === 'string' ?
-        await castArgument(defaultValue, definition.name, definition.type, definition.validators) :
+        await castArgument(defaultValue, definition.name, definition.type, definition.validators, true) :
         defaultValue;
 
       commandArgs.push(value);
@@ -657,7 +669,7 @@ class ArgsParser {
         );
       }
 
-      commandOptions![key] = await castArgument(arg, name, type, validators);
+      commandOptions![key] = await castArgument(arg, name, type, validators, false);
     }
 
     async function castArgument(
@@ -665,9 +677,11 @@ class ArgsParser {
       name: string,
       type: CastableType<any>,
       validators: GeneralValidator<any>[],
+      usingDefault: boolean,
     ): Promise<any> {
       let castingContext = buildCastingContext(context, {
         name,
+        default: usingDefault,
         validators,
       });
 

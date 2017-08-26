@@ -40,6 +40,7 @@ describe('Castable array', () => {
     let castingContext = buildCastingContext(context, {
       name: 'test',
       validators: [],
+      default: false,
     });
 
     await cast('foo, bar', array(String), castingContext)
@@ -56,6 +57,7 @@ describe('Castable array', () => {
     let castingContext = buildCastingContext(context, {
       name: 'test',
       validators: [],
+      default: false,
     });
 
     await cast('yo, ha', array(CastableFoo), castingContext)
@@ -75,6 +77,7 @@ describe('Castable array', () => {
     let castingContext = buildCastingContext(context, {
       name: 'test',
       validators: [],
+      default: false,
     });
 
     let type = array(array(String, { trim: false, empty: true }), { separator: ';' });
@@ -90,6 +93,7 @@ describe('Castable array', () => {
     let castingContext = buildCastingContext(context, {
       name: 'test',
       validators: [],
+      default: false,
     });
 
     let typeA = array(Number, {

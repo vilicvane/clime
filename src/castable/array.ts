@@ -49,6 +49,7 @@ export function array<T>(
       let castingContext = buildCastingContext(context, {
         name: `element of ${context.name}`,
         validators,
+        default: context.default,
       });
 
       return await v.map(parts, part => cast(part, type, castingContext));
