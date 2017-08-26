@@ -5,11 +5,6 @@
   "main": "bld/index.js",
   "typings": "bld/index.d.ts",
   "scripts": {
-    "tsc": "tsc",
-    "baseman": "baseman",
-    "nyc": "nyc",
-    "coveralls": "coveralls",
-    "tslint": "tslint",
     "lint": "tslint -c tslint.json -p tsconfig.json --type-check",
     "build": "yarn lint && rimraf bld && tsc",
     "bare-test": "mocha && baseman run bld/test/baseman",
