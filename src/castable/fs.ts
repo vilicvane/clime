@@ -62,6 +62,11 @@ export class File {
     }
   }
 
+  async exists(): Promise<boolean> {
+    let stats = await v.call(FS.stat, this.fullName).catch(v.bear);
+    return !!stats && stats.isFile();
+  }
+
   static cast(name: string, context: CastingContext<File>): File {
     return new this(name, context.cwd, context.default);
   }
@@ -96,6 +101,11 @@ export class Directory {
     } else if (stats) {
       throw new ExpectedError(`Object "${this.source}" already exists`);
     }
+  }
+
+  async exists(): Promise<boolean> {
+    let stats = await v.call(FS.stat, this.fullName).catch(v.bear);
+    return !!stats && stats.isDirectory();
   }
 
   static cast(name: string, context: CastingContext<Directory>): Directory {

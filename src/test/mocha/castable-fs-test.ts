@@ -24,20 +24,24 @@ const context: CastingContext<any> = {
 };
 
 describe('Castable object `File`', () => {
-  let textFile: File;
-  let jsonFile: File;
+  let textFile = File.cast(TEXT_FILE_PATH, context);
+  let jsonFile = File.cast(JSON_FILE_PATH, context);
 
   it('should assert existence', async () => {
-    textFile = File.cast(TEXT_FILE_PATH, context);
-    jsonFile = File.cast(JSON_FILE_PATH, context);
-
     await textFile.assert();
+    await textFile.assert(true);
     await jsonFile.assert(false).should.be.rejectedWith('already exists');
 
-    await File.cast(TEXT_FILE_NAME, context).assert(true);
     await File.cast(NON_EXISTENT_NAME, context).assert(false);
     await File.cast(NON_EXISTENT_PATH, context).assert().should.be.rejectedWith('does not exist');
     await File.cast(SAMPLE_FILES_DIR, context).assert().should.be.rejectedWith('expected to be a file');
+  });
+
+  it('should test existence', async () => {
+    await textFile.exists().should.eventually.be.true;
+
+    await File.cast(NON_EXISTENT_PATH, context).exists().should.eventually.be.false;
+    await File.cast(SAMPLE_FILES_DIR, context).exists().should.eventually.be.false;
   });
 
   it('should read buffer', async () => {
@@ -68,5 +72,11 @@ describe('Castable object `Directory`', () => {
     await Directory.cast(SAMPLE_FILES_DIR, context).assert(false).should.be.rejectedWith('already exists');
     await Directory.cast(NON_EXISTENT_PATH, context).assert().should.be.rejectedWith('does not exist');
     await Directory.cast(TEXT_FILE_NAME, context).assert().should.be.rejectedWith('expected to be a directory');
+  });
+
+  it('should test existence', async () => {
+    await Directory.cast(SAMPLE_FILES_DIR, context).exists().should.eventually.be.true;
+    await Directory.cast(NON_EXISTENT_PATH, context).exists().should.eventually.be.false;
+    await Directory.cast(TEXT_FILE_NAME, context).exists().should.eventually.be.false;
   });
 });
