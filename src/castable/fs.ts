@@ -62,9 +62,21 @@ export class File {
     }
   }
 
-  async exists(): Promise<boolean> {
-    let stats = await v.call(FS.stat, this.fullName).catch(v.bear);
-    return !!stats && stats.isFile();
+  async exists(): Promise<boolean>;
+  async exists(extensions: string[]): Promise<string | undefined>;
+  async exists(extensions?: string[]): Promise<boolean | string | undefined> {
+    let extensionsSpecified = !!extensions;
+
+    for (let extension of extensions || ['']) {
+      let path = this.fullName + extension;
+      let stats = await v.call(FS.stat, path).catch(v.bear);
+
+      if (stats && stats.isFile()) {
+        return extensionsSpecified ? path : true;
+      }
+    }
+
+    return extensionsSpecified ? undefined : false;
   }
 
   static cast(name: string, context: CastingContext<File>): File {

@@ -8,9 +8,11 @@ import {
 } from '../../castable/fs';
 
 const SAMPLE_FILES_DIR = Path.join(__dirname, '../../../test/sample-files');
+const FILE_BASE_NAME = 'file';
 const TEXT_FILE_NAME = 'file.txt';
 const JSON_FILE_NAME = 'file.json';
 const NON_EXISTENT_NAME = 'guess-what';
+const FILE_BASE_PATH = Path.join(SAMPLE_FILES_DIR, FILE_BASE_NAME);
 const TEXT_FILE_PATH = Path.join(SAMPLE_FILES_DIR, TEXT_FILE_NAME);
 const JSON_FILE_PATH = Path.join(SAMPLE_FILES_DIR, JSON_FILE_NAME);
 const NON_EXISTENT_PATH = Path.join(SAMPLE_FILES_DIR, NON_EXISTENT_NAME);
@@ -39,6 +41,21 @@ describe('Castable object `File`', () => {
 
   it('should test existence', async () => {
     await textFile.exists().should.eventually.be.true;
+
+    await File
+      .cast(FILE_BASE_PATH, context)
+      .exists(['.txt'])
+      .should.eventually.equal(TEXT_FILE_PATH);
+
+    await File
+      .cast(FILE_BASE_PATH, context)
+      .exists(['.js', '.txt'])
+      .should.eventually.equal(TEXT_FILE_PATH);
+
+    await File
+      .cast(FILE_BASE_PATH, context)
+      .exists(['.js'])
+      .should.eventually.be.undefined;
 
     await File.cast(NON_EXISTENT_PATH, context).exists().should.eventually.be.false;
     await File.cast(SAMPLE_FILES_DIR, context).exists().should.eventually.be.false;
