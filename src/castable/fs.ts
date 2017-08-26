@@ -4,20 +4,23 @@ import * as Path from 'path';
 import * as v from 'villa';
 
 import {
-  Context,
+  CastingContext,
   ExpectedError,
 } from '../core';
 
 export class File {
   readonly baseName: string;
   readonly fullName: string;
+  readonly default: boolean;
 
   private constructor(
     public readonly source: string,
-    public readonly context: Context,
+    public readonly cwd: string,
+    usingDefault: boolean,
   ) {
     this.baseName = Path.basename(source);
-    this.fullName = Path.resolve(context.cwd, source);
+    this.fullName = Path.resolve(cwd, source);
+    this.default = usingDefault;
   }
 
   require<T>(): T {
@@ -59,21 +62,24 @@ export class File {
     }
   }
 
-  static cast(name: string, context: Context): File {
-    return new this(name, context);
+  static cast(name: string, context: CastingContext<File>): File {
+    return new this(name, context.cwd, context.default);
   }
 }
 
 export class Directory {
   readonly baseName: string;
   readonly fullName: string;
+  readonly default: boolean;
 
   private constructor(
     public readonly source: string,
-    public readonly context: Context,
+    public readonly cwd: string,
+    usingDefault: boolean,
   ) {
     this.baseName = Path.basename(source);
-    this.fullName = Path.resolve(context.cwd, source);
+    this.fullName = Path.resolve(cwd, source);
+    this.default = usingDefault;
   }
 
   async assert(exists = true): Promise<void> {
@@ -92,7 +98,7 @@ export class Directory {
     }
   }
 
-  static cast(name: string, context: Context): Directory {
-    return new this(name, context);
+  static cast(name: string, context: CastingContext<Directory>): Directory {
+    return new this(name, context.cwd, context.default);
   }
 }

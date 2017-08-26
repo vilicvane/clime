@@ -1,6 +1,6 @@
 import * as Path from 'path';
 
-import { Context } from '../..';
+import { CastingContext } from '../..';
 
 import {
   Directory,
@@ -15,10 +15,13 @@ const TEXT_FILE_PATH = Path.join(SAMPLE_FILES_DIR, TEXT_FILE_NAME);
 const JSON_FILE_PATH = Path.join(SAMPLE_FILES_DIR, JSON_FILE_NAME);
 const NON_EXISTENT_PATH = Path.join(SAMPLE_FILES_DIR, NON_EXISTENT_NAME);
 
-const context = new Context({
-  cwd: SAMPLE_FILES_DIR,
+const context: CastingContext<any> = {
+  name: 'test',
   commands: ['clime'],
-});
+  cwd: SAMPLE_FILES_DIR,
+  validators: [],
+  default: false,
+};
 
 describe('Castable object `File`', () => {
   let textFile: File;
