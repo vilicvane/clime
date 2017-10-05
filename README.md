@@ -6,6 +6,13 @@
 
 The command-line interface framework for TypeScript, fully tested with [baseman](https://github.com/vilic/baseman).
 
+## Prerequisites
+
+- Node.js 6+
+- TypeScript compilation options in `tsconfig.json`
+  - `target` needs to be set as `'es6'` / `'es2015'` or higher.
+  - `experimentalDecorators` and `emitDecoratorMetadata` should both be enabled.
+
 ## Install
 
 ```sh
@@ -16,7 +23,7 @@ npm install clime --save
 
 ## Usage
 
-Here is a basic example, an entry file (usually won't change among time) and a single command:
+Here is a basic example, an entry file (usually won't change much among time) and a single command:
 
 **src/cli.ts**
 
@@ -71,7 +78,6 @@ export default class extends Command {
 ### Parameter types and options schema
 
 Clime provides a way in which you can get parameters and options you really want to: **typed** at compile time and **casted** at run time.
-To make this work, you'll need to set both of `experimentalDecorators` and `emitDecoratorMetadata` in your `tsconfig.json` to `true`.
 
 ```ts
 import {
@@ -155,7 +161,7 @@ class File implements StringCastable {
     public path: string,
   ) { }
 
-  static cast(path: string, context: Context): File {
+  static cast(path: string, context: CastingContext<File>): File {
     return new File(Path.resolve(context.cwd, path));
   }
 }
@@ -164,11 +170,13 @@ class File implements StringCastable {
 #### Validators
 
 A `validator` or `validators` can be specified for parameters and options validation.
-A validator can either be an instance of interface `Validator<T>`, a function of type `ValidatorFunction<T>` or a regular expression.
+A validator can either be an instance that implements interface `Validator<T>`, a function that matches type `ValidatorFunction<T>` or a regular expression.
+
+For the validators in forms other than regular expression, it is the casted value that will be tested against. And for regular expression validator, the source string will be tested against instead.
 
 #### Expected error
 
-A useful way to distinguish expected errors (e.g., errors that might be caused by incorrect user input) from other errors is to use `ExpectedError` class when throwing.
+A useful way to distinguish expected errors (e.g., errors that might be caused by incorrect user input) from other errors is to throw instances of `ExpectedError` class or its subclasses.
 And a validator for example, usually throw instances of `ExpectedError`.
 
 #### Preserving metadata without command-line parameters
@@ -205,10 +213,10 @@ export default class extends Command {
 
 ### Subcommands
 
-Clime provides an easy way to create subcommands. The default entry of a clime command is `default.js` (`default.ts` before compilation).
+Clime provides an easy way to create subcommands. The default entry of a clime command is `default.js` (`default.ts` before compilation of course).
 Any other `.js` files under the same folder are considered as subcommand files.
 
-Clime allows multi-level subcommands via folders, for three-level commands like:
+Clime allows multi-level subcommands based on file structures. For three-level commands like below:
 
 ```text
 command
@@ -255,7 +263,7 @@ export const brief = 'brief description';
 #### Configuring subcommand definitions using `subcommands` field
 
 Clime has to load every subcommand modules under a specific command to know their briefs.
-To avoid this, you may export a `subcommands` array with subcommand definitions like:
+To avoid this, you may export a `subcommands` array with subcommand definitions like below:
 
 ```ts
 import { SubcommandDefinition } from 'clime';
@@ -272,7 +280,7 @@ export const subcommands: SubcommandDefinition[] = [
 ];
 ```
 
-Further more, those definition entries also allow you to add aliases for a subcommand:
+Further more, those definition entries also allow you to add alias or aliases for subcommands:
 
 ```ts
 import { SubcommandDefinition } from 'clime';
@@ -289,6 +297,34 @@ export const subcommands: SubcommandDefinition[] = [
     brief: 'A subcommand named bar',
   },
 ];
+```
+
+## Multiple command roots support
+
+For some CLI tools, it would be nice to support project specific commands. And Clime has this ability built-in.
+
+For example, you may define the `cli` object like below to load commands from both CLI tool commands path as well as project path:
+
+```ts
+let cli = new CLI('greet', [
+  Path.join(__dirname, 'commands'),
+  'project-commands',
+]);
+```
+
+And you can also add different labels for those command directories:
+
+```ts
+let cli = new CLI('greet', [
+  {
+    label: 'Built-in',
+    path: Path.join(__dirname, 'commands'),
+  },
+  {
+    label: 'Extra',
+    path: 'project-commands',
+  },
+]);
 ```
 
 ## Testable
