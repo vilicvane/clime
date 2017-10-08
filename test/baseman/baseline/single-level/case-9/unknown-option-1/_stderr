@@ -1,0 +1,12 @@
+ERR Unknown option `foo`.
+
+  Foo bar
+
+  USAGE
+
+    single-level --foo-bar <fooBar>
+
+  OPTIONS
+
+    --foo-bar <fooBar>
+

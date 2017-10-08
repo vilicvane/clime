@@ -1,0 +1,12 @@
+ERR Missing required option(s) `foo-bar`.
+
+  Foo bar
+
+  USAGE
+
+    single-level --foo-bar <fooBar>
+
+  OPTIONS
+
+    --foo-bar <fooBar>
+
