@@ -280,7 +280,7 @@ ${buildTableOutput(rows, { indent: 4, separators })}`);
     let optionDefinitions = TargetCommand.optionDefinitions || [];
     let requiredOptionUsageItems = optionDefinitions
       .filter(definition => definition.required)
-      .map(({ name, placeholder }) => `--${name} <${placeholder || name}>`);
+      .map(({ name, key, placeholder }) => `--${name} <${placeholder || key}>`);
 
     let usageLine = [
       Chalk.bold(TargetCommand.sequence.join(' ')),
