@@ -283,7 +283,7 @@ ${buildTableOutput(rows, { indent: 4, separators })}`);
       .map(({ name, key, placeholder }) => `--${name} <${placeholder || key}>`);
 
     let usageLine = [
-      Chalk.bold(TargetCommand.sequence.join(' ')),
+      Chalk.bold(TargetCommand.sequence.join(' ').replace(/^\/ /, '/')),
       ...parameterUsageTexts,
       ...requiredOptionUsageItems,
     ].join(' ');
