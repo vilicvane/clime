@@ -12,6 +12,6 @@ describe('Castable object `CommaSeparatedStrings`', () => {
 
 describe('Castable object `CastableDate`', () => {
   it('should cast', () => {
-    CastableDate.cast('2013-12-15').getTime().should.equal(new Date('2013-12-15').getTime());
+    CastableDate.cast('2013-12-15').getTime().should.equal(new Date(2013, 11, 5).getTime());
   });
 });
