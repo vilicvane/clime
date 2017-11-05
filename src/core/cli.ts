@@ -111,7 +111,22 @@ export class CLI {
     });
   }
 
-  async execute(argv: string[], cwd = process.cwd()): Promise<any> {
+  async execute(argv: string[], cwd?: string): Promise<any>;
+  async execute(argv: string[], contextExtension: object, cwd?: string): Promise<any>;
+  async execute(
+    argv: string[],
+    contextExtension: object | string | undefined,
+    cwd?: string | undefined,
+  ): Promise<any> {
+    if (typeof contextExtension === 'string') {
+      cwd = contextExtension;
+      contextExtension = undefined;
+    }
+
+    if (!cwd) {
+      cwd = process.cwd();
+    }
+
     let {
       sequence,
       args,
@@ -144,7 +159,7 @@ make sure to decorate it with \`@command()\``);
         TargetCommand.sequence = sequence;
 
         let argsParser = new ArgsParser(TargetCommand);
-        let parsedArgs = await argsParser.parse(sequence, args, cwd);
+        let parsedArgs = await argsParser.parse(sequence, args, cwd, contextExtension);
 
         if (!parsedArgs) {
           return await HelpInfo.build(TargetCommand);
@@ -453,14 +468,22 @@ class ArgsParser {
     }
   }
 
-  async parse(sequence: string[], args: string[], cwd: string): Promise<ParsedArgs | undefined> {
+  async parse(
+    sequence: string[],
+    args: string[],
+    cwd: string,
+    contextExtension: object | undefined,
+  ): Promise<ParsedArgs | undefined> {
     let that = this;
 
-    let ContextConstructor = this.contextConstructor || Context;
-    let context = new ContextConstructor({
-      cwd,
-      commands: sequence,
-    });
+    let ContextConstructor: Clime.Constructor<Context> = this.contextConstructor || Context;
+    let context = new ContextConstructor(
+      {
+        cwd,
+        commands: sequence,
+      },
+      contextExtension,
+    );
 
     args = args.concat();
 
