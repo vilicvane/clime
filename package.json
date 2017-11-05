@@ -33,6 +33,7 @@
     "chalk": "^2.1.0",
     "extendable-error": "^0.1.5",
     "hyphenate": "^0.2.1",
+    "parse-messy-time": "^2.1.0",
     "reflect-metadata": "^0.1.10",
     "strip-ansi": "^4.0.0",
     "villa": "^0.2.11"

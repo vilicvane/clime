@@ -1,3 +1,5 @@
+import parseMessyTime = require('parse-messy-time');
+
 export class CommaSeparatedStrings extends Array<string> {
   private constructor(...args: string[]) {
     super(...args);
@@ -15,7 +17,7 @@ export class CommaSeparatedStrings extends Array<string> {
 
 export class CastableDate extends Date {
   private constructor(str: string) {
-    super(str);
+    super(parseMessyTime(str));
   }
 
   static cast(str: string): CastableDate {
