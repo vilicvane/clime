@@ -21,7 +21,7 @@ export interface ArrayCastingOptions<T> {
 }
 
 export function array<T>(
-  type: CastableType<T>,
+  type: CastableType<any>,
   {
     separator = ',',
     trim = true,

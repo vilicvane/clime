@@ -55,7 +55,7 @@
     "source-map-support": "^0.4.16",
     "tslint": "^5.6.0",
     "tslint-language-service": "^0.9.6",
-    "typescript": "^2.4.2",
+    "typescript": "^2.6.1",
     "vts": "^5.6.1"
   }
 }

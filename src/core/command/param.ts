@@ -21,7 +21,7 @@ export interface ParamOptions<T> {
    */
   name?: string;
   /** Parameter type, defaults to type of emitted "design:type" metadata. */
-  type?: CastableType<T>;
+  type?: CastableType<any>;
   /** Indicates whether this parameter is required, defaults to `false`. */
   required?: boolean;
   /**
@@ -41,7 +41,7 @@ export interface ParamOptions<T> {
 export interface ParamDefinition<T> {
   name: string;
   index: number;
-  type: CastableType<T>;
+  type: CastableType<any>;
   description: string | undefined;
   required: boolean;
   validators: GeneralValidator<T>[];

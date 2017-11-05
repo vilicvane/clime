@@ -21,7 +21,7 @@ export interface ParamsOptions<T> {
    */
   name?: string;
   /** Type of every element in variadic parameters. */
-  type: CastableType<T>;
+  type: CastableType<any>;
   /**
    * Indicates whether at least one element is required, defaults to `false`.
    */
@@ -41,7 +41,7 @@ export interface ParamsOptions<T> {
 export interface ParamsDefinition<T> {
   name: string;
   index: number;
-  type: CastableType<T>;
+  type: CastableType<any>;
   required: boolean;
   validators: GeneralValidator<T>[];
   description: string | undefined;
