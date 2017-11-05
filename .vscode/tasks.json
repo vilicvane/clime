@@ -6,7 +6,7 @@
       "command": "yarn",
       "isBuildCommand": true,
       "isShellCommand": true,
-      "args": ["tsc", "--", "-w"],
+      "args": ["tsc", "-w"],
       "showOutput": "silent",
       "isBackground": true,
       "problemMatcher": "$tsc-watch"
@@ -15,7 +15,7 @@
       "taskName": "lint",
       "command": "yarn",
       "isShellCommand": true,
-      "args": ["lint", "--", "--force"],
+      "args": ["lint", "--force"],
       "showOutput": "silent",
 			"problemMatcher": {
 				"owner": "typescript",
