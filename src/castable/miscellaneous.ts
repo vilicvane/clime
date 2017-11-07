@@ -15,7 +15,7 @@ export class CommaSeparatedStrings extends Array<string> {
   }
 }
 
-export class CastableDate extends Date {
+class CastableDate extends Date {
   private constructor(str: string) {
     super(parseMessyTime(str, {now: Math.round(Date.now() / 1000) * 1000}));
   }
@@ -29,4 +29,4 @@ export class CastableDate extends Date {
   }
 }
 
-export { CastableDate as Date };
+export { CastableDate as Date, CastableDate };
