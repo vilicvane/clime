@@ -543,7 +543,7 @@ class ArgsParser {
         return undefined;
       }
 
-      if (arg[0] === '-') {
+      if (arg[0] === '-' && isNaN(Number(arg))) {
         if (arg[1] === '-') {
           await consumeToggleOrOption(arg.substr(2));
         } else {
@@ -685,7 +685,7 @@ class ArgsParser {
         throw new UsageError(`Expecting value for option \`${name}\``, that.helpProvider);
       }
 
-      if (arg[0] === '-') {
+      if (arg[0] === '-' && isNaN(Number(arg))) {
         throw new UsageError(
           `Expecting a value instead of an option or toggle "${arg}" for option \`${name}\``,
           that.helpProvider,
