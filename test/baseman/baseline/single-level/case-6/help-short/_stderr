@@ -9,5 +9,5 @@ ERR Expecting value for option `foo`.
   OPTIONS
 
     -h, --foo <yo> - guess what
-    --bar <bar>   
+    --bar <bar>    - [456]     
 
