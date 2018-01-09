@@ -9,5 +9,5 @@ ERR Unknown option flag "f".
   OPTIONS
 
     -h, --foo <yo> - guess what
-    --bar <bar>   
+    --bar <bar>    - [456]     
 

@@ -324,7 +324,7 @@ ${buildTableOutput(parameterDescriptionRows, { indent: 4, separators: ' - '})}`)
           }
 
           if (defaultValue !== undefined && defaultValue) {
-            description += ` [${defaultValue}]`;
+            description = description ? `description [${defaultValue}]` : `[${defaultValue}]`;
           }
 
           return [

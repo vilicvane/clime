@@ -9,5 +9,5 @@ ERR Missing required option(s) `foo`.
   OPTIONS
 
     -h, --foo <yo> - guess what
-    --bar <bar>   
+    --bar <bar>    - [456]     
 
