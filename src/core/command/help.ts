@@ -312,6 +312,7 @@ ${buildTableOutput(parameterDescriptionRows, { indent: 4, separators: ' - '})}`)
             placeholder,
             toggle: isToggle,
             description,
+            default: defaultValue,
           } = definition;
 
           let triggerStr = flag ? `-${flag}, ` : '';
@@ -320,6 +321,10 @@ ${buildTableOutput(parameterDescriptionRows, { indent: 4, separators: ' - '})}`)
 
           if (!isToggle) {
             triggerStr += ` <${placeholder || key}>`;
+          }
+
+          if (defaultValue !== undefined && defaultValue) {
+            description += ` [${defaultValue}]`;
           }
 
           return [
