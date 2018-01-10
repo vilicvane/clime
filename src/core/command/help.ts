@@ -323,8 +323,8 @@ ${buildTableOutput(parameterDescriptionRows, { indent: 4, separators: ' - '})}`)
             triggerStr += ` <${placeholder || key}>`;
           }
 
-          if (defaultValue !== undefined && defaultValue) {
-            description = description ? `description [${defaultValue}]` : `[${defaultValue}]`;
+          if (defaultValue !== undefined) {
+            description = description ? `${description} [${defaultValue}]` : `[${defaultValue}]`;
           }
 
           return [
