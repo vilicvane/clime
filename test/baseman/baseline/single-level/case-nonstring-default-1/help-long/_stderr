@@ -1,0 +1,11 @@
+
+  Foo bar
+
+  USAGE
+
+    single-level --foo-bar <fooBar>
+
+  OPTIONS
+
+    --foo-bar <fooBar> - [false]
+
