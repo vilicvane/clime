@@ -5,7 +5,7 @@
   "main": "bld/index.js",
   "typings": "bld/index.d.ts",
   "scripts": {
-    "lint": "tslint -c tslint.json -p tsconfig.json --type-check",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
     "build": "yarn lint && rimraf bld && tsc",
     "bare-test": "mocha && baseman run bld/test/baseman",
     "pretest": "yarn build",
@@ -52,11 +52,12 @@
     "glob": "^7.1.2",
     "mocha": "^3.5.0",
     "nyc": "^11.1.0",
+    "prettier": "^1.10.2",
     "rimraf": "^2.6.1",
     "source-map-support": "^0.4.16",
-    "tslint": "^5.6.0",
-    "tslint-language-service": "^0.9.6",
-    "typescript": "^2.6.1",
-    "vts": "^5.6.1"
+    "tslint": "^5.9.1",
+    "tslint-language-service": "^0.9.8",
+    "typescript": "^2.7.2",
+    "vts": "^5.8.3"
   }
 }

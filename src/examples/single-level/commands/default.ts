@@ -1,3 +1,5 @@
+// tslint:disable:no-implicit-dependencies
+
 import 'source-map-support/register';
 
 import {
@@ -39,7 +41,6 @@ export default class extends Command {
       description: 'Your loud name',
     })
     name: string,
-
     options: GreetingOptions,
   ) {
     let lang = options.lang;

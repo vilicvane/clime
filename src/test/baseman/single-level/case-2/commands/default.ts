@@ -1,9 +1,4 @@
-import {
-  Castable,
-  Command,
-  command,
-  param,
-} from '../../../../..';
+import {Castable, Command, command, param} from '../../../../..';
 
 @command({
   description: 'Foo bar',

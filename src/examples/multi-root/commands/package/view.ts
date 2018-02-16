@@ -1,8 +1,4 @@
-import {
-  Command,
-  command,
-  param,
-} from '../../../..';
+import {Command, command, param} from '../../../..';
 
 @command({
   description: 'View package information',

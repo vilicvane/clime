@@ -29,4 +29,4 @@ class CastableDate extends Date {
   }
 }
 
-export { CastableDate as Date, CastableDate };
+export {CastableDate as Date, CastableDate};

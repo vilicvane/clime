@@ -3,10 +3,7 @@ import * as Path from 'path';
 
 import * as v from 'villa';
 
-import {
-  CastingContext,
-  ExpectedError,
-} from '../core';
+import {CastingContext, ExpectedError} from '../core';
 
 export class File {
   readonly baseName: string;
@@ -14,8 +11,8 @@ export class File {
   readonly default: boolean;
 
   private constructor(
-    public readonly source: string,
-    public readonly cwd: string,
+    readonly source: string,
+    readonly cwd: string,
     usingDefault: boolean,
   ) {
     this.baseName = Path.basename(source);
@@ -55,7 +52,9 @@ export class File {
       }
 
       if (!stats.isFile()) {
-        throw new ExpectedError(`Object "${this.source}" is expected to be a file`);
+        throw new ExpectedError(
+          `Object "${this.source}" is expected to be a file`,
+        );
       }
     } else if (stats) {
       throw new ExpectedError(`Object "${this.source}" already exists`);
@@ -90,8 +89,8 @@ export class Directory {
   readonly default: boolean;
 
   private constructor(
-    public readonly source: string,
-    public readonly cwd: string,
+    readonly source: string,
+    readonly cwd: string,
     usingDefault: boolean,
   ) {
     this.baseName = Path.basename(source);
@@ -108,7 +107,9 @@ export class Directory {
       }
 
       if (!stats.isDirectory()) {
-        throw new ExpectedError(`Object "${this.source}" is expected to be a directory`);
+        throw new ExpectedError(
+          `Object "${this.source}" is expected to be a directory`,
+        );
       }
     } else if (stats) {
       throw new ExpectedError(`Object "${this.source}" already exists`);

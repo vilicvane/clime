@@ -1,8 +1,4 @@
-import {
-  Command,
-  command,
-  metadata,
-} from '../../../../../..';
+import {Command, command, metadata} from '../../../../../..';
 
 @command({
   brief: 'Hia',

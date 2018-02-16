@@ -3,7 +3,7 @@ import * as FS from 'fs';
 import * as v from 'villa';
 
 export async function safeStat(path: string): Promise<FS.Stats | undefined> {
-  return await v.call(FS.stat, path).catch(v.bear);
+  return v.call(FS.stat, path).catch(v.bear);
 }
 
 export async function existsFile(path: string): Promise<boolean> {

@@ -1,9 +1,6 @@
-import {
-  Command,
-  command,
-} from '../../../../..';
+import {Command, command} from '../../../../..';
 
 @command()
 export default class extends Command {
-  execute() { }
+  execute() {}
 }

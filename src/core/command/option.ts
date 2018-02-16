@@ -2,9 +2,9 @@ import * as assert from 'assert';
 
 import hyphenate from 'hyphenate';
 
-import { CastableType } from '..';
+import {CastableType} from '..';
 
-import { GeneralValidator } from './command';
+import {GeneralValidator} from './command';
 
 /**
  * Options for command options.
@@ -82,7 +82,10 @@ export function option<T>({
   default: defaultValue,
   description,
 }: OptionOptions<T> = {}) {
-  assert(!flag || /^[a-z]$/i.test(flag), 'The option flag is expected to be a letter');
+  assert(
+    !flag || /^[a-z]$/i.test(flag),
+    'The option flag is expected to be a letter',
+  );
 
   return (target: Options, name: string) => {
     let constructor = target.constructor as typeof Options;
@@ -94,9 +97,13 @@ export function option<T>({
       definitions = constructor.definitions = [];
     }
 
-    type = type || Reflect.getMetadata('design:type', target, name) as Clime.Constructor<T>;
+    type =
+      type ||
+      (Reflect.getMetadata('design:type', target, name) as Clime.Constructor<
+        T
+      >);
 
-    optionName = optionName || hyphenate(name, { lowerCase: true });
+    optionName = optionName || hyphenate(name, {lowerCase: true});
 
     if (!validators) {
       validators = validator ? [validator] : [];

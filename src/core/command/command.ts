@@ -36,10 +36,7 @@ export class Context {
   /** Commands sequence including entry and subcommands. */
   commands: string[];
 
-  constructor({
-    cwd,
-    commands,
-  }: ContextOptions) {
+  constructor({cwd, commands}: ContextOptions) {
     this.cwd = cwd;
     this.commands = commands;
   }
@@ -78,7 +75,10 @@ export interface Validator<T> {
  * @param name - Name of the parameter or option, used for generating error
  * message.
  */
-export type ValidatorFunction<T> = (value: T, context: ValidationContext) => void;
+export type ValidatorFunction<T> = (
+  value: T,
+  context: ValidationContext,
+) => void;
 
 export type GeneralValidator<T> = ValidatorFunction<T> | Validator<T> | RegExp;
 
@@ -121,7 +121,7 @@ export abstract class Command {
    * Get the help object of current command.
    */
   static async getHelp(): Promise<HelpInfo> {
-    return await HelpInfo.build(this);
+    return HelpInfo.build(this);
   }
 }
 
@@ -159,7 +159,9 @@ export function command(options: CommandOptions = {}) {
             target.requiredParamsNumber++;
           } else {
             if (variadicParamsRequired) {
-              throw new Error('Parameter cannot be optional if variadic parameters are required');
+              throw new Error(
+                'Parameter cannot be optional if variadic parameters are required',
+              );
             }
 
             hasOptional = true;
@@ -168,26 +170,41 @@ export function command(options: CommandOptions = {}) {
       }
     }
 
-    if (paramsDefinition && paramsDefinition.index !== paramDefinitions.length) {
-      throw new Error('Expecting variadic parameters to be adjacent to other parameters');
+    if (
+      paramsDefinition &&
+      paramsDefinition.index !== paramDefinitions.length
+    ) {
+      throw new Error(
+        'Expecting variadic parameters to be adjacent to other parameters',
+      );
     }
 
     // Prepare option definitions.
-    let types = Reflect.getMetadata('design:paramtypes', target.prototype, 'execute') as Clime.Constructor<any>[];
+    let types = Reflect.getMetadata(
+      'design:paramtypes',
+      target.prototype,
+      'execute',
+    ) as Clime.Constructor<any>[];
 
     if (!types) {
-      throw new Error('No parameter type information found, please add `@metadata` decorator to method `execute` \
-if no other decorator applied');
+      throw new Error(
+        'No parameter type information found, please add `@metadata` decorator to method `execute` \
+if no other decorator applied',
+      );
     }
 
-    let optionsConstructorCandidateIndex = paramDefinitions.length + (target.paramsDefinition ? 1 : 0);
+    let optionsConstructorCandidateIndex =
+      paramDefinitions.length + (target.paramsDefinition ? 1 : 0);
     let optionsConstructorCandidate = types[optionsConstructorCandidateIndex];
 
     let contextConstructorCandidateIndex: number;
 
-    if (optionsConstructorCandidate && optionsConstructorCandidate.prototype instanceof Options) {
+    if (
+      optionsConstructorCandidate &&
+      optionsConstructorCandidate.prototype instanceof Options
+    ) {
       target.optionsConstructor = optionsConstructorCandidate;
-      target.optionDefinitions = (optionsConstructorCandidate as any as typeof Options).definitions;
+      target.optionDefinitions = ((optionsConstructorCandidate as any) as typeof Options).definitions;
 
       contextConstructorCandidateIndex = optionsConstructorCandidateIndex + 1;
     } else {
@@ -197,10 +214,9 @@ if no other decorator applied');
     let contextConstructorCandidate = types[contextConstructorCandidateIndex];
 
     if (
-      contextConstructorCandidate && (
-        contextConstructorCandidate === Context ||
-        contextConstructorCandidate.prototype instanceof Context
-      )
+      contextConstructorCandidate &&
+      (contextConstructorCandidate === Context ||
+        contextConstructorCandidate.prototype instanceof Context)
     ) {
       target.contextConstructor = contextConstructorCandidate;
     }
@@ -214,4 +230,4 @@ if no other decorator applied');
  * TypeScript emits type metadata for `execute` method that has no other
  * decorators.
  */
-export const metadata: MethodDecorator = () => { };
+export const metadata: MethodDecorator = () => {};

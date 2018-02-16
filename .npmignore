@@ -8,6 +8,7 @@
 
 /tsconfig.json
 /tslint.json
+/prettier.config.js
 /yarn.lock
 
 .*

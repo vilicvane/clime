@@ -2,14 +2,11 @@ import * as assert from 'assert';
 
 import hyphenate from 'hyphenate';
 
-import { CastableType } from '..';
+import {CastableType} from '..';
 
-import {
-  Command,
-  GeneralValidator,
-} from './command';
+import {Command, GeneralValidator} from './command';
 
-import { Reflection } from '../../internal-util';
+import {Reflection} from '../../internal-util';
 
 /**
  * Options for variadic command parameters.
@@ -68,9 +65,12 @@ export function params<T>({
       throw new Error('Can only define one `params` parameter');
     }
 
-    paramName = paramName ||
+    paramName =
+      paramName ||
       // tslint:disable-next-line:no-unbound-method
-      hyphenate(Reflection.getFunctionParameterName(target.execute, index), { lowerCase: true });
+      hyphenate(Reflection.getFunctionParameterName(target.execute, index), {
+        lowerCase: true,
+      });
 
     if (!validators) {
       validators = validator ? [validator] : [];

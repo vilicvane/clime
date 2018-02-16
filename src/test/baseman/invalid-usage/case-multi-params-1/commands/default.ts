@@ -1,8 +1,4 @@
-import {
-  Command,
-  param,
-  params,
-} from '../../../../..';
+import {Command, param, params} from '../../../../..';
 
 export default class extends Command {
   execute(
@@ -11,15 +7,16 @@ export default class extends Command {
       required: true,
     })
     name: string,
-
     @params({
       type: String,
     })
     texts: string[],
-
     @params({
       type: String,
     })
     extraTexts: string[],
-  ) { }
+  ) {
+    // tslint:disable-next-line
+    [name, texts, extraTexts];
+  }
 }

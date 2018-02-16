@@ -1,10 +1,4 @@
-import {
-  Command,
-  Options,
-  command,
-  metadata,
-  option,
-} from '../../../../..';
+import {Command, Options, command, metadata, option} from '../../../../..';
 
 export class FooOptions extends Options {
   @option({

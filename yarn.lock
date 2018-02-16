@@ -63,7 +63,7 @@ ansi-styles@^2.2.1:
   version "2.2.1"
   resolved "http://registry.npm.taobao.org/ansi-styles/download/ansi-styles-2.2.1.tgz#b432dd3358b634cf75e1e4664368240533c1ddbe"
 
-ansi-styles@^3.1.0:
+ansi-styles@^3.1.0, ansi-styles@^3.2.0:
   version "3.2.0"
   resolved "http://registry.npm.taobao.org/ansi-styles/download/ansi-styles-3.2.0.tgz#c159b8d5be0f9e5a6f346dab94f16ce022161b88"
   dependencies:
@@ -254,7 +254,7 @@ browser-stdout@1.3.0:
   version "1.3.0"
   resolved "http://registry.npm.taobao.org/browser-stdout/download/browser-stdout-1.3.0.tgz#f351d32969d32fa5d7a5567154263d928ae3bd1f"
 
-builtin-modules@^1.0.0:
+builtin-modules@^1.0.0, builtin-modules@^1.1.1:
   version "1.1.1"
   resolved "http://registry.npm.taobao.org/builtin-modules/download/builtin-modules-1.1.1.tgz#270f076c5a72c02f5b65a47df94c5fe3a278892f"
 
@@ -324,6 +324,14 @@ chalk@^2.0.0, chalk@^2.1.0:
     escape-string-regexp "^1.0.5"
     supports-color "^4.0.0"
 
+chalk@^2.3.0:
+  version "2.3.1"
+  resolved "http://registry.npm.taobao.org/chalk/download/chalk-2.3.1.tgz#523fe2678aec7b04e8041909292fe8b17059b796"
+  dependencies:
+    ansi-styles "^3.2.0"
+    escape-string-regexp "^1.0.5"
+    supports-color "^5.2.0"
+
 check-error@^1.0.1, check-error@^1.0.2:
   version "1.0.2"
   resolved "http://registry.npm.taobao.org/check-error/download/check-error-1.0.2.tgz#574d312edd88bb5dd8912e9286dd6c0aed4aac82"
@@ -378,10 +386,6 @@ color-name@^1.1.1:
   version "1.1.3"
   resolved "http://registry.npm.taobao.org/color-name/download/color-name-1.1.3.tgz#a7d0558bd89c42f795dd42328f740831ca53bc25"
 
-colors@^1.1.2:
-  version "1.1.2"
-  resolved "http://registry.npm.taobao.org/colors/download/colors-1.1.2.tgz#168a4701756b6a7f51a12ce0c97bfa28c084ed63"
-
 combined-stream@^1.0.5, combined-stream@~1.0.5:
   version "1.0.5"
   resolved "http://registry.npm.taobao.org/combined-stream/download/combined-stream-1.0.5.tgz#938370a57b4a51dea2c77c15d5c5fdf895164009"
@@ -393,6 +397,10 @@ commander@2.9.0:
   resolved "http://registry.npm.taobao.org/commander/download/commander-2.9.0.tgz#9c99094176e12240cb22d6c5146098400fe0f7d4"
   dependencies:
     graceful-readlink ">= 1.0.0"
+
+commander@^2.12.1:
+  version "2.14.1"
+  resolved "http://registry.npm.taobao.org/commander/download/commander-2.14.1.tgz#2235123e37af8ca3c65df45b026dbd357b01b9aa"
 
 commander@^2.9.0:
   version "2.11.0"
@@ -518,6 +526,10 @@ escape-string-regexp@1.0.5, escape-string-regexp@^1.0.2, escape-string-regexp@^1
 esprima@^2.6.0:
   version "2.7.3"
   resolved "http://registry.npm.taobao.org/esprima/download/esprima-2.7.3.tgz#96e3b70d5779f6ad49cd032673d1c312767ba581"
+
+esprima@^4.0.0:
+  version "4.0.0"
+  resolved "http://registry.npm.taobao.org/esprima/download/esprima-4.0.0.tgz#4499eddcd1110e0b218bacf2fa7f7f59f55ca804"
 
 esutils@^2.0.2:
   version "2.0.2"
@@ -765,6 +777,10 @@ has-flag@^1.0.0:
 has-flag@^2.0.0:
   version "2.0.0"
   resolved "http://registry.npm.taobao.org/has-flag/download/has-flag-2.0.0.tgz#e8207af1cc7b30d446cc70b734b5e8be18f88d51"
+
+has-flag@^3.0.0:
+  version "3.0.0"
+  resolved "http://registry.npm.taobao.org/has-flag/download/has-flag-3.0.0.tgz#b5d454dc2199ae225699f3467e5a07f3b955bafd"
 
 hawk@~3.1.3:
   version "3.1.3"
@@ -1021,6 +1037,13 @@ js-yaml@3.6.1:
   dependencies:
     argparse "^1.0.7"
     esprima "^2.6.0"
+
+js-yaml@^3.7.0:
+  version "3.10.0"
+  resolved "http://registry.npm.taobao.org/js-yaml/download/js-yaml-3.10.0.tgz#2e78441646bd4682e963f22b6e92823c309c62dc"
+  dependencies:
+    argparse "^1.0.7"
+    esprima "^4.0.0"
 
 jsbn@~0.1.0:
   version "0.1.1"
@@ -1495,6 +1518,10 @@ preserve@^0.2.0:
   version "0.2.0"
   resolved "http://registry.npm.taobao.org/preserve/download/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
 
+prettier@^1.10.2:
+  version "1.10.2"
+  resolved "http://registry.npm.taobao.org/prettier/download/prettier-1.10.2.tgz#1af8356d1842276a99a5b5529c82dd9e9ad3cc93"
+
 pseudomap@^1.0.2:
   version "1.0.2"
   resolved "http://registry.npm.taobao.org/pseudomap/download/pseudomap-1.0.2.tgz#f052a28da70e618917ef0a8ac34c1ae5a68286b3"
@@ -1813,6 +1840,12 @@ supports-color@^4.0.0:
   dependencies:
     has-flag "^2.0.0"
 
+supports-color@^5.2.0:
+  version "5.2.0"
+  resolved "http://registry.npm.taobao.org/supports-color/download/supports-color-5.2.0.tgz#b0d5333b1184dd3666cbe5aa0b45c5ac7ac17a4a"
+  dependencies:
+    has-flag "^3.0.0"
+
 test-exclude@^4.1.1:
   version "4.1.1"
   resolved "http://registry.npm.taobao.org/test-exclude/download/test-exclude-4.1.1.tgz#4d84964b0966b0087ecc334a2ce002d3d9341e26"
@@ -1847,34 +1880,40 @@ trim-right@^1.0.1:
   version "1.0.1"
   resolved "http://registry.npm.taobao.org/trim-right/download/trim-right-1.0.1.tgz#cb2e1203067e0c8de1f614094b9fe45704ea6003"
 
-tslib@^1.7.1:
-  version "1.7.1"
-  resolved "http://registry.npm.taobao.org/tslib/download/tslib-1.7.1.tgz#bc8004164691923a79fe8378bbeb3da2017538ec"
+tslib@^1.8.0, tslib@^1.8.1:
+  version "1.9.0"
+  resolved "http://registry.npm.taobao.org/tslib/download/tslib-1.9.0.tgz#e37a86fda8cbbaf23a057f473c9f4dc64e5fc2e8"
 
-tslint-language-service@^0.9.6:
-  version "0.9.6"
-  resolved "http://registry.npm.taobao.org/tslint-language-service/download/tslint-language-service-0.9.6.tgz#882bb0704cf8397b332ddc0af7168c7f22f279ea"
+tslint-config-prettier@^1.6.0:
+  version "1.8.0"
+  resolved "http://registry.npm.taobao.org/tslint-config-prettier/download/tslint-config-prettier-1.8.0.tgz#707c25b01b5984c60a4e971400b0485077ca21f6"
 
-tslint@^5.6.0:
-  version "5.6.0"
-  resolved "http://registry.npm.taobao.org/tslint/download/tslint-5.6.0.tgz#088aa6c6026623338650b2900828ab3edf59f6cf"
+tslint-language-service@^0.9.8:
+  version "0.9.8"
+  resolved "http://registry.npm.taobao.org/tslint-language-service/download/tslint-language-service-0.9.8.tgz#22a6f2f926b7c0a4cafed3ae1f65021e8008dc96"
+
+tslint@^5.9.1:
+  version "5.9.1"
+  resolved "http://registry.npm.taobao.org/tslint/download/tslint-5.9.1.tgz#1255f87a3ff57eb0b0e1f0e610a8b4748046c9ae"
   dependencies:
     babel-code-frame "^6.22.0"
-    colors "^1.1.2"
-    commander "^2.9.0"
+    builtin-modules "^1.1.1"
+    chalk "^2.3.0"
+    commander "^2.12.1"
     diff "^3.2.0"
     glob "^7.1.1"
+    js-yaml "^3.7.0"
     minimatch "^3.0.4"
     resolve "^1.3.2"
     semver "^5.3.0"
-    tslib "^1.7.1"
-    tsutils "^2.7.1"
+    tslib "^1.8.0"
+    tsutils "^2.12.1"
 
-tsutils@^2.7.1:
-  version "2.8.1"
-  resolved "http://registry.npm.taobao.org/tsutils/download/tsutils-2.8.1.tgz#3771404e7ca9f0bedf5d919a47a4b1890a68efff"
+tsutils@^2.12.1:
+  version "2.21.1"
+  resolved "http://registry.npm.taobao.org/tsutils/download/tsutils-2.21.1.tgz#5b23c263233300ed7442b4217855cbc7547c296a"
   dependencies:
-    tslib "^1.7.1"
+    tslib "^1.8.1"
 
 tunnel-agent@~0.4.1:
   version "0.4.3"
@@ -1892,9 +1931,9 @@ type-detect@^4.0.0:
   version "4.0.3"
   resolved "http://registry.npm.taobao.org/type-detect/download/type-detect-4.0.3.tgz#0e3f2670b44099b0b46c284d136a7ef49c74c2ea"
 
-typescript@^2.6.1:
-  version "2.6.1"
-  resolved "http://registry.npm.taobao.org/typescript/download/typescript-2.6.1.tgz#ef39cdea27abac0b500242d6726ab90e0c846631"
+typescript@^2.7.2:
+  version "2.7.2"
+  resolved "http://registry.npm.taobao.org/typescript/download/typescript-2.7.2.tgz#2d615a1ef4aee4f574425cdff7026edf81919836"
 
 uglify-js@^2.6:
   version "2.8.29"
@@ -1932,9 +1971,11 @@ villa@^0.2.10, villa@^0.2.11:
   version "0.2.11"
   resolved "http://registry.npm.taobao.org/villa/download/villa-0.2.11.tgz#a99a1c0ac01025b7311bb550c1fa7f8e6570692a"
 
-vts@^5.6.1:
-  version "5.6.1"
-  resolved "http://registry.npm.taobao.org/vts/download/vts-5.6.1.tgz#fdb3aa605af9534fd2d7a63b72cd6a014a02e658"
+vts@^5.8.3:
+  version "5.8.3"
+  resolved "http://registry.npm.taobao.org/vts/download/vts-5.8.3.tgz#4153691adad69028637a1ae9cc6041195b49cfdb"
+  dependencies:
+    tslint-config-prettier "^1.6.0"
 
 which-module@^2.0.0:
   version "2.0.0"

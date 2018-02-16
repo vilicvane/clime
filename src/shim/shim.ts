@@ -4,19 +4,13 @@ import * as Util from 'util';
 
 import * as Chalk from 'chalk';
 
-import {
-  CLI,
-  ExpectedError,
-  isPrintable,
-} from '../core';
+import {CLI, ExpectedError, isPrintable} from '../core';
 
 /**
  * A Clime command line interface shim for pure Node.js.
  */
 export class Shim {
-  constructor(
-    public cli: CLI,
-  ) { }
+  constructor(public cli: CLI) {}
 
   /**
    * Execute CLI with an array as `argv`.

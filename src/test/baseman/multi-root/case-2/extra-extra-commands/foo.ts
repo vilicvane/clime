@@ -1,8 +1,4 @@
-import {
-  Command,
-  command,
-  param,
-} from '../../../../..';
+import {Command, command, param} from '../../../../..';
 
 @command({
   brief: 'Extra extra foo brief',
@@ -15,9 +11,13 @@ export default class extends Command {
     })
     name: string,
   ) {
-    return JSON.stringify({
-      extraExtra: true,
-      name,
-    }, undefined, 2);
+    return JSON.stringify(
+      {
+        extraExtra: true,
+        name,
+      },
+      undefined,
+      2,
+    );
   }
 }

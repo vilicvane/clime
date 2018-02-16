@@ -1,11 +1,8 @@
 import * as Path from 'path';
 
-import { CastingContext } from '../..';
+import {CastingContext} from '../..';
 
-import {
-  Directory,
-  File,
-} from '../../castable/fs';
+import {Directory, File} from '../../castable/fs';
 
 const SAMPLE_FILES_DIR = Path.join(__dirname, '../../../test/sample-files');
 const FILE_BASE_NAME = 'file';
@@ -35,30 +32,32 @@ describe('Castable object `File`', () => {
     await jsonFile.assert(false).should.be.rejectedWith('already exists');
 
     await File.cast(NON_EXISTENT_NAME, context).assert(false);
-    await File.cast(NON_EXISTENT_PATH, context).assert().should.be.rejectedWith('does not exist');
-    await File.cast(SAMPLE_FILES_DIR, context).assert().should.be.rejectedWith('expected to be a file');
+    await File.cast(NON_EXISTENT_PATH, context)
+      .assert()
+      .should.be.rejectedWith('does not exist');
+    await File.cast(SAMPLE_FILES_DIR, context)
+      .assert()
+      .should.be.rejectedWith('expected to be a file');
   });
 
   it('should test existence', async () => {
     await textFile.exists().should.eventually.be.true;
 
-    await File
-      .cast(FILE_BASE_PATH, context)
+    await File.cast(FILE_BASE_PATH, context)
       .exists(['.txt'])
       .should.eventually.equal(TEXT_FILE_PATH);
 
-    await File
-      .cast(FILE_BASE_PATH, context)
+    await File.cast(FILE_BASE_PATH, context)
       .exists(['.js', '.txt'])
       .should.eventually.equal(TEXT_FILE_PATH);
 
-    await File
-      .cast(FILE_BASE_PATH, context)
-      .exists(['.js'])
-      .should.eventually.be.undefined;
+    await File.cast(FILE_BASE_PATH, context).exists(['.js']).should.eventually
+      .be.undefined;
 
-    await File.cast(NON_EXISTENT_PATH, context).exists().should.eventually.be.false;
-    await File.cast(SAMPLE_FILES_DIR, context).exists().should.eventually.be.false;
+    await File.cast(NON_EXISTENT_PATH, context).exists().should.eventually.be
+      .false;
+    await File.cast(SAMPLE_FILES_DIR, context).exists().should.eventually.be
+      .false;
   });
 
   it('should read buffer', async () => {
@@ -73,11 +72,11 @@ describe('Castable object `File`', () => {
   });
 
   it('should read json', async () => {
-    (await jsonFile.json<object>()).should.deep.equal({ key: 'value' });
+    (await jsonFile.json<object>()).should.deep.equal({key: 'value'});
   });
 
   it('should require', () => {
-    jsonFile.require<object>().should.deep.equal({ key: 'value' });
+    jsonFile.require<object>().should.deep.equal({key: 'value'});
   });
 });
 
@@ -86,14 +85,23 @@ describe('Castable object `Directory`', () => {
     await Directory.cast(SAMPLE_FILES_DIR, context).assert();
     await Directory.cast('.', context).assert(true);
     await Directory.cast(NON_EXISTENT_NAME, context).assert(false);
-    await Directory.cast(SAMPLE_FILES_DIR, context).assert(false).should.be.rejectedWith('already exists');
-    await Directory.cast(NON_EXISTENT_PATH, context).assert().should.be.rejectedWith('does not exist');
-    await Directory.cast(TEXT_FILE_NAME, context).assert().should.be.rejectedWith('expected to be a directory');
+    await Directory.cast(SAMPLE_FILES_DIR, context)
+      .assert(false)
+      .should.be.rejectedWith('already exists');
+    await Directory.cast(NON_EXISTENT_PATH, context)
+      .assert()
+      .should.be.rejectedWith('does not exist');
+    await Directory.cast(TEXT_FILE_NAME, context)
+      .assert()
+      .should.be.rejectedWith('expected to be a directory');
   });
 
   it('should test existence', async () => {
-    await Directory.cast(SAMPLE_FILES_DIR, context).exists().should.eventually.be.true;
-    await Directory.cast(NON_EXISTENT_PATH, context).exists().should.eventually.be.false;
-    await Directory.cast(TEXT_FILE_NAME, context).exists().should.eventually.be.false;
+    await Directory.cast(SAMPLE_FILES_DIR, context).exists().should.eventually
+      .be.true;
+    await Directory.cast(NON_EXISTENT_PATH, context).exists().should.eventually
+      .be.false;
+    await Directory.cast(TEXT_FILE_NAME, context).exists().should.eventually.be
+      .false;
   });
 });

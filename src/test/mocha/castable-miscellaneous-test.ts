@@ -6,7 +6,11 @@ import {
 describe('Castable object `CommaSeparatedStrings`', () => {
   it('should cast', () => {
     CommaSeparatedStrings.cast('foo, bar').should.deep.equal(['foo', 'bar']);
-    CommaSeparatedStrings.cast('foo, bar, , pia').should.deep.equal(['foo', 'bar', 'pia']);
+    CommaSeparatedStrings.cast('foo, bar, , pia').should.deep.equal([
+      'foo',
+      'bar',
+      'pia',
+    ]);
   });
 });
 

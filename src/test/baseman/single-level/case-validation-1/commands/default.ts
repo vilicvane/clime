@@ -18,10 +18,7 @@ export class FooOptions extends Options {
 
   @option({
     description: 'Bar description',
-    validators: [
-      Validation.integer,
-      Validation.range(10, 20),
-    ],
+    validators: [Validation.integer, Validation.range(10, 20)],
   })
   bar: number;
 }
@@ -35,10 +32,9 @@ export default class extends Command {
       validator: /yoha/,
     })
     foo: string,
-
     @param({
       validators: [
-        (value: number, { name }) => {
+        (value: number, {name}) => {
           if (value !== 123) {
             throw new ExpectedError(`Value of ${name} is not valid`);
           }
@@ -46,18 +42,19 @@ export default class extends Command {
       ],
     })
     bar: number,
-
     @params({
       type: Number,
       validator: Validation.integer,
     })
     args: number[],
-
     options: FooOptions,
   ) {
-    let data = Object.assign({
-      args: [foo, bar, ...args],
-    }, options);
+    let data = Object.assign(
+      {
+        args: [foo, bar, ...args],
+      },
+      options,
+    );
 
     return JSON.stringify(data, undefined, 2);
   }

@@ -1,7 +1,4 @@
-import {
-  Command,
-  param,
-} from '../../../../..';
+import {Command, param} from '../../../../..';
 
 export default class extends Command {
   execute(
@@ -10,5 +7,8 @@ export default class extends Command {
       required: true,
     })
     name: string,
-  ) { }
+  ) {
+    // tslint:disable-next-line
+    name;
+  }
 }

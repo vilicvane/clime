@@ -4,14 +4,11 @@ import * as Path from 'path';
 import * as Chalk from 'chalk';
 import * as v from 'villa';
 
-import { Command, CommandClass } from '.';
+import {Command, CommandClass} from '.';
 
-import { Printable } from '../object';
+import {Printable} from '../object';
 
-import {
-  CLI,
-  CommandModule,
-} from '../cli';
+import {CLI, CommandModule} from '../cli';
 
 import {
   buildTableOutput,
@@ -48,12 +45,14 @@ export class HelpInfo implements Printable {
     return this.texts.join('\n');
   }
 
-  async buildTextForSubCommands(contexts: HelpBuildingContext[]): Promise<void> {
+  async buildTextForSubCommands(
+    contexts: HelpBuildingContext[],
+  ): Promise<void> {
     let labels: string[] = [];
     let labelToHelpItemsMap = new Map<string, SubcommandHelpItem[]>();
     let helpItemMap = new Map<string, SubcommandHelpItem>();
 
-    for (let [groupIndex, { label, dir }] of contexts.entries()) {
+    for (let [groupIndex, {label, dir}] of contexts.entries()) {
       let helpItems: SubcommandHelpItem[];
 
       if (labelToHelpItemsMap.has(label)) {
@@ -67,8 +66,9 @@ export class HelpInfo implements Printable {
       let definitions = await CLI.getSubcommandDefinitions(dir);
 
       for (let definition of definitions) {
-        let { name, brief } = definition;
-        let aliases = definition.aliases || definition.alias && [definition.alias] || [];
+        let {name, brief} = definition;
+        let aliases =
+          definition.aliases || (definition.alias && [definition.alias]) || [];
 
         let item: SubcommandHelpItem;
         let existingItem = helpItemMap.get(name);
@@ -119,7 +119,11 @@ export class HelpInfo implements Printable {
         let existingItem = helpItemMap.get(name);
 
         // `brief` already set in `subcommands` field
-        if (existingItem && existingItem.group === groupIndex && existingItem.brief) {
+        if (
+          existingItem &&
+          existingItem.group === groupIndex &&
+          existingItem.brief
+        ) {
           continue;
         }
 
@@ -129,7 +133,9 @@ export class HelpInfo implements Printable {
         if (stats) {
           let module = require(path) as CommandModule;
           commandConstructor = module.default;
-          brief = commandConstructor && (commandConstructor.brief || commandConstructor.description);
+          brief =
+            commandConstructor &&
+            (commandConstructor.brief || commandConstructor.description);
         }
 
         if (existingItem && existingItem.group === groupIndex) {
@@ -169,8 +175,7 @@ export class HelpInfo implements Printable {
 
     for (let label of labels) {
       let hasAliases = false;
-      let rows = labelToHelpItemsMap
-        .get(label)!
+      let rows = labelToHelpItemsMap.get(label)!
         .filter(item => {
           if (item.overridden) {
             return false;
@@ -182,7 +187,7 @@ export class HelpInfo implements Printable {
 
           return true;
         })
-        .map(({ name, aliases, brief }) => {
+        .map(({name, aliases, brief}) => {
           if (hasAliases) {
             return [
               Chalk.bold(name),
@@ -190,10 +195,7 @@ export class HelpInfo implements Printable {
               brief,
             ];
           } else {
-            return [
-              Chalk.bold(name),
-              brief,
-            ];
+            return [Chalk.bold(name), brief];
           }
         });
 
@@ -202,12 +204,12 @@ export class HelpInfo implements Printable {
       if (rows.length) {
         this.texts.push(`\
   ${Chalk.green(label.toUpperCase())}\n
-${buildTableOutput(rows, { indent: 4, separators })}`);
+${buildTableOutput(rows, {indent: 4, separators})}`);
       }
     }
   }
 
-  print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream): void {
+  print(_stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream): void {
     stderr.write(`\n${this.text}\n`);
   }
 
@@ -234,53 +236,34 @@ ${buildTableOutput(rows, { indent: 4, separators })}`);
 
     if (paramDefinitions) {
       parameterUsageTexts = paramDefinitions.map(definition => {
-        let {
-          name,
-          required,
-          description,
-          default: defaultValue,
-        } = definition;
+        let {name, required, description, default: defaultValue} = definition;
 
         if (description) {
-          parameterDescriptionRows.push([
-            Chalk.bold(name),
-            description,
-          ]);
+          parameterDescriptionRows.push([Chalk.bold(name), description]);
         }
 
-        return required ?
-          `<${name}>` :
-          `[${name}${defaultValue !== undefined ? `=${defaultValue}` : ''}]`;
+        return required
+          ? `<${name}>`
+          : `[${name}${defaultValue !== undefined ? `=${defaultValue}` : ''}]`;
       });
     } else {
       parameterUsageTexts = [];
     }
 
     if (paramsDefinition) {
-      let {
-        name,
-        required,
-        description,
-      } = paramsDefinition;
+      let {name, required, description} = paramsDefinition;
 
       if (description) {
-        parameterDescriptionRows.push([
-          Chalk.bold(name),
-          description,
-        ]);
+        parameterDescriptionRows.push([Chalk.bold(name), description]);
       }
 
-      parameterUsageTexts.push(
-        required ?
-          `<...${name}>` :
-          `[...${name}]`,
-      );
+      parameterUsageTexts.push(required ? `<...${name}>` : `[...${name}]`);
     }
 
     let optionDefinitions = TargetCommand.optionDefinitions || [];
     let requiredOptionUsageItems = optionDefinitions
       .filter(definition => definition.required)
-      .map(({ name, key, placeholder }) => `--${name} <${placeholder || key}>`);
+      .map(({name, key, placeholder}) => `--${name} <${placeholder || key}>`);
 
     let usageLine = [
       Chalk.bold(TargetCommand.sequence.join(' ').replace(/^\/ /, '/')),
@@ -299,43 +282,41 @@ ${buildTableOutput(rows, { indent: 4, separators })}`);
     if (parameterDescriptionRows.length) {
       this.texts.push(`\
   ${Chalk.green('PARAMETERS')}\n
-${buildTableOutput(parameterDescriptionRows, { indent: 4, separators: ' - '})}`);
+${buildTableOutput(parameterDescriptionRows, {indent: 4, separators: ' - '})}`);
     }
 
     if (optionDefinitions.length) {
-      let optionRows = optionDefinitions
-        .map(definition => {
-          let {
-            name,
-            key,
-            flag,
-            placeholder,
-            toggle: isToggle,
-            description,
-            default: defaultValue,
-          } = definition;
+      let optionRows = optionDefinitions.map(definition => {
+        let {
+          name,
+          key,
+          flag,
+          placeholder,
+          toggle: isToggle,
+          description,
+          default: defaultValue,
+        } = definition;
 
-          let triggerStr = flag ? `-${flag}, ` : '';
+        let triggerStr = flag ? `-${flag}, ` : '';
 
-          triggerStr += `--${name}`;
+        triggerStr += `--${name}`;
 
-          if (!isToggle) {
-            triggerStr += ` <${placeholder || key}>`;
-          }
+        if (!isToggle) {
+          triggerStr += ` <${placeholder || key}>`;
+        }
 
-          if (defaultValue !== undefined) {
-            description = description ? `${description} [${defaultValue}]` : `[${defaultValue}]`;
-          }
+        if (defaultValue !== undefined) {
+          description = description
+            ? `${description} [${defaultValue}]`
+            : `[${defaultValue}]`;
+        }
 
-          return [
-            Chalk.bold(triggerStr),
-            description,
-          ];
-        });
+        return [Chalk.bold(triggerStr), description];
+      });
 
       this.texts.push(`\
   ${Chalk.green('OPTIONS')}\n
-${buildTableOutput(optionRows, { indent: 4, separators: ' - ' })}`);
+${buildTableOutput(optionRows, {indent: 4, separators: ' - '})}`);
     }
   }
 

@@ -1,7 +1,7 @@
-export function parseFunctionParameterNames(fn: Function): string[] | undefined {
-  let groups = fn
-    .toString()
-    .match(/^[^{=]*\(([\w\d$-,\s]*)\)/);
+export function parseFunctionParameterNames(
+  fn: Function,
+): string[] | undefined {
+  let groups = fn.toString().match(/^[^{=]*\(([\w\d$-,\s]*)\)/);
 
   return groups ? groups[1].trim().split(/\s*,\s*/) : undefined;
 }
@@ -15,5 +15,5 @@ export function getFunctionParameterName(fn: Function, index: number): string {
     paramNames = (fn as any).__paramNames = parseFunctionParameterNames(fn);
   }
 
-  return paramNames && paramNames[index] || `param${index}`;
+  return (paramNames && paramNames[index]) || `param${index}`;
 }

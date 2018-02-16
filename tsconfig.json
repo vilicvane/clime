@@ -6,23 +6,18 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "strict": true,
+    "strictPropertyInitialization": false,
     "noImplicitReturns": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "stripInternal": true,
     "sourceMap": true,
     "skipDefaultLibCheck": true,
     "newLine": "LF",
     "rootDir": "src",
     "outDir": "bld",
-    "plugins": [
-      {
-        "name": "tslint-language-service"
-      }
-    ]
+    "plugins": [{"name": "tslint-language-service"}]
   },
-  "exclude": [
-    "bld",
-    "node_modules"
-  ]
+  "include": ["src", "types"]
 }

@@ -52,7 +52,7 @@ export function array<T>(
         default: context.default,
       });
 
-      return await v.map(parts, part => cast(part, type, castingContext));
+      return v.map(parts, part => cast(part, type, castingContext));
     },
   };
 }

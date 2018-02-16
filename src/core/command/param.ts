@@ -2,14 +2,11 @@ import * as assert from 'assert';
 
 import hyphenate from 'hyphenate';
 
-import {
-  Command,
-  GeneralValidator,
-} from './command';
+import {Command, GeneralValidator} from './command';
 
-import { CastableType } from '..';
+import {CastableType} from '..';
 
-import { Reflection } from '../../internal-util';
+import {Reflection} from '../../internal-util';
 
 /**
  * Options for command parameter.
@@ -76,12 +73,18 @@ export function param<T>({
       definitions = constructor.paramDefinitions = [];
     }
 
-    type = type ||
-      Reflect.getMetadata('design:paramtypes', target, 'execute')[index] as CastableType<T>;
+    type =
+      type ||
+      (Reflect.getMetadata('design:paramtypes', target, 'execute')[
+        index
+      ] as CastableType<T>);
 
-    paramName = paramName ||
+    paramName =
+      paramName ||
       // tslint:disable-next-line:no-unbound-method
-      hyphenate(Reflection.getFunctionParameterName(target.execute, index), { lowerCase: true });
+      hyphenate(Reflection.getFunctionParameterName(target.execute, index), {
+        lowerCase: true,
+      });
 
     if (!validators) {
       validators = validator ? [validator] : [];

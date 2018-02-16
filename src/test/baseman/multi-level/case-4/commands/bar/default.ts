@@ -1,4 +1,4 @@
-import { SubcommandDefinition } from '../../../../../..';
+import {SubcommandDefinition} from '../../../../../..';
 
 export const subcommands: SubcommandDefinition[] = [
   {

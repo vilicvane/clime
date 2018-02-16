@@ -1,14 +1,14 @@
-import { Resolvable } from 'villa';
+import {Resolvable} from 'villa';
 
-import {
-  Context,
-  GeneralValidator,
-} from './command';
+import {Context, GeneralValidator} from './command';
 
-import { ExpectedError } from './error';
+import {ExpectedError} from './error';
 
 export interface Printable {
-  print(stdout: NodeJS.WritableStream, stderr: NodeJS.WritableStream): Promise<void> | void;
+  print(
+    stdout: NodeJS.WritableStream,
+    stderr: NodeJS.WritableStream,
+  ): Promise<void> | void;
 }
 
 export function isPrintable(object: any): object is Printable {
@@ -19,8 +19,14 @@ export interface StringCastable<T> {
   cast(source: string, context: CastingContext<T>): Resolvable<T>;
 }
 
-export function isStringCastable<T>(object: object): object is StringCastable<T>  {
-  return !!object && !!(object as any).cast && typeof (object as any).cast === 'function';
+export function isStringCastable<T>(
+  object: object,
+): object is StringCastable<T> {
+  return (
+    !!object &&
+    !!(object as any).cast &&
+    typeof (object as any).cast === 'function'
+  );
 }
 
 export type CastableType<T> = Clime.Constructor<T> | StringCastable<T>;
@@ -32,11 +38,7 @@ export async function cast<T>(
 ): Promise<T> {
   let value: any;
 
-  let {
-    name,
-    validators,
-    default: usingDefault,
-  } = context;
+  let {name, validators, default: usingDefault} = context;
 
   switch (type as CastableType<any>) {
     case String:
@@ -61,7 +63,8 @@ export async function cast<T>(
       break;
     default:
       if (!isStringCastable(type)) {
-        throw new Error(`Type \`${type.name || type}\` cannot be casted from a string, \
+        throw new Error(`Type \`${type.name ||
+          type}\` cannot be casted from a string, \
 see \`StringCastable\` interface for more information`);
       }
 
@@ -83,14 +86,13 @@ see \`StringCastable\` interface for more information`);
         throw new ExpectedError(`Invalid value for "${name}"`);
       }
     } else if (typeof validator === 'function') {
-      validator(value, { name, source });
+      validator(value, {name, source});
     } else {
-      validator.validate(value, { name, source });
+      validator.validate(value, {name, source});
     }
   }
 
   return value;
-
 }
 
 export interface CastingContextExtension<T> {
@@ -100,8 +102,13 @@ export interface CastingContextExtension<T> {
   upper?: CastingContext<any>;
 }
 
-export interface CastingContext<T> extends CastingContextExtension<T>, Context { }
+export interface CastingContext<T>
+  extends CastingContextExtension<T>,
+    Context {}
 
-export function buildCastingContext<T>(context: Context, extension: CastingContextExtension<T>): CastingContext<T> {
+export function buildCastingContext<T>(
+  context: Context,
+  extension: CastingContextExtension<T>,
+): CastingContext<T> {
   return Object.assign(Object.create(context), extension);
 }

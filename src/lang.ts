@@ -1,6 +1,6 @@
 declare namespace Clime {
   interface Constructor<T> {
-    new(...args: any[]): T;
+    new (...args: any[]): T;
   }
 
   interface Dictionary<T> {

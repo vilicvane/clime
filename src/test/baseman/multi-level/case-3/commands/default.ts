@@ -1,9 +1,4 @@
-import {
-  Command,
-  SubcommandDefinition,
-  command,
-  param,
-} from '../../../../..';
+import {Command, SubcommandDefinition, command, param} from '../../../../..';
 
 @command({
   description: 'Foo bar',
@@ -15,9 +10,13 @@ export default class extends Command {
     })
     name: string,
   ) {
-    return JSON.stringify({
-      name,
-    }, undefined, 2);
+    return JSON.stringify(
+      {
+        name,
+      },
+      undefined,
+      2,
+    );
   }
 }
 

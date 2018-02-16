@@ -1,17 +1,11 @@
-import {
-  Command,
-  command,
-  param,
-} from '../../../../..';
+import {Command, command, param} from '../../../../..';
 
 @command({
   description: 'Foo bar',
 })
 export default class extends Command {
   execute(
-    @param()
-    error: boolean,
-
+    @param() error: boolean,
     @param({
       default: true,
     })
