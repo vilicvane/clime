@@ -285,7 +285,7 @@ instead of "${definition.name}"`);
     let contexts: SubcommandSearchContext[] = await v.map(
       this.roots,
       async root => {
-        let path: string | undefined = Path.join(root.path, 'default.js');
+        let path: string | undefined = Path.join(root.path, `${CLI.commandModuleDefaultName}${CLI.commandModuleExtension}`);
         path = (await existsFile(path)) ? path : undefined;
 
         let module: CommandModule | undefined;
@@ -397,6 +397,26 @@ instead of "${definition.name}"`);
   }
 
   /**
+   * The name of the default sub-command module
+   * @example <caption>Overriding</caption>
+   * ```ts
+   * import { CLI } from 'clime';
+   * CLI.commandModuleDefaultName = 'mySpecialDefaultName'
+   * ```
+   */
+  static commandModuleDefaultName: string = 'default';
+
+  /**
+   * The extension to use when looking up sub-command modules
+   * @example <caption>Overriding</caption>
+   * ```ts
+   * import { CLI } from 'clime';
+   * CLI.commandModuleExtension = '.cjs'
+   * ```
+   */
+  static commandModuleExtension: string = '.js';
+
+  /**
    * @internal
    * Get subcommands definition written as `export subcommands = [...]`.
    */
@@ -416,8 +436,8 @@ instead of "${definition.name}"`);
     searchBase: string,
   ): Promise<CommandEntry | undefined> {
     let possiblePaths = [
-      `${searchBase}.js`,
-      Path.join(searchBase, 'default.js'),
+      `${searchBase}${CLI.commandModuleExtension}`,
+      Path.join(searchBase, `${CLI.commandModuleDefaultName}${CLI.commandModuleExtension}`),
     ];
 
     for (let possiblePath of possiblePaths) {
