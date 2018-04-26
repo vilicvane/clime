@@ -8,10 +8,10 @@ The command-line interface framework for TypeScript, fully tested with [baseman]
 
 ## Prerequisites
 
-- Node.js 6+
-- TypeScript compilation options in `tsconfig.json`
-  - `target` needs to be set as `'es6'` / `'es2015'` or higher.
-  - `experimentalDecorators` and `emitDecoratorMetadata` should both be enabled.
+* Node.js 6+
+* TypeScript compilation options in `tsconfig.json`
+  * `target` needs to be set as `'es6'` / `'es2015'` or higher.
+  * `experimentalDecorators` and `emitDecoratorMetadata` should both be enabled.
 
 ## Install
 
@@ -31,7 +31,7 @@ Here is a basic example, an entry file (usually won't change much among time) an
 #!/usr/bin/env node
 
 import * as Path from 'path';
-import { CLI, Shim } from 'clime';
+import {CLI, Shim} from 'clime';
 
 // The second parameter is the path to folder that contains command modules.
 let cli = new CLI('greet', Path.join(__dirname, 'commands'));
@@ -45,11 +45,7 @@ shim.execute(process.argv);
 **src/commands/default.ts**
 
 ```ts
-import {
-  Command,
-  command,
-  param,
-} from 'clime';
+import {Command, command, param} from 'clime';
 
 @command({
   description: 'This is a command for printing a greeting message',
@@ -69,25 +65,18 @@ export default class extends Command {
 
 ## Features
 
-- ☑ Type and schema based parameters/options casting
-- ☑ Object and promise based architecture
-- ☑ File path based multi-level subcommands
-- ☑ Automatic usage generating
-- ☑ Multiple command roots support <sup>New in v0.5</sup>
+* ☑ Type and schema based parameters/options casting
+* ☑ Object and promise based architecture
+* ☑ File path based multi-level subcommands
+* ☑ Automatic usage generating
+* ☑ Multiple command roots support <sup>New in v0.5</sup>
 
 ### Parameter types and options schema
 
 Clime provides a way in which you can get parameters and options you really want to: **typed** at compile time and **casted** at run time.
 
 ```ts
-import {
-  Command,
-  Options,
-  command,
-  option,
-  param,
-  params,
-} from 'clime';
+import {Command, Options, command, option, param, params} from 'clime';
 
 export class SomeOptions extends Options {
   @option({
@@ -110,18 +99,15 @@ export default class extends Command {
       description: 'required parameter foo',
     })
     foo: string,
-
     @param({
       description: 'optional parameter bar',
     })
     bar: number,
-
     @params({
       type: String,
       description: 'extra parameters',
     })
     args: string[],
-
     options: SomeOptions,
   ) {
     return 'Hello, Clime!';
@@ -143,7 +129,6 @@ USAGE
 OPTIONS
 
   -t, --timeout <timeout> - timeout that does nothing
-
 ```
 
 #### Casting from string
@@ -154,12 +139,10 @@ It also defines interface `StringCastable` that allows user-defined classes to b
 For example:
 
 ```ts
-import { StringCastable } from 'clime';
+import {StringCastable} from 'clime';
 
 class File implements StringCastable {
-  constructor(
-    public path: string,
-  ) { }
+  constructor(public path: string) {}
 
   static cast(path: string, context: CastingContext<File>): File {
     return new File(Path.resolve(context.cwd, path));
@@ -266,7 +249,7 @@ Clime has to load every subcommand modules under a specific command to know thei
 To avoid this, you may export a `subcommands` array with subcommand definitions like below:
 
 ```ts
-import { SubcommandDefinition } from 'clime';
+import {SubcommandDefinition} from 'clime';
 
 export const subcommands: SubcommandDefinition[] = [
   {
@@ -283,7 +266,7 @@ export const subcommands: SubcommandDefinition[] = [
 Further more, those definition entries also allow you to add alias or aliases for subcommands:
 
 ```ts
-import { SubcommandDefinition } from 'clime';
+import {SubcommandDefinition} from 'clime';
 
 export const subcommands: SubcommandDefinition[] = [
   {
@@ -334,12 +317,7 @@ As the core of Clime is not coupled with stream-based command line, commands wri
 For example:
 
 ```ts
-import {
-  Command,
-  Context,
-  command,
-  metadata,
-} from 'clime';
+import {Command, Context, command, metadata} from 'clime';
 
 export class TestContext extends Context {
   promptForQuery(): Promise<string> {
@@ -362,12 +340,10 @@ To test this command, we just need to extend `TestContext`, override `promptForQ
 If this command is meant to stop somewhere and exit the process, we can define a `ExitSignal` class that implements `Printable` interface:
 
 ```ts
-import { Printable } from 'clime';
+import {Printable} from 'clime';
 
 export class ExitSignal implements Printable {
-  constructor(
-    public code: number,
-  ) { }
+  constructor(public code: number) {}
 
   print(): void {
     process.exit(this.code);
