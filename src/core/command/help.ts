@@ -302,7 +302,9 @@ ${buildTableOutput(parameterDescriptionRows, {indent: 4, separators: ' - '})}`);
         triggerStr += `--${name}`;
 
         if (!isToggle) {
-          triggerStr += ` <${placeholder || key}>`;
+          triggerStr += ` <${placeholder || key}${
+            defaultValue === undefined ? '' : `=${defaultValue}`
+          }>`;
         }
 
         if (defaultValue !== undefined) {

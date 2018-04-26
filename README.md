@@ -136,12 +136,14 @@ OPTIONS
 Clime will automatically cast parameters to `number`, `boolean` based on their types.
 It also defines interface `StringCastable` that allows user-defined classes to be casted from parameters.
 
+> Please note that `StringCastable` is correspondent to the type of constructor instead of instance, so no `implements` should be present.
+
 For example:
 
 ```ts
-import {StringCastable} from 'clime';
+import {CastingContext} from 'clime';
 
-class File implements StringCastable {
+class File {
   constructor(public path: string) {}
 
   static cast(path: string, context: CastingContext<File>): File {
