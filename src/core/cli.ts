@@ -17,7 +17,7 @@ import {CastableType, Printable, buildCastingContext, cast} from './object';
 
 import {ExpectedError} from './error';
 
-import {existsDir, existsFile} from '../internal-util';
+import {existsDir, existsSourceFile} from '../internal-util';
 
 const COMMAND_NAME_REGEX = /^[\w\d]+(?:-[\w\d]+)*$/;
 const HELP_OPTION_REGEX = /^(?:-[h?]|--help)$/;
@@ -285,8 +285,7 @@ instead of "${definition.name}"`);
     let contexts: SubcommandSearchContext[] = await v.map(
       this.roots,
       async root => {
-        let path: string | undefined = Path.join(root.path, 'default.js');
-        path = (await existsFile(path)) ? path : undefined;
+        let path: string | undefined = await existsSourceFile(root.path);
 
         let module: CommandModule | undefined;
 
@@ -415,18 +414,12 @@ instead of "${definition.name}"`);
   private static async findEntryBySearchBase(
     searchBase: string,
   ): Promise<CommandEntry | undefined> {
-    let possiblePaths = [
-      `${searchBase}.js`,
-      Path.join(searchBase, 'default.js'),
-    ];
-
-    for (let possiblePath of possiblePaths) {
-      if (await existsFile(possiblePath)) {
-        return {
-          path: possiblePath,
-          module: require(possiblePath) as CommandModule,
-        };
-      }
+    const srcFile = await existsSourceFile(searchBase);
+    if (srcFile !== undefined) {
+      return {
+        path: srcFile,
+        module: require(srcFile) as CommandModule,
+      };
     }
 
     if (await existsDir(searchBase)) {
