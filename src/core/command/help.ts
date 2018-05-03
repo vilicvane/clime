@@ -13,6 +13,7 @@ import {CLI, CommandModule} from '../cli';
 import {
   buildTableOutput,
   existsDir,
+  existsSourceFile,
   indent,
   safeStat,
 } from '../../internal-util';
@@ -102,18 +103,22 @@ export class HelpInfo implements Printable {
       let names = await v.call<string[]>(FS.readdir, dir);
 
       for (let name of names) {
-        let path = Path.join(dir, name);
+        let path: string | undefined = Path.join(dir, name);
         let stats = await safeStat(path);
 
         if (stats!.isFile()) {
-          if (name === 'default.js' || Path.extname(path) !== '.js') {
+          const ext = Path.extname(path);
+          name = Path.basename(path).replace(ext, '');
+
+          if (
+            name === 'default' ||
+            (ext !== '.js' && ext !== '.ts') ||
+            path.endsWith('.d.ts')
+          ) {
             continue;
           }
-
-          name = Path.basename(name, '.js');
         } else {
-          path = Path.join(path, 'default.js');
-          stats = await safeStat(path);
+          path = await existsSourceFile(path);
         }
 
         let existingItem = helpItemMap.get(name);
@@ -130,7 +135,7 @@ export class HelpInfo implements Printable {
         let commandConstructor: CommandClass | undefined;
         let brief: string | undefined;
 
-        if (stats) {
+        if (path) {
           let module = require(path) as CommandModule;
           commandConstructor = module.default;
           brief =
