@@ -282,32 +282,28 @@ instead of "${definition.name}"`);
     let targetPath: string | undefined;
     let targetModule: CommandModule | undefined;
 
-    let contexts: SubcommandSearchContext[] = await v.map(
-      this.roots,
-      async root => {
-        let path: string | undefined = Path.join(root.path, 'default.js');
-        path = (await existsFile(path)) ? path : undefined;
+    let contexts: SubcommandSearchContext[] = this.roots.map(root => {
+      let path = existsFile(root.path);
 
-        let module: CommandModule | undefined;
+      let module: CommandModule | undefined;
 
-        if (path) {
-          module = require(path) as CommandModule;
+      if (path) {
+        module = require(path) as CommandModule;
 
-          if (module.default || !targetPath) {
-            targetPath = path;
-            targetModule = module;
-          }
+        if (module.default || !targetPath) {
+          targetPath = path;
+          targetModule = module;
         }
+      }
 
-        return {
-          label: root.label,
-          name: this.name,
-          searchBase: root.path,
-          path,
-          module,
-        };
-      },
-    );
+      return {
+        label: root.label,
+        name: this.name,
+        searchBase: root.path,
+        path,
+        module,
+      };
+    });
 
     for (let i = argsIndex; i < argv.length && contexts.length; i++) {
       let possibleCommandName = argv[i];
@@ -415,18 +411,12 @@ instead of "${definition.name}"`);
   private static async findEntryBySearchBase(
     searchBase: string,
   ): Promise<CommandEntry | undefined> {
-    let possiblePaths = [
-      `${searchBase}.js`,
-      Path.join(searchBase, 'default.js'),
-    ];
-
-    for (let possiblePath of possiblePaths) {
-      if (await existsFile(possiblePath)) {
-        return {
-          path: possiblePath,
-          module: require(possiblePath) as CommandModule,
-        };
-      }
+    const srcFile = existsFile(searchBase);
+    if (srcFile !== undefined) {
+      return {
+        path: srcFile,
+        module: require(srcFile) as CommandModule,
+      };
     }
 
     if (await existsDir(searchBase)) {
