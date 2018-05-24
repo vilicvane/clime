@@ -13,7 +13,7 @@ import {CLI, CommandModule} from '../cli';
 import {
   buildTableOutput,
   existsDir,
-  existsSourceFile,
+  existsFile,
   indent,
   safeStat,
 } from '../../internal-util';
@@ -118,7 +118,7 @@ export class HelpInfo implements Printable {
             continue;
           }
         } else {
-          path = await existsSourceFile(path);
+          path = await existsFile(path);
         }
 
         let existingItem = helpItemMap.get(name);
