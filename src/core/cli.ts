@@ -285,7 +285,10 @@ instead of "${definition.name}"`);
     let contexts: SubcommandSearchContext[] = await v.map(
       this.roots,
       async root => {
-        let path: string | undefined = Path.join(root.path, `${CLI.commandModuleDefaultName}${CLI.commandModuleExtension}`);
+        let path: string | undefined = Path.join(
+          root.path,
+          CLI.commandModuleDefaultFileName,
+        );
         path = (await existsFile(path)) ? path : undefined;
 
         let module: CommandModule | undefined;
@@ -397,24 +400,34 @@ instead of "${definition.name}"`);
   }
 
   /**
-   * The name of the default sub-command module
-   * @example <caption>Overriding</caption>
+   * The name of the default sub-command module.
+   *
+   * E.g.:
+   *
    * ```ts
-   * import { CLI } from 'clime';
-   * CLI.commandModuleDefaultName = 'mySpecialDefaultName'
+   * import {CLI} from 'clime';
+   *
+   * CLI.commandModuleDefaultName = 'mySpecialDefaultName';
    * ```
    */
-  static commandModuleDefaultName: string = 'default';
+  static commandModuleDefaultName = 'default';
 
   /**
-   * The extension to use when looking up sub-command modules
-   * @example <caption>Overriding</caption>
+   * The extension to use when looking up sub-command modules.
+   *
+   * E.g.:
+   *
    * ```ts
-   * import { CLI } from 'clime';
+   * import {CLI} from 'clime';
+   *
    * CLI.commandModuleExtension = '.cjs'
    * ```
    */
-  static commandModuleExtension: string = '.js';
+  static commandModuleExtension = '.js';
+
+  static get commandModuleDefaultFileName(): string {
+    return `${this.commandModuleDefaultName}${this.commandModuleExtension}`;
+  }
 
   /**
    * @internal
@@ -437,7 +450,7 @@ instead of "${definition.name}"`);
   ): Promise<CommandEntry | undefined> {
     let possiblePaths = [
       `${searchBase}${CLI.commandModuleExtension}`,
-      Path.join(searchBase, `${CLI.commandModuleDefaultName}${CLI.commandModuleExtension}`),
+      Path.join(searchBase, this.commandModuleDefaultFileName),
     ];
 
     for (let possiblePath of possiblePaths) {
