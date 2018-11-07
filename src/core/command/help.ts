@@ -105,17 +105,17 @@ export class HelpInfo implements Printable {
         let path = Path.join(dir, name);
         let stats = await safeStat(path);
 
-        const { commandModuleDefaultName: defaultName, commandModuleExtension: extension } = CLI;
-        const defaultFile = `${defaultName}${extension}`;
-
         if (stats!.isFile()) {
-          if (name === defaultFile || Path.extname(path) !== extension) {
+          if (
+            name === CLI.commandModuleDefaultFileName ||
+            Path.extname(path) !== CLI.commandModuleExtension
+          ) {
             continue;
           }
 
-          name = Path.basename(name, extension);
+          name = Path.basename(name, CLI.commandModuleExtension);
         } else {
-          path = Path.join(path, defaultFile);
+          path = Path.join(path, CLI.commandModuleDefaultFileName);
           stats = await safeStat(path);
         }
 
