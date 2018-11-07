@@ -449,7 +449,7 @@ instead of "${definition.name}"`);
     searchBase: string,
   ): Promise<CommandEntry | undefined> {
     let possiblePaths = [
-      `${searchBase}${CLI.commandModuleExtension}`,
+      `${searchBase}${this.commandModuleExtension}`,
       Path.join(searchBase, this.commandModuleDefaultFileName),
     ];
 
