@@ -270,13 +270,12 @@ ${buildTableOutput(rows, {indent: 4, separators})}`);
 
     let usageLine = [
       Chalk.bold(TargetCommand.sequence.join(' ').replace(/^\/ /, '/')),
-      ...parameterUsageTexts,
       ...requiredOptionUsageItems,
+      ...(optionDefinitions.length > requiredOptionUsageItems.length
+        ? ['[...options]']
+        : []),
+      ...parameterUsageTexts,
     ].join(' ');
-
-    if (optionDefinitions.length > requiredOptionUsageItems.length) {
-      usageLine += ' [...options]';
-    }
 
     this.texts.push(`\
   ${Chalk.green('USAGE')}\n

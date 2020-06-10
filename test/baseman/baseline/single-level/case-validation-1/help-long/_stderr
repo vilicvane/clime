@@ -3,7 +3,7 @@
 
   USAGE
 
-    single-level-validation [foo] [bar] [...args] [...options]
+    single-level-validation [...options] [foo] [bar] [...args]
 
   OPTIONS
 
