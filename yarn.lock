@@ -4,36 +4,36 @@
 
 "@types/chai-as-promised@0.0.31":
   version "0.0.31"
-  resolved "https://registry.yarnpkg.com/@types/chai-as-promised/-/@types/chai-as-promised-0.0.31.tgz#e1e905ea6d971dafcad36560c8f1f7a7d690c5e5"
+  resolved "https://registry.yarnpkg.com/@types/chai-as-promised/-/chai-as-promised-0.0.31.tgz#e1e905ea6d971dafcad36560c8f1f7a7d690c5e5"
   dependencies:
     "@types/chai" "*"
 
 "@types/chai@*", "@types/chai@^4.0.4":
   version "4.0.4"
-  resolved "https://registry.yarnpkg.com/@types/chai/-/@types/chai-4.0.4.tgz#fe86315d9a66827feeb16f73bc954688ec950e18"
+  resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.0.4.tgz#fe86315d9a66827feeb16f73bc954688ec950e18"
 
 "@types/chalk@^0.4.31":
   version "0.4.31"
-  resolved "https://registry.yarnpkg.com/@types/chalk/-/@types/chalk-0.4.31.tgz#a31d74241a6b1edbb973cf36d97a2896834a51f9"
+  resolved "https://registry.yarnpkg.com/@types/chalk/-/chalk-0.4.31.tgz#a31d74241a6b1edbb973cf36d97a2896834a51f9"
 
 "@types/glob@^5.0.32":
   version "5.0.32"
-  resolved "https://registry.yarnpkg.com/@types/glob/-/@types/glob-5.0.32.tgz#aec5cfe987c72f099fdb1184452986aa506d5e8f"
+  resolved "https://registry.yarnpkg.com/@types/glob/-/glob-5.0.32.tgz#aec5cfe987c72f099fdb1184452986aa506d5e8f"
   dependencies:
     "@types/minimatch" "*"
     "@types/node" "*"
 
 "@types/minimatch@*":
   version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@types/minimatch/-/@types/minimatch-3.0.1.tgz#b683eb60be358304ef146f5775db4c0e3696a550"
+  resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.1.tgz#b683eb60be358304ef146f5775db4c0e3696a550"
 
 "@types/mocha@^2.2.42":
   version "2.2.42"
-  resolved "https://registry.yarnpkg.com/@types/mocha/-/@types/mocha-2.2.42.tgz#ab769f51d37646b6fe8d4a086a98c285b1fab3f5"
+  resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-2.2.42.tgz#ab769f51d37646b6fe8d4a086a98c285b1fab3f5"
 
 "@types/node@*", "@types/node@^8.0.25":
   version "8.0.25"
-  resolved "https://registry.yarnpkg.com/@types/node/-/@types/node-8.0.25.tgz#66ecaf4df93f5281b48427ee96fbcdfc4f0cdce1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.25.tgz#66ecaf4df93f5281b48427ee96fbcdfc4f0cdce1"
 
 align-text@^0.1.1, align-text@^0.1.3:
   version "0.1.4"
