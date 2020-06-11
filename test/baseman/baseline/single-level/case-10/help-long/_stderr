@@ -1,0 +1,11 @@
+
+  Foo bar
+
+  USAGE
+
+    single-level --foo <yo>
+
+  OPTIONS
+
+    -h, --foo <yo> - guess what foo
+

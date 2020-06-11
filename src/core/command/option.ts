@@ -6,6 +6,8 @@ import {CastableType} from '..';
 
 import {GeneralValidator} from './command';
 
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
 /**
  * Options for command options.
  */
@@ -89,9 +91,9 @@ export function option<T>({
 
   return (target: Options, name: string) => {
     let constructor = target.constructor as typeof Options;
-    let definitions = constructor.definitions;
+    let definitions: OptionDefinition<any>[];
 
-    if (definitions) {
+    if (hasOwnProperty.call(constructor, 'definitions')) {
       definitions = constructor.definitions;
     } else {
       definitions = constructor.definitions = [];

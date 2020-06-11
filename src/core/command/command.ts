@@ -206,7 +206,9 @@ if no other decorator applied',
       optionsConstructorCandidate.prototype instanceof Options
     ) {
       target.optionsConstructor = optionsConstructorCandidate;
-      target.optionDefinitions = ((optionsConstructorCandidate as any) as typeof Options).definitions;
+      target.optionDefinitions = getOptionDefinitions(
+        optionsConstructorCandidate,
+      );
 
       contextConstructorCandidateIndex = optionsConstructorCandidateIndex + 1;
     } else {
@@ -233,3 +235,14 @@ if no other decorator applied',
  * decorators.
  */
 export const metadata: MethodDecorator = () => {};
+
+function getOptionDefinitions(OptionConstructor: any): OptionDefinition<any>[] {
+  if (!(OptionConstructor.prototype instanceof Options)) {
+    return [];
+  }
+
+  return [
+    ...getOptionDefinitions(Object.getPrototypeOf(OptionConstructor)),
+    ...(OptionConstructor.definitions || []),
+  ];
+}
