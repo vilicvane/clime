@@ -7,6 +7,8 @@ import {
   ParamsDefinition,
 } from '.';
 
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
 /**
  * Options for command.
  */
@@ -252,6 +254,8 @@ function getOptionDefinitions(OptionConstructor: any): OptionDefinition<any>[] {
 
   return [
     ...getOptionDefinitions(Object.getPrototypeOf(OptionConstructor)),
-    ...(OptionConstructor.definitions || []),
+    ...(hasOwnProperty.call(OptionConstructor, 'definitions')
+      ? OptionConstructor.definitions
+      : []),
   ];
 }
