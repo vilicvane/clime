@@ -17,6 +17,7 @@ const NON_EXISTENT_PATH = Path.join(SAMPLE_FILES_DIR, NON_EXISTENT_NAME);
 const context: CastingContext<any> = {
   name: 'test',
   commands: ['clime'],
+  skippedArgs: [],
   cwd: SAMPLE_FILES_DIR,
   validators: [],
   default: false,

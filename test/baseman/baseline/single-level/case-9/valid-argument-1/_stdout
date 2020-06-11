@@ -1,3 +1,6 @@
 {
-  "fooBar": 123
+  "fooBar": 123,
+  "skippedArgs": [
+    "test"
+  ]
 }

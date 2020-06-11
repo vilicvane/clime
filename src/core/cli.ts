@@ -603,6 +603,10 @@ class ArgsParser {
         return undefined;
       }
 
+      if (arg === '--') {
+        break;
+      }
+
       if (arg[0] === '-' && isNaN(Number(arg))) {
         if (arg[1] === '-') {
           await consumeToggleOrOption(arg.substr(2));
@@ -639,6 +643,8 @@ class ArgsParser {
         );
       }
     }
+
+    context.skippedArgs = args;
 
     {
       let expecting = this.requiredParamsNumber;

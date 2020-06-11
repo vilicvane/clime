@@ -35,6 +35,8 @@ export class Context {
   cwd: string;
   /** Commands sequence including entry and subcommands. */
   commands: string[];
+  /** Skipped args after `--`. */
+  skippedArgs: string[];
 
   constructor({cwd, commands}: ContextOptions) {
     this.cwd = cwd;

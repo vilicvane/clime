@@ -1,4 +1,11 @@
-import {Command, Options, command, metadata, option} from '../../../../..';
+import {
+  Command,
+  Context,
+  Options,
+  command,
+  metadata,
+  option,
+} from '../../../../..';
 
 export class SomeOptions extends Options {
   @option({
@@ -12,7 +19,11 @@ export class SomeOptions extends Options {
 })
 export default class extends Command {
   @metadata
-  execute(options: SomeOptions) {
-    return JSON.stringify(options, undefined, 2);
+  execute(options: SomeOptions, context: Context) {
+    return JSON.stringify(
+      {...options, skippedArgs: context.skippedArgs},
+      undefined,
+      2,
+    );
   }
 }
