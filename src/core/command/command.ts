@@ -121,7 +121,7 @@ export abstract class Command {
   /** @internal */
   static requiredParamsNumber = 0;
   /** @internal */
-static skippedArgsEnabled: boolean;
+  static skippedArgsEnabled: boolean;
 
   /**
    * Get the help object of current command.
@@ -136,7 +136,11 @@ export type CommandClass = Clime.Constructor<Command> & typeof Command;
 /**
  * The `command()` decorator that decorates concrete class of `Command`.
  */
-export function command({brief, description, skippedArgs: skippedArgsEnabled = false}: CommandOptions = {}) {
+export function command({
+  brief,
+  description,
+  skippedArgs: skippedArgsEnabled = false,
+}: CommandOptions = {}) {
   return (target: typeof Command) => {
     target.brief = brief;
     target.description = description;
