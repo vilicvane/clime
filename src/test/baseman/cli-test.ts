@@ -16,7 +16,7 @@ export class ClimeCLITestCase extends CLITestCase {
   get description(): string {
     let argsStr = this.args
       .slice(1)
-      .map(arg => JSON.stringify(arg))
+      .map((arg) => JSON.stringify(arg))
       .join(' ');
     return `args ${argsStr}`;
   }
@@ -46,7 +46,7 @@ export class ClimeCLITest extends CLITest {
     });
 
     return caseNames
-      .map(caseName => {
+      .map((caseName) => {
         if (!/-\d+\/$/.test(caseName)) {
           throw new Error(
             `Expecting numeric suffix for case name "${caseName}"`,
@@ -57,7 +57,7 @@ export class ClimeCLITest extends CLITest {
         let subcases = require(Path.join(caseDir, 'subcases'))
           .default as SubcaseDefinition[];
 
-        return subcases.map(subcase => {
+        return subcases.map((subcase) => {
           return new ClimeCLITestCase(
             `${caseName}${subcase.name}`,
             [Path.join(caseDir, 'cli.js')].concat(subcase.args),

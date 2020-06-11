@@ -35,7 +35,7 @@ export function buildTableOutput(
   return (
     // tslint:disable-next-line:prefer-template
     rows
-      .map(row => {
+      .map((row) => {
         let line = indentStr;
 
         for (let i = 0; i < row.length; i++) {

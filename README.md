@@ -8,10 +8,10 @@ The command-line interface framework for TypeScript, fully tested with [baseman]
 
 ## Prerequisites
 
-* Node.js 6+
-* TypeScript compilation options in `tsconfig.json`
-  * `target` needs to be set as `'es6'` / `'es2015'` or higher.
-  * `experimentalDecorators` and `emitDecoratorMetadata` should both be enabled.
+- Node.js 6+
+- TypeScript compilation options in `tsconfig.json`
+  - `target` needs to be set as `'es6'` / `'es2015'` or higher.
+  - `experimentalDecorators` and `emitDecoratorMetadata` should both be enabled.
 
 ## Install
 
@@ -65,11 +65,11 @@ export default class extends Command {
 
 ## Features
 
-* ☑ Type and schema based parameters/options casting
-* ☑ Object and promise based architecture
-* ☑ File path based multi-level subcommands
-* ☑ Automatic usage generating
-* ☑ Multiple command roots support <sup>New in v0.5</sup>
+- ☑ Type and schema based parameters/options casting
+- ☑ Object and promise based architecture
+- ☑ File path based multi-level subcommands
+- ☑ Automatic usage generating
+- ☑ Multiple command roots support <sup>New in v0.5</sup>
 
 ### Parameter types and options schema
 

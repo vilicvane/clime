@@ -95,7 +95,7 @@ export class HelpInfo implements Printable {
         helpItemMap.set(name, item);
       }
 
-      if (!await existsDir(dir)) {
+      if (!(await existsDir(dir))) {
         continue;
       }
 
@@ -178,8 +178,9 @@ export class HelpInfo implements Printable {
 
     for (let label of labels) {
       let hasAliases = false;
-      let rows = labelToHelpItemsMap.get(label)!
-        .filter(item => {
+      let rows = labelToHelpItemsMap
+        .get(label)!
+        .filter((item) => {
           if (item.overridden) {
             return false;
           }
@@ -238,7 +239,7 @@ ${buildTableOutput(rows, {indent: 4, separators})}`);
     let parameterUsageTexts: string[] = [];
 
     if (paramDefinitions) {
-      parameterUsageTexts = paramDefinitions.map(definition => {
+      parameterUsageTexts = paramDefinitions.map((definition) => {
         let {name, required, description, default: defaultValue} = definition;
 
         if (description) {
@@ -265,7 +266,7 @@ ${buildTableOutput(rows, {indent: 4, separators})}`);
 
     let optionDefinitions = TargetCommand.optionDefinitions || [];
     let requiredOptionUsageItems = optionDefinitions
-      .filter(definition => definition.required)
+      .filter((definition) => definition.required)
       .map(({name, key, placeholder}) => `--${name} <${placeholder || key}>`);
 
     let usageLine = [
@@ -288,7 +289,7 @@ ${buildTableOutput(parameterDescriptionRows, {indent: 4, separators: ' - '})}`);
     }
 
     if (optionDefinitions.length) {
-      let optionRows = optionDefinitions.map(definition => {
+      let optionRows = optionDefinitions.map((definition) => {
         let {
           name,
           key,

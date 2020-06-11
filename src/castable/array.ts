@@ -35,11 +35,11 @@ export function array<T>(
       let parts = str.split(separator as any);
 
       if (trim) {
-        parts = parts.map(part => part.trim());
+        parts = parts.map((part) => part.trim());
       }
 
       if (!empty) {
-        parts = parts.filter(part => !!part);
+        parts = parts.filter((part) => !!part);
       }
 
       if (!validators) {
@@ -52,7 +52,7 @@ export function array<T>(
         default: context.default,
       });
 
-      return v.map(parts, part => cast(part, type, castingContext));
+      return v.map(parts, (part) => cast(part, type, castingContext));
     },
   };
 }

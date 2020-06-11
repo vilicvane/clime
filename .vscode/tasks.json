@@ -17,18 +17,18 @@
       "isShellCommand": true,
       "args": ["lint", "--force"],
       "showOutput": "silent",
-			"problemMatcher": {
-				"owner": "typescript",
-				"fileLocation": "absolute",
-				"pattern": {
-					"regexp": "^(?:([A-Z]+): )?(.*)\\[(\\d+),\\s(\\d+)\\]:\\s(.*)$",
+      "problemMatcher": {
+        "owner": "typescript",
+        "fileLocation": "absolute",
+        "pattern": {
+          "regexp": "^(?:([A-Z]+): )?(.*)\\[(\\d+),\\s(\\d+)\\]:\\s(.*)$",
           "severity": 1,
-					"file": 2,
-					"line": 3,
-					"column": 4,
-					"message": 5
-				}
-			}
+          "file": 2,
+          "line": 3,
+          "column": 4,
+          "message": 5
+        }
+      }
     }
   ]
 }

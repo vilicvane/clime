@@ -87,7 +87,7 @@ export class CLI {
     roots: GeneralCommandRoot | GeneralCommandRoot[],
   ) {
     roots = Array.isArray(roots) ? roots : [roots];
-    this.roots = roots.map(root => {
+    this.roots = roots.map((root) => {
       let label: string | undefined;
       let path: string;
 
@@ -148,7 +148,7 @@ make sure to decorate it with \`@command()\``);
         }
 
         TargetCommand.path = path!;
-        TargetCommand.helpBuildingContexts = searchContexts.map(context => {
+        TargetCommand.helpBuildingContexts = searchContexts.map((context) => {
           return {
             label: context.label,
             dir: context.searchBase,
@@ -192,7 +192,7 @@ make sure to decorate it with \`@command()\``);
 
     let helpInfo = await HelpInfo.build({
       sequence,
-      contexts: searchContexts.map(context => {
+      contexts: searchContexts.map((context) => {
         return {
           label: context.label,
           dir: context.searchBase,
@@ -284,7 +284,7 @@ instead of "${definition.name}"`);
 
     let contexts: SubcommandSearchContext[] = await v.map(
       this.roots,
-      async root => {
+      async (root) => {
         let path: string | undefined = Path.join(
           root.path,
           CLI.commandModuleDefaultFileName,
@@ -323,7 +323,7 @@ instead of "${definition.name}"`);
 
       let nextContexts: SubcommandSearchInProgressContext[] = await v.map(
         contexts,
-        async context => {
+        async (context) => {
           let searchBaseContext = await this.preProcessSearchBase(
             context.searchBase,
             possibleCommandName,
@@ -336,7 +336,7 @@ instead of "${definition.name}"`);
         },
       );
 
-      let targetContexts = nextContexts.filter(context => !!context.path);
+      let targetContexts = nextContexts.filter((context) => !!context.path);
 
       if (!targetContexts.length) {
         possibleUnknownCommandName = possibleCommandName;
@@ -361,7 +361,7 @@ instead of "${definition.name}"`);
       sequence.push(possibleCommandName);
 
       contexts = nextContexts.filter(
-        context => !!context.searchBase,
+        (context) => !!context.searchBase,
       ) as SubcommandSearchContext[];
     }
 
@@ -636,9 +636,7 @@ class ArgsParser {
         commandExtraArgs.push(casted);
       } else {
         throw new UsageError(
-          `Expecting ${
-            paramDefinitions.length
-          } parameter(s) at most but got ${argsNumber} instead`,
+          `Expecting ${paramDefinitions.length} parameter(s) at most but got ${argsNumber} instead`,
           this.helpProvider,
         );
       }
@@ -653,7 +651,7 @@ class ArgsParser {
       if (got < expecting) {
         let missingArgNames = pendingParamDefinitions
           .slice(0, expecting - got)
-          .map(definition => `\`${definition.name}\``);
+          .map((definition) => `\`${definition.name}\``);
 
         throw new UsageError(
           `Expecting parameter(s) ${missingArgNames.join(', ')}`,
@@ -694,9 +692,7 @@ class ArgsParser {
       !commandExtraArgs.length
     ) {
       throw new UsageError(
-        `Expecting at least one element for variadic parameters \`${
-          paramsDefinition.name
-        }\``,
+        `Expecting at least one element for variadic parameters \`${paramsDefinition.name}\``,
         this.helpProvider,
       );
     }

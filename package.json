@@ -6,6 +6,7 @@
   "typings": "bld/index.d.ts",
   "scripts": {
     "lint": "tslint -c tslint.json -p tsconfig.json",
+    "lint-prettier": "prettier --list-different \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "build": "yarn lint && rimraf bld && tsc",
     "bare-test": "mocha && baseman run bld/test/baseman",
     "pretest": "yarn build",
@@ -52,7 +53,7 @@
     "glob": "^7.1.2",
     "mocha": "^3.5.0",
     "nyc": "^11.1.0",
-    "prettier": "^1.10.2",
+    "prettier": "^2.0.5",
     "rimraf": "^2.6.1",
     "source-map-support": "^0.4.16",
     "tslint": "^5.9.1",

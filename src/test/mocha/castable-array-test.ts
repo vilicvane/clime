@@ -96,7 +96,10 @@ describe('Castable array', () => {
       'yo,, ha ; biu, pia',
       type,
       castingContext,
-    ).should.eventually.deep.equal([['yo', '', ' ha'], ['biu', ' pia']]);
+    ).should.eventually.deep.equal([
+      ['yo', '', ' ha'],
+      ['biu', ' pia'],
+    ]);
   });
 
   it('should validate array values', async () => {

@@ -63,8 +63,9 @@ export async function cast<T>(
       break;
     default:
       if (!isStringCastable(type)) {
-        throw new Error(`Type \`${type.name ||
-          type}\` cannot be casted from a string, \
+        throw new Error(`Type \`${
+          type.name || type
+        }\` cannot be casted from a string, \
 see \`StringCastable\` interface for more information`);
       }
 

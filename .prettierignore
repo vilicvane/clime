@@ -1,1 +1,4 @@
+bld/**
+coverage/**
+
 package.json
