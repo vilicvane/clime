@@ -494,6 +494,8 @@ class ArgsParser {
   private optionsConstructor: Clime.Constructor<Clime.Dictionary<any>>;
   private optionDefinitions: OptionDefinition<any>[];
 
+  private skippedArgsEnabled: boolean;
+
   private contextConstructor: typeof Context;
 
   constructor(command: typeof Command) {
@@ -506,6 +508,8 @@ class ArgsParser {
 
     this.optionsConstructor = command.optionsConstructor;
     this.optionDefinitions = command.optionDefinitions;
+
+    this.skippedArgsEnabled = command.skippedArgsEnabled;
 
     this.contextConstructor = command.contextConstructor;
 
@@ -603,7 +607,7 @@ class ArgsParser {
         return undefined;
       }
 
-      if (arg === '--') {
+      if (this.skippedArgsEnabled && arg === '--') {
         break;
       }
 

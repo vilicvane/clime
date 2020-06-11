@@ -276,6 +276,7 @@ ${buildTableOutput(rows, {indent: 4, separators})}`);
         ? ['[...options]']
         : []),
       ...parameterUsageTexts,
+      ...TargetCommand.skippedArgsEnabled ? ['-- ...'] : []
     ].join(' ');
 
     this.texts.push(`\

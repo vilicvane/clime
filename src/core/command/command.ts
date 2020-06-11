@@ -15,6 +15,8 @@ export interface CommandOptions {
   brief?: string;
   /** Shown on usage as the description of current command. */
   description?: string;
+  /** Enable skipped args following `--`. */
+  skippedArgs?: boolean;
 }
 
 /**
@@ -118,6 +120,8 @@ export abstract class Command {
   static contextConstructor: typeof Context;
   /** @internal */
   static requiredParamsNumber = 0;
+  /** @internal */
+static skippedArgsEnabled: boolean;
 
   /**
    * Get the help object of current command.
@@ -132,10 +136,11 @@ export type CommandClass = Clime.Constructor<Command> & typeof Command;
 /**
  * The `command()` decorator that decorates concrete class of `Command`.
  */
-export function command(options: CommandOptions = {}) {
+export function command({brief, description, skippedArgs: skippedArgsEnabled = false}: CommandOptions = {}) {
   return (target: typeof Command) => {
-    target.brief = options.brief;
-    target.description = options.description;
+    target.brief = brief;
+    target.description = description;
+    target.skippedArgsEnabled = skippedArgsEnabled;
 
     // Validate param definitions.
     let paramDefinitions = target.paramDefinitions || [];

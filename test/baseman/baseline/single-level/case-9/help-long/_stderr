@@ -3,7 +3,7 @@
 
   USAGE
 
-    single-level --foo-bar <fooBar>
+    single-level --foo-bar <fooBar> -- ...
 
   OPTIONS
 

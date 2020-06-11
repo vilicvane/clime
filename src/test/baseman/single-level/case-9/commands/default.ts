@@ -16,6 +16,7 @@ export class SomeOptions extends Options {
 
 @command({
   description: 'Foo bar',
+  skippedArgs: true,
 })
 export default class extends Command {
   @metadata
