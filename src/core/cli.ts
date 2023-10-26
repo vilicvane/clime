@@ -294,7 +294,7 @@ instead of "${definition.name}"`);
         let module: CommandModule | undefined;
 
         if (path) {
-          module = require(path) as CommandModule;
+          module = (await import(path)) as CommandModule;
 
           if (module.default || !targetPath) {
             targetPath = path;
@@ -457,7 +457,7 @@ instead of "${definition.name}"`);
       if (await existsFile(possiblePath)) {
         return {
           path: possiblePath,
-          module: require(possiblePath) as CommandModule,
+          module: (await import(possiblePath)) as CommandModule,
         };
       }
     }

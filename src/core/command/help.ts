@@ -134,7 +134,7 @@ export class HelpInfo implements Printable {
         let brief: string | undefined;
 
         if (stats) {
-          let module = require(path) as CommandModule;
+          let module = (await import(path)) as CommandModule;
           commandConstructor = module.default;
           brief =
             commandConstructor &&
