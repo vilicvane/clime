@@ -17,7 +17,7 @@ import {CastableType, Printable, buildCastingContext, cast} from './object';
 
 import {ExpectedError} from './error';
 
-import {existsDir, existsFile} from '../internal-util';
+import {dynamicImport, existsDir, existsFile} from '../internal-util';
 
 const COMMAND_NAME_REGEX = /^[\w\d]+(?:-[\w\d]+)*$/;
 const HELP_OPTION_REGEX = /^(?:-[h?]|--help)$/;
@@ -294,7 +294,7 @@ instead of "${definition.name}"`);
         let module: CommandModule | undefined;
 
         if (path) {
-          module = (await import(path)) as CommandModule;
+          module = (await dynamicImport(path)) as CommandModule;
 
           if (module.default || !targetPath) {
             targetPath = path;
@@ -457,7 +457,7 @@ instead of "${definition.name}"`);
       if (await existsFile(possiblePath)) {
         return {
           path: possiblePath,
-          module: (await import(possiblePath)) as CommandModule,
+          module: (await dynamicImport(possiblePath)) as CommandModule,
         };
       }
     }

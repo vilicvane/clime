@@ -12,6 +12,7 @@ import {CLI, CommandModule} from '../cli';
 
 import {
   buildTableOutput,
+  dynamicImport,
   existsDir,
   indent,
   safeStat,
@@ -134,7 +135,7 @@ export class HelpInfo implements Printable {
         let brief: string | undefined;
 
         if (stats) {
-          let module = (await import(path)) as CommandModule;
+          let module = (await dynamicImport(path)) as CommandModule;
           commandConstructor = module.default;
           brief =
             commandConstructor &&
