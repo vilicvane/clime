@@ -138,8 +138,10 @@ export class HelpInfo implements Printable {
           let module = (await dynamicImport(path)) as CommandModule;
           commandConstructor = module.default;
           brief =
-            commandConstructor &&
-            (commandConstructor.brief || commandConstructor.description);
+            (commandConstructor &&
+              (commandConstructor.brief || commandConstructor.description)) ||
+            module.brief ||
+            module.description;
         }
 
         if (existingItem && existingItem.group === groupIndex) {
